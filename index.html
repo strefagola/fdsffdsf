@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>StrefaGola (SG)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+</head>
+<body>
+  <!-- Boczny panel -->
+  <aside id="sidebar">
+    <div class="logo-box">
+      <span class="logo-text">StrefaGola</span>
+    </div>
+
+    <nav>
+      <ul>
+        <li><a href="#" data-section="home" class="active">🏠 Strona główna</a></li>
+        <li><a href="#" data-section="news">📰 Aktualności</a></li>
+        <li><a href="#" data-section="results">📊 Wyniki</a></li>
+        <li><a href="#" data-section="analysis">🎯 Analizy</a></li>
+        <li><a href="#" data-section="media">🎥 Multimedia</a></li>
+        <li><a href="#" data-section="history">🏆 Historia</a></li>
+        <li><a href="#" data-section="schedule">📅 Terminarz</a></li>
+        <li><a href="#" data-section="polskie">🇵🇱 Polskie ligi</a></li>
+        <li><a href="#" data-section="zagraniczne">🌍 Zagraniczne ligi</a></li>
+        <li><a href="#" data-section="champions_league">🏆 Liga Mistrzów</a></li>
+        <li><a href="#" data-section="europa_league">🥈 Liga Europy</a></li>
+        <li><a href="#" data-section="conference_league">🥉 Liga Konferencji</a></li>
+        <li><a href="#" data-section="mundial2026">🌍 Mundial 2026</a></li>
+      </ul>
+    </nav>
+
+    <!-- Panel admina -->
+    <div class="admin-panel" id="adminPanel">
+      <div class="login-form" id="loginForm">
+        <h3>🔐 Admin</h3>
+        <input type="password" id="adminPass" placeholder="Hasło" />
+        <button class="btn primary" onclick="loginAdmin()">Zaloguj</button>
+        <p id="loginErr" class="error"></p>
+      </div>
+      <div class="tools hidden" id="adminTools">
+        <h3>🛠️ Panel</h3>
+        <button class="btn add" onclick="openAddForm('news')">+ Aktualności</button>
+        <button class="btn danger" onclick="logoutAdmin()">Wyloguj</button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Główna zawartość -->
+  <main id="main">
+    <header>
+      <img src="https://www.ebilet.pl/now/app/uploads/2024/02/shutterstock_2253076431-1-1280x720.jpg" alt="Strefa piłkarska" />
+    </header>
+
+    <!-- MODAL -->
+    <div id="modal" class="modal hidden">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 id="modalTitle">Dodaj treść</h2>
+          <button class="close-btn" onclick="closeModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+          <select id="modalSection">
+            <option value="news">📰 Aktualności</option>
+            <option value="results">📊 Wyniki</option>
+            <option value="analysis">🎯 Analizy</option>
+            <option value="media">🎥 Multimedia</option>
+            <option value="history">🏆 Historia</option>
+            <option value="schedule">📅 Terminarz</option>
+            <!-- Polskie -->
+            <option value="ekstraklasa">🇵🇱 Ekstraklasa</option>
+            <option value="pierwsza_liga">🇵🇱 1 liga</option>
+            <option value="druga_liga">🇵🇱 2 liga</option>
+            <option value="trzecia_liga">🇵🇱 3 liga</option>
+            <!-- Zagraniczne -->
+            <option value="premier_league">🇬🇧 Premier League</option>
+            <option value="laliga">🇪🇸 LaLiga</option>
+            <option value="bundesliga">🇩🇪 Bundesliga</option>
+            <option value="serie_a">🇮🇹 Serie A</option>
+            <option value="ligue_1">🇫🇷 Ligue 1</option>
+            <option value="eredivisie">🇳🇱 Eredivisie</option>
+            <option value="primeira_liga">🇵🇹 Primeira Liga</option>
+            <option value="super_lig">🇹🇷 Süper Lig</option>
+            <option value="jupiler_league">🇧🇪 Jupiler Pro League</option>
+            <!-- Europa -->
+            <option value="champions_league">🏆 Liga Mistrzów</option>
+            <option value="europa_league">🥈 Liga Europy</option>
+            <option value="conference_league">🥉 Liga Konferencji</option>
+            <!-- Mundial -->
+            <option value="mundial2026">🌍 Mundial 2026</option>
+          </select>
+          <input type="text" id="modalTitleInput" placeholder="Tytuł artykułu" />
+          <textarea id="modalContent" placeholder="Treść artykułu..."></textarea>
+          <input type="url" id="modalImage" placeholder="Link do zdjęcia (https://...)" />
+          <input type="url" id="modalVideo" placeholder="Link do filmu (YouTube, MP4 itp.)" />
+          <div class="modal-actions">
+            <button class="btn primary" onclick="saveContent()">Zapisz</button>
+            <button class="btn danger hidden" id="modalDelBtn" onclick="deleteContent()">Usuń</button>
+          </div>
+          <p id="modalErr" class="error"></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Strona główna -->
+    <section id="home" class="page active">
+      <div class="hero">
+        <h1>⚽ Witaj w StrefieGola</h1>
+        <p>Najlepsze treści piłkarskie — bez zbędnego hałasu, tylko esencja.</p>
+      </div>
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon">🇵🇱</div>
+          <h3>Polskie ligi</h3>
+          <p>Ekstraklasa, 1 liga i niższe szczeble — wszystko na bieżąco.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🌍</div>
+          <h3>Zagraniczne ligi</h3>
+          <p>Premier League, LaLiga, Bundesliga i wiele więcej.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🏆</div>
+          <h3>Liga Mistrzów</h3>
+          <p>Walka o najważniejszy kubek Europy — tylko u nas.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Standardowe sekcje -->
+    <section id="news" class="page"><h2>📰 Aktualności</h2><div id="news-list" class="content-grid">Ładowanie...</div></section>
+    <section id="results" class="page"><h2>📊 Wyniki</h2><div id="results-list" class="content-grid">Ładowanie...</div></section>
+    <section id="analysis" class="page"><h2>🎯 Analizy</h2><div id="analysis-list" class="content-grid">Ładowanie...</div></section>
+    <section id="media" class="page"><h2>🎥 Multimedia</h2><div id="media-list" class="content-grid">Ładowanie...</div></section>
+    <section id="history" class="page"><h2>🏆 Historia</h2><div id="history-list" class="content-grid">Ładowanie...</div></section>
+    <section id="schedule" class="page"><h2>📅 Terminarz</h2><div id="schedule-list" class="content-grid">Ładowanie...</div></section>
+
+    <!-- POLSKIE LIGI -->
+    <section id="polskie" class="page">
+      <h2>🇵🇱 Polskie ligi</h2>
+      <div class="ligi-nav">
+        <button class="liga-btn" onclick="showLiga('polskie', 'ekstraklasa')">Wyniki Ekstraklasa</button>
+        <button class="liga-btn" onclick="showLiga('polskie', 'pierwsza_liga')">1 liga</button>
+        <button class="liga-btn" onclick="showLiga('polskie', 'druga_liga')">2 liga</button>
+        <button class="liga-btn" onclick="showLiga('polskie', 'trzecia_liga')">3 liga</button>
+      </div>
+      <div id="ekstraklasa-content" class="liga-subpage active-liga"><div id="ekstraklasa-list" class="content-grid">Ładowanie...</div></div>
+      <div id="pierwsza_liga-content" class="liga-subpage"><div id="pierwsza_liga-list" class="content-grid">Ładowanie...</div></div>
+      <div id="druga_liga-content" class="liga-subpage"><div id="druga_liga-list" class="content-grid">Ładowanie...</div></div>
+      <div id="trzecia_liga-content" class="liga-subpage"><div id="trzecia_liga-list" class="content-grid">Ładowanie...</div></div>
+    </section>
+
+    <!-- ZAGRANICZNE LIGI -->
+    <section id="zagraniczne" class="page">
+      <h2>🌍 Zagraniczne ligi</h2>
+      <div class="ligi-nav">
+        <button class="liga-btn" onclick="showLiga('zagraniczne', 'premier_league')">Premier League</button>
+        <button class="liga-btn" onclick="showLiga('zagraniczne', 'laliga')">LaLiga</button>
+        <button class="liga-btn" onclick="showLiga('zagraniczne', 'bundesliga')">Bundesliga</button>
+        <button class="liga-btn" onclick="showLiga('zagraniczne', 'serie_a')">Serie A</button>
+        <button class="liga-btn" onclick="showLiga('zagraniczne', 'ligue_1')">Ligue 1</button>
+        <button class="liga-btn" onclick="showLiga('zagraniczne', 'eredivisie')">Eredivisie</button>
+        <button class="liga-btn" onclick="showLiga('zagraniczne', 'primeira_liga')">Primeira Liga</button>
+        <button class="liga-btn" onclick="showLiga('zagraniczne', 'super_lig')">Süper Lig</button>
+        <button class="liga-btn" onclick="showLiga('zagraniczne', 'jupiler_league')">Jupiler Pro League</button>
+      </div>
+      <div id="premier_league-content" class="liga-subpage active-liga"><div id="premier_league-list" class="content-grid">Ładowanie...</div></div>
+      <div id="laliga-content" class="liga-subpage"><div id="laliga-list" class="content-grid">Ładowanie...</div></div>
+      <div id="bundesliga-content" class="liga-subpage"><div id="bundesliga-list" class="content-grid">Ładowanie...</div></div>
+      <div id="serie_a-content" class="liga-subpage"><div id="serie_a-list" class="content-grid">Ładowanie...</div></div>
+      <div id="ligue_1-content" class="liga-subpage"><div id="ligue_1-list" class="content-grid">Ładowanie...</div></div>
+      <div id="eredivisie-content" class="liga-subpage"><div id="eredivisie-list" class="content-grid">Ładowanie...</div></div>
+      <div id="primeira_liga-content" class="liga-subpage"><div id="primeira_liga-list" class="content-grid">Ładowanie...</div></div>
+      <div id="super_lig-content" class="liga-subpage"><div id="super_lig-list" class="content-grid">Ładowanie...</div></div>
+      <div id="jupiler_league-content" class="liga-subpage"><div id="jupiler_league-list" class="content-grid">Ładowanie...</div></div>
+    </section>
+
+    <!-- LIGI EUROPEJSKIE -->
+    <section id="champions_league" class="page"><h2>🏆 Liga Mistrzów</h2><div id="champions_league-list" class="content-grid">Ładowanie...</div></section>
+    <section id="europa_league" class="page"><h2>🥈 Liga Europy</h2><div id="europa_league-list" class="content-grid">Ładowanie...</div></section>
+    <section id="conference_league" class="page"><h2>🥉 Liga Konferencji</h2><div id="conference_league-list" class="content-grid">Ładowanie...</div></section>
+
+    <!-- MUNDIAL 2026 -->
+    <section id="mundial2026" class="page"><h2>🌍 Mundial 2026</h2><div id="mundial2026-list" class="content-grid">Ładowanie...</div></section>
+
+    <!-- STOPKA -->
+    <footer class="site-footer">
+      <div class="footer-content">
+        <div class="footer-logo"><span>StrefaGola (SG)</span></div>
+        <div class="footer-links">
+          <h4>Linki</h4>
+          <ul>
+            <li><a href="#" onclick="showSection('home')">Strona główna</a></li>
+            <li><a href="#" onclick="showSection('polskie')">Polskie ligi</a></li>
+            <li><a href="#" onclick="showSection('champions_league')">Liga Mistrzów</a></li>
+            <li><a href="#" onclick="showSection('europa_league')">Liga Europy</a></li>
+            <li><a href="#" onclick="showSection('conference_league')">Liga Konferencji</a></li>
+            <li><a href="#" onclick="showSection('mundial2026')">Mundial 2026</a></li>
+          </ul>
+        </div>
+        <div class="footer-info">
+          <h4>Kontakt</h4>
+          <p>Email: kontakt@strefagola.pl</p>
+          <p>© 2025 StrefaGola. Wszelkie prawa zastrzeżone.</p>
+        </div>
+      </div>
+    </footer>
+  </main>
+
+  <script src="firebase-config.js"></script>
+  <script>
+    let isAdmin = false;
+    let currentDocId = null;
+    let currentSection = null;
+
+    function showSection(id) {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+      document.querySelector(`nav a[data-section="${id}"]`).classList.add('active');
+      if (id !== 'home') {
+        if (id === 'polskie') {
+          showLiga('polskie', 'ekstraklasa');
+        } else if (id === 'zagraniczne') {
+          showLiga('zagraniczne', 'premier_league');
+        } else {
+          loadSection(id);
+        }
+      }
+    }
+
+    // 🔧 NAJWAŻNIEJSZA NAPRAWA: funkcja showLiga z obsługą kontekstu
+    function showLiga(context, ligaId) {
+      // Ukryj wszystkie podstrony lig w danym kontekście
+      const container = document.getElementById(context);
+      if (!container) return;
+
+      container.querySelectorAll('.liga-subpage').forEach(el => {
+        el.classList.remove('active-liga');
+      });
+
+      // Pokaż wybraną ligę
+      const target = document.getElementById(ligaId + '-content');
+      if (target) target.classList.add('active-liga');
+
+      // Załaduj treść
+      loadSection(ligaId);
+    }
+
+    auth.onAuthStateChanged(user => {
+      isAdmin = user && user.email === "admin@sgstrefagola.pl";
+      document.getElementById('loginForm').classList.toggle('hidden', isAdmin);
+      document.getElementById('adminTools').classList.toggle('hidden', !isAdmin);
+      if (isAdmin) {
+        const allSections = [
+          'news','results','analysis','media','history','schedule',
+          'ekstraklasa','pierwsza_liga','druga_liga','trzecia_liga',
+          'premier_league','laliga','bundesliga','serie_a','ligue_1',
+          'eredivisie','primeira_liga','super_lig','jupiler_league',
+          'champions_league','europa_league','conference_league',
+          'mundial2026'
+        ];
+        allSections.forEach(loadSection);
+      }
+    });
+
+    function loginAdmin() {
+      const pass = document.getElementById('adminPass').value;
+      auth.signInWithEmailAndPassword("admin@sgstrefagola.pl", pass)
+        .catch(() => document.getElementById('loginErr').textContent = "Błędne hasło");
+    }
+
+    function logoutAdmin() {
+      auth.signOut();
+    }
+
+    function openAddForm(section) {
+      if (!isAdmin) return;
+      currentDocId = null;
+      currentSection = section;
+      document.getElementById('modalSection').value = section;
+      resetModal();
+      document.getElementById('modal').classList.remove('hidden');
+    }
+
+    function openEditForm(section, docId, data) {
+      if (!isAdmin) return;
+      currentDocId = docId;
+      currentSection = section;
+      document.getElementById('modalSection').value = section;
+      document.getElementById('modalTitleInput').value = data.title || '';
+      document.getElementById('modalContent').value = data.content || '';
+      document.getElementById('modalImage').value = data.imageUrl || '';
+      document.getElementById('modalVideo').value = data.videoUrl || '';
+      document.getElementById('modalDelBtn').classList.remove('hidden');
+      document.getElementById('modal').classList.remove('hidden');
+    }
+
+    function resetModal() {
+      document.getElementById('modalTitleInput').value = '';
+      document.getElementById('modalContent').value = '';
+      document.getElementById('modalImage').value = '';
+      document.getElementById('modalVideo').value = '';
+      document.getElementById('modalErr').textContent = '';
+      document.getElementById('modalDelBtn').classList.add('hidden');
+    }
+
+    function closeModal() {
+      document.getElementById('modal').classList.add('hidden');
+      resetModal();
+    }
+
+    function embedVideo(url) {
+      if (!url) return '';
+      const yt = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/);
+      if (yt) return `<iframe src="https://www.youtube.com/embed/${yt[1]}" frameborder="0" allowfullscreen></iframe>`;
+      const vimeo = url.match(/vimeo\.com\/(\d+)/);
+      if (vimeo) return `<iframe src="https://player.vimeo.com/video/${vimeo[1]}" frameborder="0" allowfullscreen></iframe>`;
+      if (url.endsWith('.mp4') || url.endsWith('.webm')) return `<video controls style="width:100%"><source src="${url}" type="video/mp4"></video>`;
+      return `<a href="${url}" target="_blank" style="display:inline-block;padding:8px 16px;background:#1d4ed8;color:white;border-radius:8px;text-decoration:none;">Otwórz film</a>`;
+    }
+
+    async function saveContent() {
+      const title = document.getElementById('modalTitleInput').value.trim();
+      const content = document.getElementById('modalContent').value.trim();
+      const imageUrl = document.getElementById('modalImage').value.trim();
+      const videoUrl = document.getElementById('modalVideo').value.trim();
+      const section = document.getElementById('modalSection').value;
+
+      const err = document.getElementById('modalErr');
+      if (!title || !content) {
+        err.textContent = "Tytuł i treść są wymagane.";
+        return;
+      }
+
+      const data = { title, content, imageUrl: imageUrl || null, videoUrl: videoUrl || null };
+
+      try {
+        if (currentDocId) {
+          await db.collection(section).doc(currentDocId).update(data);
+        } else {
+          await db.collection(section).add({ ...data, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+        }
+        closeModal();
+        loadSection(section);
+        // Odśwież widok lig, jeśli jesteśmy w tej sekcji
+        if (section === 'ekstraklasa' || section === 'pierwsza_liga' || section === 'druga_liga' || section === 'trzecia_liga') {
+          showLiga('polskie', section);
+        }
+        if (['premier_league','laliga','bundesliga','serie_a','ligue_1','eredivisie','primeira_liga','super_lig','jupiler_league'].includes(section)) {
+          showLiga('zagraniczne', section);
+        }
+      } catch (e) {
+        err.textContent = "Błąd zapisu.";
+      }
+    }
+
+    async function deleteContent() {
+      if (!confirm("Na pewno chcesz usunąć tę treść?")) return;
+      try {
+        await db.collection(currentSection).doc(currentDocId).delete();
+        closeModal();
+        loadSection(currentSection);
+      } catch (e) {
+        document.getElementById('modalErr').textContent = "Błąd usuwania.";
+      }
+    }
+
+    async function loadSection(section) {
+      const container = document.getElementById(section + '-list');
+      if (!container) return;
+      try {
+        const snap = await db.collection(section).orderBy("createdAt", "desc").get();
+        if (snap.empty) {
+          container.innerHTML = "<p>Brak treści.</p>";
+          return;
+        }
+
+        let html = '';
+        snap.forEach(doc => {
+          const d = doc.data();
+          const editBtn = isAdmin ? 
+            `<button class="edit-btn" onclick="openEditForm('${section}', '${doc.id}', ${JSON.stringify(d).replace(/"/g, '&quot;')})">✎ Edytuj</button>` : '';
+
+          let media = '';
+          if (d.imageUrl) media += `<img src="${d.imageUrl}" alt="Zdjęcie">`;
+          if (d.videoUrl) media += embedVideo(d.videoUrl);
+
+          html += `
+            <div class="content-item">
+              ${editBtn}
+              <h3>${d.title}</h3>
+              <p>${d.content}</p>
+              ${media}
+            </div>
+          `;
+        });
+        container.innerHTML = html;
+      } catch (e) {
+        container.innerHTML = "<p>Błąd ładowania treści.</p>";
+      }
+    }
+
+    // CSS dla przycisków lig
+    const style = document.createElement('style');
+    style.textContent = `
+      .ligi-nav {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.8rem;
+        margin: 1.5rem 0 2rem;
+      }
+      .liga-btn {
+        padding: 0.6rem 1.2rem;
+        background: #e2e8f0;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: all 0.2s;
+      }
+      .liga-btn:hover {
+        background: #cbd5e1;
+      }
+      .liga-subpage {
+        display: none;
+      }
+      .liga-subpage.active-liga {
+        display: block;
+      }
+    `;
+    document.head.appendChild(style);
+
+    // Start
+    document.querySelectorAll('nav a').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        showSection(link.getAttribute('data-section'));
+      });
+    });
+    showSection('home');
+  </script>
+</body>
+</html>
