@@ -36,7 +36,7 @@
       overflow-x: hidden;
     }
 
-    /* 📱 Przycisk hamburger — WIDOCZNY TYLKO NA MOBILE */
+    /* 📱 Przycisk hamburger */
     .menu-toggle {
       display: none;
       position: fixed;
@@ -249,10 +249,12 @@
       margin-bottom: 1rem;
     }
 
-    .content-item p {
+    /* ✅ NOWE: treść z nowymi liniami */
+    .content-item .article-content {
       line-height: 1.7;
       color: #64748b;
       margin-bottom: 1.2rem;
+      white-space: pre-wrap; /* 🔑 to pozwala na nowe linie */
     }
 
     .content-item img {
@@ -445,10 +447,10 @@
       font-style: italic;
     }
 
-    /* 📱 MOBILE — poniżej 768px */
+    /* 📱 MOBILE */
     @media (max-width: 768px) {
       .menu-toggle {
-        display: block; /* ✅ TERAZ JEST WIDOCZNY NA TELEFONIE */
+        display: block;
       }
 
       #sidebar {
@@ -502,7 +504,6 @@
       }
     }
 
-    /* Overlay na mobile */
     .overlay {
       display: none;
     }
@@ -520,7 +521,6 @@
   </style>
 </head>
 <body>
-  <!-- ✅ Przycisk hamburger — TERAŻ WIDOCZNY NA TELEFONIE -->
   <button class="menu-toggle" id="menuToggle">☰</button>
   <div class="overlay" id="overlay"></div>
 
@@ -599,7 +599,8 @@
             <option value="mundial2026">🌍 Mundial 2026</option>
           </select>
           <input type="text" id="modalTitleInput" placeholder="Tytuł artykułu" />
-          <textarea id="modalContent" placeholder="Treść artykułu..."></textarea>
+          <!-- ✅ Textarea — Enter działa -->
+          <textarea id="modalContent" placeholder="Treść artykułu...&#10;&#10;Możesz nacisnąć ENTER dla nowej linii."></textarea>
           <input type="url" id="modalImage" placeholder="Link do zdjęcia (https://...)" />
           <input type="url" id="modalVideo" placeholder="Link do filmu (YouTube, MP4 itp.)" />
           <div class="modal-actions">
@@ -714,7 +715,6 @@
     let currentDocId = null;
     let currentSection = null;
 
-    // 📱 Mobile menu
     document.getElementById('menuToggle').addEventListener('click', () => {
       document.getElementById('sidebar').classList.add('active');
       document.getElementById('overlay').classList.add('active');
@@ -735,7 +735,6 @@
         else if (id === 'zagraniczne') showLiga('zagraniczne', 'premier_league');
         else loadSection(id);
       }
-      // Zamknij menu na mobile
       if (window.innerWidth <= 768) {
         document.getElementById('sidebar').classList.remove('active');
         document.getElementById('overlay').classList.remove('active');
@@ -826,7 +825,7 @@
 
     async function saveContent() {
       const title = document.getElementById('modalTitleInput').value.trim();
-      const content = document.getElementById('modalContent').value.trim();
+      const content = document.getElementById('modalContent').value; // ✅ nie trim() — zachowujemy nowe linie
       const imageUrl = document.getElementById('modalImage').value.trim();
       const videoUrl = document.getElementById('modalVideo').value.trim();
       const section = document.getElementById('modalSection').value;
@@ -889,11 +888,12 @@
           if (d.imageUrl) media += `<img src="${d.imageUrl}" alt="Zdjęcie">`;
           if (d.videoUrl) media += embedVideo(d.videoUrl);
 
+          // ✅ Treść w elemencie z white-space: pre-wrap
           html += `
             <div class="content-item">
               ${editBtn}
               <h3>${d.title}</h3>
-              <p>${d.content}</p>
+              <div class="article-content">${d.content}</div>
               ${media}
             </div>
           `;
