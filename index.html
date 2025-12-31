@@ -12,8 +12,526 @@
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <style>
+    /* 🔧 RESPONSYWNOŚĆ — DOŁĄCZONA BEZPOŚREDNIO */
+    :root {
+      --sidebar-width: 260px;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: #f9fbfd;
+      color: #1e293b;
+      display: flex;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Sidebar - desktop */
+    #sidebar {
+      width: var(--sidebar-width);
+      background: #0f172a;
+      color: #cbd5e1;
+      padding: 1.5rem 1rem;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 2px 0 20px rgba(0,0,0,0.15);
+      position: fixed;
+      height: 100vh;
+      z-index: 100;
+    }
+
+    .logo-box {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 2rem;
+      padding-bottom: 1.2rem;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .logo-text {
+      font-size: 1.4rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #60a5fa, #3b82f6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    nav ul {
+      list-style: none;
+      margin-bottom: auto;
+    }
+
+    nav a {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 0.8rem 1rem;
+      color: #cbd5e1;
+      text-decoration: none;
+      border-radius: 8px;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+
+    nav a:hover, nav a.active {
+      background: rgba(255,255,255,0.12);
+      color: white;
+    }
+
+    .admin-panel {
+      margin-top: auto;
+      padding-top: 1.5rem;
+      border-top: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .admin-panel h3 {
+      font-size: 1rem;
+      margin-bottom: 1rem;
+      opacity: 0.9;
+    }
+
+    #adminPass {
+      width: 100%;
+      padding: 0.7rem;
+      border-radius: 8px;
+      border: 1px solid #334155;
+      background: #0f172a;
+      color: white;
+      margin-bottom: 0.8rem;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 0.65rem;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-bottom: 0.6rem;
+      transition: all 0.2s;
+    }
+
+    .btn.primary { background: #1d4ed8; color: white; }
+    .btn.primary:hover { background: #1e40af; }
+    .btn.danger { background: #dc2626; color: white; }
+    .btn.danger:hover { background: #b91c1c; }
+    .btn.add { background: #0d9488; color: white; }
+    .btn.add:hover { background: #0f766e; }
+
+    .hidden { display: none !important; }
+    .error { color: #ef4444; font-size: 0.85rem; margin-top: 0.4rem; }
+
+    /* Main content */
+    #main {
+      flex: 1;
+      margin-left: var(--sidebar-width);
+      padding: 1.8rem;
+    }
+
+    header img {
+      width: 100%;
+      height: 220px;
+      object-fit: cover;
+      border-radius: 14px;
+      margin-bottom: 2.2rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    .page {
+      display: none;
+    }
+
+    .page.active {
+      display: block;
+    }
+
+    .page h2 {
+      font-size: 1.8rem;
+      margin-bottom: 1.8rem;
+      color: #1e40af;
+    }
+
+    /* Strona główna */
+    .hero {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+
+    .hero h1 {
+      font-size: 2.4rem;
+      font-weight: 800;
+      margin-bottom: 0.7rem;
+      background: linear-gradient(135deg, #1d4ed8, #0ea5e9);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero p {
+      font-size: 1.15rem;
+      color: #64748b;
+      max-width: 650px;
+      margin: 0 auto;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.8rem;
+      margin-top: 1.5rem;
+    }
+
+    .feature-card {
+      background: white;
+      padding: 1.8rem;
+      border-radius: 14px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      text-align: center;
+      transition: all 0.25s;
+    }
+
+    .feature-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+    }
+
+    .feature-icon {
+      font-size: 2.2rem;
+      margin-bottom: 1rem;
+    }
+
+    .feature-card h3 {
+      font-size: 1.3rem;
+      margin-bottom: 0.7rem;
+    }
+
+    /* Treści */
+    .content-grid {
+      display: grid;
+      gap: 1.8rem;
+    }
+
+    .content-item {
+      background: white;
+      padding: 2rem;
+      border-radius: 14px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    .content-item h3 {
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .content-item p {
+      line-height: 1.7;
+      color: #64748b;
+      margin-bottom: 1.2rem;
+    }
+
+    .content-item img {
+      width: 100%;
+      height: auto;
+      border-radius: 10px;
+      margin: 1rem 0;
+    }
+
+    .content-item iframe, .content-item video {
+      width: 100%;
+      height: 280px;
+      border-radius: 10px;
+      margin: 1rem 0;
+    }
+
+    .edit-btn {
+      background: #1d4ed8;
+      color: white;
+      border: none;
+      padding: 0.4rem 1rem;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      float: right;
+      margin-top: -0.5rem;
+    }
+
+    .edit-btn:hover {
+      background: #1e40af;
+    }
+
+    /* Przyciski lig */
+    .ligi-nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.7rem;
+      margin: 1.2rem 0 1.8rem;
+    }
+
+    .liga-btn {
+      padding: 0.55rem 1.1rem;
+      background: #e2e8f0;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+
+    .liga-btn:hover {
+      background: #cbd5e1;
+    }
+
+    .liga-subpage {
+      display: none;
+    }
+
+    .liga-subpage.active-liga {
+      display: block;
+    }
+
+    /* Modal */
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.75);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 2000;
+    }
+
+    .modal-content {
+      background: white;
+      width: 90%;
+      max-width: 650px;
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+    }
+
+    .modal-header {
+      padding: 1.4rem 1.8rem;
+      background: #1d4ed8;
+      color: white;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .close-btn {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1.6rem;
+      cursor: pointer;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .close-btn:hover {
+      background: rgba(255,255,255,0.2);
+    }
+
+    .modal-body {
+      padding: 1.8rem;
+    }
+
+    .modal-body input,
+    .modal-body textarea,
+    .modal-body select {
+      width: 100%;
+      padding: 0.8rem;
+      margin: 0.7rem 0;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      font-size: 1rem;
+    }
+
+    textarea {
+      min-height: 130px;
+      resize: vertical;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 1rem;
+    }
+
+    /* Stopka */
+    .site-footer {
+      background: #0c152e;
+      color: #cbd5e1;
+      padding: 2rem 0 1.5rem;
+      margin-top: 2.5rem;
+      border-top: 1px solid #1e293b;
+    }
+
+    .footer-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1.8rem;
+    }
+
+    .footer-logo span {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: white;
+    }
+
+    .footer-links h4,
+    .footer-info h4 {
+      color: white;
+      margin-bottom: 1rem;
+      font-size: 1.05rem;
+    }
+
+    .footer-links ul {
+      list-style: none;
+    }
+
+    .footer-links li {
+      margin-bottom: 0.6rem;
+    }
+
+    .footer-links a {
+      color: #94a3b8;
+      text-decoration: none;
+    }
+
+    .footer-links a:hover {
+      color: white;
+    }
+
+    .admin-note {
+      font-size: 0.8rem;
+      color: #64748b;
+      margin-top: 1rem;
+      font-style: italic;
+    }
+
+    /* 📱 RESPONSYWNOŚĆ DLA TELEFONÓW */
+    @media (max-width: 768px) {
+      :root {
+        --sidebar-width: 0;
+      }
+
+      #sidebar {
+        width: 280px;
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+        z-index: 1000;
+      }
+
+      #sidebar.active {
+        transform: translateX(0);
+      }
+
+      #main {
+        margin-left: 0;
+        padding: 1.2rem;
+      }
+
+      header img {
+        height: 180px;
+      }
+
+      .hero h1 {
+        font-size: 2rem;
+      }
+
+      .hero p {
+        font-size: 1rem;
+      }
+
+      .page h2 {
+        font-size: 1.6rem;
+      }
+
+      .modal-content {
+        width: 95%;
+        max-width: 500px;
+      }
+
+      .ligi-nav {
+        flex-direction: column;
+        gap: 0.6rem;
+      }
+
+      .liga-btn {
+        width: 100%;
+        text-align: left;
+        justify-content: flex-start;
+        display: flex;
+        align-items: center;
+      }
+
+      .content-item iframe,
+      .content-item video {
+        height: 220px;
+      }
+
+      /* Przycisk menu hamburger */
+      .menu-toggle {
+        display: block;
+        position: fixed;
+        top: 15px;
+        left: 15px;
+        background: #1d4ed8;
+        color: white;
+        border: none;
+        width: 40px;
+        height: 40px;
+        border-radius: 8px;
+        z-index: 999;
+        font-size: 1.2rem;
+      }
+    }
+
+    /* Przycisk hamburger na mobile */
+    .menu-toggle {
+      display: none;
+    }
+
+    /* Overlay przy otwartym sidebarze na mobile */
+    .overlay {
+      display: none;
+    }
+
+    .overlay.active {
+      display: block;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      z-index: 999;
+    }
+  </style>
 </head>
 <body>
+  <!-- Przycisk hamburger na mobile -->
+  <button class="menu-toggle" id="menuToggle">☰</button>
+  <div class="overlay" id="overlay"></div>
+
   <!-- Boczny panel -->
   <aside id="sidebar">
     <div class="logo-box">
@@ -49,6 +567,28 @@
       <div class="tools hidden" id="adminTools">
         <h3>🛠️ Panel</h3>
         <button class="btn add" onclick="openAddForm('news')">+ Aktualności</button>
+        <button class="btn add" onclick="openAddForm('results')">+ Wyniki</button>
+        <button class="btn add" onclick="openAddForm('analysis')">+ Analizy</button>
+        <button class="btn add" onclick="openAddForm('media')">+ Multimedia</button>
+        <button class="btn add" onclick="openAddForm('history')">+ Historia</button>
+        <button class="btn add" onclick="openAddForm('schedule')">+ Terminarz</button>
+        <button class="btn add" onclick="openAddForm('ekstraklasa')">+ Ekstraklasa</button>
+        <button class="btn add" onclick="openAddForm('pierwsza_liga')">+ 1 liga</button>
+        <button class="btn add" onclick="openAddForm('druga_liga')">+ 2 liga</button>
+        <button class="btn add" onclick="openAddForm('trzecia_liga')">+ 3 liga</button>
+        <button class="btn add" onclick="openAddForm('premier_league')">+ Premier League</button>
+        <button class="btn add" onclick="openAddForm('laliga')">+ LaLiga</button>
+        <button class="btn add" onclick="openAddForm('bundesliga')">+ Bundesliga</button>
+        <button class="btn add" onclick="openAddForm('serie_a')">+ Serie A</button>
+        <button class="btn add" onclick="openAddForm('ligue_1')">+ Ligue 1</button>
+        <button class="btn add" onclick="openAddForm('eredivisie')">+ Eredivisie</button>
+        <button class="btn add" onclick="openAddForm('primeira_liga')">+ Primeira Liga</button>
+        <button class="btn add" onclick="openAddForm('super_lig')">+ Süper Lig</button>
+        <button class="btn add" onclick="openAddForm('jupiler_league')">+ Jupiler Pro League</button>
+        <button class="btn add" onclick="openAddForm('champions_league')">+ Liga Mistrzów</button>
+        <button class="btn add" onclick="openAddForm('europa_league')">+ Liga Europy</button>
+        <button class="btn add" onclick="openAddForm('conference_league')">+ Liga Konferencji</button>
+        <button class="btn add" onclick="openAddForm('mundial2026')">+ Mundial 2026</button>
         <button class="btn danger" onclick="logoutAdmin()">Wyloguj</button>
       </div>
     </div>
@@ -75,12 +615,10 @@
             <option value="media">🎥 Multimedia</option>
             <option value="history">🏆 Historia</option>
             <option value="schedule">📅 Terminarz</option>
-            <!-- Polskie -->
             <option value="ekstraklasa">🇵🇱 Ekstraklasa</option>
             <option value="pierwsza_liga">🇵🇱 1 liga</option>
             <option value="druga_liga">🇵🇱 2 liga</option>
             <option value="trzecia_liga">🇵🇱 3 liga</option>
-            <!-- Zagraniczne -->
             <option value="premier_league">🇬🇧 Premier League</option>
             <option value="laliga">🇪🇸 LaLiga</option>
             <option value="bundesliga">🇩🇪 Bundesliga</option>
@@ -90,11 +628,9 @@
             <option value="primeira_liga">🇵🇹 Primeira Liga</option>
             <option value="super_lig">🇹🇷 Süper Lig</option>
             <option value="jupiler_league">🇧🇪 Jupiler Pro League</option>
-            <!-- Europa -->
             <option value="champions_league">🏆 Liga Mistrzów</option>
             <option value="europa_league">🥈 Liga Europy</option>
             <option value="conference_league">🥉 Liga Konferencji</option>
-            <!-- Mundial -->
             <option value="mundial2026">🌍 Mundial 2026</option>
           </select>
           <input type="text" id="modalTitleInput" placeholder="Tytuł artykułu" />
@@ -210,6 +746,7 @@
           <h4>Kontakt</h4>
           <p>Email: kontakt@strefagola.pl</p>
           <p>© 2025 StrefaGola. Wszelkie prawa zastrzeżone.</p>
+          <p class="admin-note">Tylko admin@sgstrefagola.pl ma dostęp do edycji treści.</p>
         </div>
       </div>
     </footer>
@@ -220,6 +757,17 @@
     let isAdmin = false;
     let currentDocId = null;
     let currentSection = null;
+
+    // 📱 Mobile menu toggle
+    document.getElementById('menuToggle').addEventListener('click', () => {
+      document.getElementById('sidebar').classList.add('active');
+      document.getElementById('overlay').classList.add('active');
+    });
+
+    document.getElementById('overlay').addEventListener('click', () => {
+      document.getElementById('sidebar').classList.remove('active');
+      document.getElementById('overlay').classList.remove('active');
+    });
 
     function showSection(id) {
       document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -235,23 +783,19 @@
           loadSection(id);
         }
       }
+      // Zamknij menu na mobile
+      if (window.innerWidth <= 768) {
+        document.getElementById('sidebar').classList.remove('active');
+        document.getElementById('overlay').classList.remove('active');
+      }
     }
 
-    // 🔧 NAJWAŻNIEJSZA NAPRAWA: funkcja showLiga z obsługą kontekstu
     function showLiga(context, ligaId) {
-      // Ukryj wszystkie podstrony lig w danym kontekście
       const container = document.getElementById(context);
       if (!container) return;
-
-      container.querySelectorAll('.liga-subpage').forEach(el => {
-        el.classList.remove('active-liga');
-      });
-
-      // Pokaż wybraną ligę
+      container.querySelectorAll('.liga-subpage').forEach(el => el.classList.remove('active-liga'));
       const target = document.getElementById(ligaId + '-content');
       if (target) target.classList.add('active-liga');
-
-      // Załaduj treść
       loadSection(ligaId);
     }
 
@@ -351,7 +895,6 @@
         }
         closeModal();
         loadSection(section);
-        // Odśwież widok lig, jeśli jesteśmy w tej sekcji
         if (section === 'ekstraklasa' || section === 'pierwsza_liga' || section === 'druga_liga' || section === 'trzecia_liga') {
           showLiga('polskie', section);
         }
@@ -408,36 +951,6 @@
         container.innerHTML = "<p>Błąd ładowania treści.</p>";
       }
     }
-
-    // CSS dla przycisków lig
-    const style = document.createElement('style');
-    style.textContent = `
-      .ligi-nav {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.8rem;
-        margin: 1.5rem 0 2rem;
-      }
-      .liga-btn {
-        padding: 0.6rem 1.2rem;
-        background: #e2e8f0;
-        border: none;
-        border-radius: 8px;
-        cursor: pointer;
-        font-weight: 600;
-        transition: all 0.2s;
-      }
-      .liga-btn:hover {
-        background: #cbd5e1;
-      }
-      .liga-subpage {
-        display: none;
-      }
-      .liga-subpage.active-liga {
-        display: block;
-      }
-    `;
-    document.head.appendChild(style);
 
     // Start
     document.querySelectorAll('nav a').forEach(link => {
