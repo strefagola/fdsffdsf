@@ -7,15 +7,18 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css" />
-  <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   <style>
-    /* 🔧 RESPONSYWNOŚĆ — DOŁĄCZONA BEZPOŚREDNIO */
     :root {
       --sidebar-width: 260px;
+      --primary: #1d4ed8;
+      --text: #1e293b;
+      --bg: #f9fbfd;
+      --card: #ffffff;
+      --sidebar-bg: #0f172a;
+      --sidebar-text: #cbd5e1;
     }
 
     * {
@@ -26,18 +29,36 @@
 
     body {
       font-family: 'Inter', system-ui, sans-serif;
-      background: #f9fbfd;
-      color: #1e293b;
+      background: var(--bg);
+      color: var(--text);
       display: flex;
       min-height: 100vh;
       overflow-x: hidden;
     }
 
-    /* Sidebar - desktop */
+    /* 📱 Przycisk hamburger — WIDOCZNY TYLKO NA MOBILE */
+    .menu-toggle {
+      display: none;
+      position: fixed;
+      top: 15px;
+      left: 15px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      width: 44px;
+      height: 44px;
+      border-radius: 8px;
+      z-index: 1001;
+      font-size: 1.4rem;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+
+    /* Sidebar */
     #sidebar {
       width: var(--sidebar-width);
-      background: #0f172a;
-      color: #cbd5e1;
+      background: var(--sidebar-bg);
+      color: var(--sidebar-text);
       padding: 1.5rem 1rem;
       display: flex;
       flex-direction: column;
@@ -74,7 +95,7 @@
       align-items: center;
       gap: 12px;
       padding: 0.8rem 1rem;
-      color: #cbd5e1;
+      color: var(--sidebar-text);
       text-decoration: none;
       border-radius: 8px;
       font-weight: 500;
@@ -119,7 +140,7 @@
       transition: all 0.2s;
     }
 
-    .btn.primary { background: #1d4ed8; color: white; }
+    .btn.primary { background: var(--primary); color: white; }
     .btn.primary:hover { background: #1e40af; }
     .btn.danger { background: #dc2626; color: white; }
     .btn.danger:hover { background: #b91c1c; }
@@ -129,7 +150,7 @@
     .hidden { display: none !important; }
     .error { color: #ef4444; font-size: 0.85rem; margin-top: 0.4rem; }
 
-    /* Main content */
+    /* Main */
     #main {
       flex: 1;
       margin-left: var(--sidebar-width);
@@ -159,7 +180,6 @@
       color: #1e40af;
     }
 
-    /* Strona główna */
     .hero {
       text-align: center;
       margin-bottom: 2.5rem;
@@ -169,7 +189,7 @@
       font-size: 2.4rem;
       font-weight: 800;
       margin-bottom: 0.7rem;
-      background: linear-gradient(135deg, #1d4ed8, #0ea5e9);
+      background: linear-gradient(135deg, var(--primary), #0ea5e9);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
@@ -189,7 +209,7 @@
     }
 
     .feature-card {
-      background: white;
+      background: var(--card);
       padding: 1.8rem;
       border-radius: 14px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.08);
@@ -212,14 +232,13 @@
       margin-bottom: 0.7rem;
     }
 
-    /* Treści */
     .content-grid {
       display: grid;
       gap: 1.8rem;
     }
 
     .content-item {
-      background: white;
+      background: var(--card);
       padding: 2rem;
       border-radius: 14px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.08);
@@ -251,7 +270,7 @@
     }
 
     .edit-btn {
-      background: #1d4ed8;
+      background: var(--primary);
       color: white;
       border: none;
       padding: 0.4rem 1rem;
@@ -266,7 +285,6 @@
       background: #1e40af;
     }
 
-    /* Przyciski lig */
     .ligi-nav {
       display: flex;
       flex-wrap: wrap;
@@ -321,7 +339,7 @@
 
     .modal-header {
       padding: 1.4rem 1.8rem;
-      background: #1d4ed8;
+      background: var(--primary);
       color: white;
       display: flex;
       justify-content: space-between;
@@ -372,7 +390,7 @@
       margin-top: 1rem;
     }
 
-    /* Stopka */
+    /* Footer */
     .site-footer {
       background: #0c152e;
       color: #cbd5e1;
@@ -427,10 +445,10 @@
       font-style: italic;
     }
 
-    /* 📱 RESPONSYWNOŚĆ DLA TELEFONÓW */
+    /* 📱 MOBILE — poniżej 768px */
     @media (max-width: 768px) {
-      :root {
-        --sidebar-width: 0;
+      .menu-toggle {
+        display: block; /* ✅ TERAZ JEST WIDOCZNY NA TELEFONIE */
       }
 
       #sidebar {
@@ -465,11 +483,6 @@
         font-size: 1.6rem;
       }
 
-      .modal-content {
-        width: 95%;
-        max-width: 500px;
-      }
-
       .ligi-nav {
         flex-direction: column;
         gap: 0.6rem;
@@ -487,30 +500,9 @@
       .content-item video {
         height: 220px;
       }
-
-      /* Przycisk menu hamburger */
-      .menu-toggle {
-        display: block;
-        position: fixed;
-        top: 15px;
-        left: 15px;
-        background: #1d4ed8;
-        color: white;
-        border: none;
-        width: 40px;
-        height: 40px;
-        border-radius: 8px;
-        z-index: 999;
-        font-size: 1.2rem;
-      }
     }
 
-    /* Przycisk hamburger na mobile */
-    .menu-toggle {
-      display: none;
-    }
-
-    /* Overlay przy otwartym sidebarze na mobile */
+    /* Overlay na mobile */
     .overlay {
       display: none;
     }
@@ -528,16 +520,14 @@
   </style>
 </head>
 <body>
-  <!-- Przycisk hamburger na mobile -->
+  <!-- ✅ Przycisk hamburger — TERAŻ WIDOCZNY NA TELEFONIE -->
   <button class="menu-toggle" id="menuToggle">☰</button>
   <div class="overlay" id="overlay"></div>
 
-  <!-- Boczny panel -->
   <aside id="sidebar">
     <div class="logo-box">
       <span class="logo-text">StrefaGola</span>
     </div>
-
     <nav>
       <ul>
         <li><a href="#" data-section="home" class="active">🏠 Strona główna</a></li>
@@ -556,7 +546,6 @@
       </ul>
     </nav>
 
-    <!-- Panel admina -->
     <div class="admin-panel" id="adminPanel">
       <div class="login-form" id="loginForm">
         <h3>🔐 Admin</h3>
@@ -594,13 +583,11 @@
     </div>
   </aside>
 
-  <!-- Główna zawartość -->
   <main id="main">
     <header>
       <img src="https://www.ebilet.pl/now/app/uploads/2024/02/shutterstock_2253076431-1-1280x720.jpg" alt="Strefa piłkarska" />
     </header>
 
-    <!-- MODAL -->
     <div id="modal" class="modal hidden">
       <div class="modal-content">
         <div class="modal-header">
@@ -646,7 +633,6 @@
       </div>
     </div>
 
-    <!-- Strona główna -->
     <section id="home" class="page active">
       <div class="hero">
         <h1>⚽ Witaj w StrefieGola</h1>
@@ -671,7 +657,6 @@
       </div>
     </section>
 
-    <!-- Standardowe sekcje -->
     <section id="news" class="page"><h2>📰 Aktualności</h2><div id="news-list" class="content-grid">Ładowanie...</div></section>
     <section id="results" class="page"><h2>📊 Wyniki</h2><div id="results-list" class="content-grid">Ładowanie...</div></section>
     <section id="analysis" class="page"><h2>🎯 Analizy</h2><div id="analysis-list" class="content-grid">Ładowanie...</div></section>
@@ -679,7 +664,6 @@
     <section id="history" class="page"><h2>🏆 Historia</h2><div id="history-list" class="content-grid">Ładowanie...</div></section>
     <section id="schedule" class="page"><h2>📅 Terminarz</h2><div id="schedule-list" class="content-grid">Ładowanie...</div></section>
 
-    <!-- POLSKIE LIGI -->
     <section id="polskie" class="page">
       <h2>🇵🇱 Polskie ligi</h2>
       <div class="ligi-nav">
@@ -694,7 +678,6 @@
       <div id="trzecia_liga-content" class="liga-subpage"><div id="trzecia_liga-list" class="content-grid">Ładowanie...</div></div>
     </section>
 
-    <!-- ZAGRANICZNE LIGI -->
     <section id="zagraniczne" class="page">
       <h2>🌍 Zagraniczne ligi</h2>
       <div class="ligi-nav">
@@ -719,15 +702,11 @@
       <div id="jupiler_league-content" class="liga-subpage"><div id="jupiler_league-list" class="content-grid">Ładowanie...</div></div>
     </section>
 
-    <!-- LIGI EUROPEJSKIE -->
     <section id="champions_league" class="page"><h2>🏆 Liga Mistrzów</h2><div id="champions_league-list" class="content-grid">Ładowanie...</div></section>
     <section id="europa_league" class="page"><h2>🥈 Liga Europy</h2><div id="europa_league-list" class="content-grid">Ładowanie...</div></section>
     <section id="conference_league" class="page"><h2>🥉 Liga Konferencji</h2><div id="conference_league-list" class="content-grid">Ładowanie...</div></section>
-
-    <!-- MUNDIAL 2026 -->
     <section id="mundial2026" class="page"><h2>🌍 Mundial 2026</h2><div id="mundial2026-list" class="content-grid">Ładowanie...</div></section>
 
-    <!-- STOPKA -->
     <footer class="site-footer">
       <div class="footer-content">
         <div class="footer-logo"><span>StrefaGola (SG)</span></div>
@@ -758,7 +737,7 @@
     let currentDocId = null;
     let currentSection = null;
 
-    // 📱 Mobile menu toggle
+    // 📱 Mobile menu
     document.getElementById('menuToggle').addEventListener('click', () => {
       document.getElementById('sidebar').classList.add('active');
       document.getElementById('overlay').classList.add('active');
@@ -775,13 +754,9 @@
       document.getElementById(id).classList.add('active');
       document.querySelector(`nav a[data-section="${id}"]`).classList.add('active');
       if (id !== 'home') {
-        if (id === 'polskie') {
-          showLiga('polskie', 'ekstraklasa');
-        } else if (id === 'zagraniczne') {
-          showLiga('zagraniczne', 'premier_league');
-        } else {
-          loadSection(id);
-        }
+        if (id === 'polskie') showLiga('polskie', 'ekstraklasa');
+        else if (id === 'zagraniczne') showLiga('zagraniczne', 'premier_league');
+        else loadSection(id);
       }
       // Zamknij menu na mobile
       if (window.innerWidth <= 768) {
@@ -952,7 +927,6 @@
       }
     }
 
-    // Start
     document.querySelectorAll('nav a').forEach(link => {
       link.addEventListener('click', (e) => {
         e.preventDefault();
