@@ -196,7 +196,6 @@
       font-size: 0.95rem;
     }
 
-    /* ✅ POPRAWIONE ZDJĘCIA – nie rozciągają się na całość */
     .content-item img {
       max-width: 100%;
       height: auto;
@@ -253,6 +252,58 @@
 
     .liga-subpage.active-liga {
       display: block;
+    }
+
+    /* 📊 STYL DLA MECZÓW – jak Flashscore */
+    .match-list {
+      display: grid;
+      gap: 6px;
+    }
+
+    .match-header {
+      background: #0b0e15;
+      padding: 8px 12px;
+      border-top-left-radius: 6px;
+      border-top-right-radius: 6px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .match-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr 1fr;
+      gap: 8px;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      align-items: center;
+    }
+
+    .match-date {
+      font-size: 0.85rem;
+      color: var(--text-light);
+    }
+
+    .team-name {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.9rem;
+    }
+
+    .team-logo {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+
+    .score {
+      font-weight: 700;
+      font-size: 1rem;
+      text-align: center;
     }
 
     .admin-bar {
@@ -385,6 +436,19 @@
       .liga-btn { padding: 6px 12px; font-size: 0.85rem; }
       .edit-btn { padding: 4px 8px; font-size: 0.8rem; }
       .top-nav a { padding: 10px 12px; font-size: 0.85rem; }
+
+      .match-row {
+        grid-template-columns: auto 1fr auto;
+        gap: 8px;
+      }
+
+      .team-name {
+        font-size: 0.85rem;
+      }
+
+      .score {
+        font-size: 0.9rem;
+      }
     }
   </style>
 </head>
@@ -418,6 +482,7 @@
       <img src="https://www.ebilet.pl/now/app/uploads/2024/02/shutterstock_2253076431-1-1280x720.jpg" alt="Piłka nożna" />
     </header>
 
+    <!-- MODAL -->
     <div id="modal" class="modal hidden">
       <div class="modal-content">
         <div class="modal-header">
@@ -426,12 +491,14 @@
         </div>
         <div class="modal-body">
           <select id="modalSection">
+            <!-- Artykuły -->
             <option value="news">Aktualności</option>
             <option value="results">Wyniki</option>
             <option value="analysis">Analizy</option>
             <option value="media">Multimedia</option>
             <option value="history">Transfery</option>
             <option value="schedule">Terminarz</option>
+            <!-- Mecze – ligi -->
             <option value="ekstraklasa">Ekstraklasa</option>
             <option value="pierwsza_liga">1 liga</option>
             <option value="druga_liga">2 liga</option>
@@ -439,6 +506,7 @@
             <option value="trzecia_liga_gr2">3 liga gr II</option>
             <option value="trzecia_liga_gr3">3 liga gr III</option>
             <option value="trzecia_liga_gr4">3 liga gr IV</option>
+            <option value="czwarta_liga_test">4 liga test</option>
             <option value="premier_league">Premier League</option>
             <option value="laliga">LaLiga</option>
             <option value="bundesliga">Bundesliga</option>
@@ -453,12 +521,40 @@
             <option value="conference_league">Liga Konferencji</option>
             <option value="mundial2026">Mundial 2026</option>
           </select>
-          <input type="text" id="modalTitleInput" placeholder="Tytuł artykułu" />
-          <textarea id="modalContent" placeholder="Treść... (ENTER = nowa linia)"></textarea>
-          <input type="url" id="modalImage" placeholder="Link do zdjęcia" />
-          <input type="url" id="modalVideo" placeholder="Link do filmu" />
+
+          <!-- POLA DLA ARTYKUŁÓW -->
+          <div id="articleFields">
+            <input type="text" id="modalTitleInput" placeholder="Tytuł artykułu" />
+            <textarea id="modalContent" placeholder="Treść artykułu... (ENTER = nowa linia)"></textarea>
+            <input type="url" id="modalImage" placeholder="Link do zdjęcia (opcjonalnie)" />
+            <input type="url" id="modalVideo" placeholder="Link do filmu (opcjonalnie)" />
+          </div>
+
+          <!-- POLA DLA MECZÓW -->
+          <div id="matchFields" style="display:none;">
+            <input type="text" id="modalTitleInputMatch" placeholder="KOLEJKA 20" />
+            <div style="margin: 10px 0; padding: 10px; background: #1a1f2c; border-radius: 6px;">
+              <label style="display:block; margin-bottom:5px;">Gospodarz:</label>
+              <input type="text" id="modalHomeTeam" placeholder="Nazwa drużyny" style="width:100%; margin-bottom:8px;" />
+              <input type="url" id="modalLogoHome" placeholder="URL herbu" style="width:100%;" />
+            </div>
+            <div style="margin: 10px 0; padding: 10px; background: #1a1f2c; border-radius: 6px;">
+              <label style="display:block; margin-bottom:5px;">Gość:</label>
+              <input type="text" id="modalAwayTeam" placeholder="Nazwa drużyny" style="width:100%; margin-bottom:8px;" />
+              <input type="url" id="modalLogoAway" placeholder="URL herbu" style="width:100%;" />
+            </div>
+            <div style="margin: 10px 0; padding: 10px; background: #1a1f2c; border-radius: 6px;">
+              <label style="display:block; margin-bottom:5px;">Data i godzina:</label>
+              <input type="text" id="modalDate" placeholder="np. 06.02. 18:00" style="width:100%;" />
+            </div>
+            <div style="margin: 10px 0; padding: 10px; background: #1a1f2c; border-radius: 6px;">
+              <label style="display:block; margin-bottom:5px;">Wynik:</label>
+              <input type="text" id="modalScore" placeholder="np. 2:1 lub -" style="width:100%;" />
+            </div>
+          </div>
+
           <div class="modal-actions">
-            <button class="btn btn-primary" onclick="saveContent()">Zapisz</button>
+            <button class="btn btn-primary" id="modalSaveBtn" onclick="handleSave()">Zapisz</button>
             <button class="btn btn-danger" id="modalDelBtn" onclick="deleteContent()" style="display:none;">Usuń</button>
           </div>
           <p id="modalErr" class="error"></p>
@@ -466,6 +562,7 @@
       </div>
     </div>
 
+    <!-- SEKCJE -->
     <section id="home" class="page active">
       <div class="hero">
         <h1>Witaj w StrefieGola</h1>
@@ -478,6 +575,7 @@
       </div>
     </section>
 
+    <!-- ARTYKUŁY -->
     <section id="news" class="page"><h2>Aktualności</h2><div id="news-list" class="content-grid">Ładowanie...</div></section>
     <section id="results" class="page"><h2>Wyniki</h2><div id="results-list" class="content-grid">Ładowanie...</div></section>
     <section id="analysis" class="page"><h2>Analizy</h2><div id="analysis-list" class="content-grid">Ładowanie...</div></section>
@@ -485,6 +583,7 @@
     <section id="history" class="page"><h2>Transfery</h2><div id="history-list" class="content-grid">Ładowanie...</div></section>
     <section id="schedule" class="page"><h2>Terminarz</h2><div id="schedule-list" class="content-grid">Ładowanie...</div></section>
 
+    <!-- POLSKIE LIGI – MECZE -->
     <section id="polskie" class="page">
       <h2>Polskie ligi</h2>
       <div class="ligi-nav">
@@ -495,16 +594,19 @@
         <button class="liga-btn" onclick="showLiga('polskie', 'trzecia_liga_gr2')">3 liga gr II</button>
         <button class="liga-btn" onclick="showLiga('polskie', 'trzecia_liga_gr3')">3 liga gr III</button>
         <button class="liga-btn" onclick="showLiga('polskie', 'trzecia_liga_gr4')">3 liga gr IV</button>
+        <button class="liga-btn" onclick="showLiga('polskie', 'czwarta_liga_test')">4 liga test</button>
       </div>
-      <div id="ekstraklasa-content" class="liga-subpage active-liga"><div id="ekstraklasa-list" class="content-grid">Ładowanie...</div></div>
-      <div id="pierwsza_liga-content" class="liga-subpage"><div id="pierwsza_liga-list" class="content-grid">Ładowanie...</div></div>
-      <div id="druga_liga-content" class="liga-subpage"><div id="druga_liga-list" class="content-grid">Ładowanie...</div></div>
-      <div id="trzecia_liga_gr1-content" class="liga-subpage"><div id="trzecia_liga_gr1-list" class="content-grid">Ładowanie...</div></div>
-      <div id="trzecia_liga_gr2-content" class="liga-subpage"><div id="trzecia_liga_gr2-list" class="content-grid">Ładowanie...</div></div>
-      <div id="trzecia_liga_gr3-content" class="liga-subpage"><div id="trzecia_liga_gr3-list" class="content-grid">Ładowanie...</div></div>
-      <div id="trzecia_liga_gr4-content" class="liga-subpage"><div id="trzecia_liga_gr4-list" class="content-grid">Ładowanie...</div></div>
+      <div id="ekstraklasa-content" class="liga-subpage active-liga"><div id="ekstraklasa-list" class="match-list">Ładowanie...</div></div>
+      <div id="pierwsza_liga-content" class="liga-subpage"><div id="pierwsza_liga-list" class="match-list">Ładowanie...</div></div>
+      <div id="druga_liga-content" class="liga-subpage"><div id="druga_liga-list" class="match-list">Ładowanie...</div></div>
+      <div id="trzecia_liga_gr1-content" class="liga-subpage"><div id="trzecia_liga_gr1-list" class="match-list">Ładowanie...</div></div>
+      <div id="trzecia_liga_gr2-content" class="liga-subpage"><div id="trzecia_liga_gr2-list" class="match-list">Ładowanie...</div></div>
+      <div id="trzecia_liga_gr3-content" class="liga-subpage"><div id="trzecia_liga_gr3-list" class="match-list">Ładowanie...</div></div>
+      <div id="trzecia_liga_gr4-content" class="liga-subpage"><div id="trzecia_liga_gr4-list" class="match-list">Ładowanie...</div></div>
+      <div id="czwarta_liga_test-content" class="liga-subpage"><div id="czwarta_liga_test-list" class="match-list">Ładowanie...</div></div>
     </section>
 
+    <!-- ZAGRANICZNE LIGI – MECZE -->
     <section id="zagraniczne" class="page">
       <h2>Ligi zagraniczne</h2>
       <div class="ligi-nav">
@@ -518,22 +620,24 @@
         <button class="liga-btn" onclick="showLiga('zagraniczne', 'super_lig')">Süper Lig</button>
         <button class="liga-btn" onclick="showLiga('zagraniczne', 'jupiler_league')">Jupiler Pro League</button>
       </div>
-      <div id="premier_league-content" class="liga-subpage active-liga"><div id="premier_league-list" class="content-grid">Ładowanie...</div></div>
-      <div id="laliga-content" class="liga-subpage"><div id="laliga-list" class="content-grid">Ładowanie...</div></div>
-      <div id="bundesliga-content" class="liga-subpage"><div id="bundesliga-list" class="content-grid">Ładowanie...</div></div>
-      <div id="serie_a-content" class="liga-subpage"><div id="serie_a-list" class="content-grid">Ładowanie...</div></div>
-      <div id="ligue_1-content" class="liga-subpage"><div id="ligue_1-list" class="content-grid">Ładowanie...</div></div>
-      <div id="eredivisie-content" class="liga-subpage"><div id="eredivisie-list" class="content-grid">Ładowanie...</div></div>
-      <div id="primeira_liga-content" class="liga-subpage"><div id="primeira_liga-list" class="content-grid">Ładowanie...</div></div>
-      <div id="super_lig-content" class="liga-subpage"><div id="super_lig-list" class="content-grid">Ładowanie...</div></div>
-      <div id="jupiler_league-content" class="liga-subpage"><div id="jupiler_league-list" class="content-grid">Ładowanie...</div></div>
+      <div id="premier_league-content" class="liga-subpage active-liga"><div id="premier_league-list" class="match-list">Ładowanie...</div></div>
+      <div id="laliga-content" class="liga-subpage"><div id="laliga-list" class="match-list">Ładowanie...</div></div>
+      <div id="bundesliga-content" class="liga-subpage"><div id="bundesliga-list" class="match-list">Ładowanie...</div></div>
+      <div id="serie_a-content" class="liga-subpage"><div id="serie_a-list" class="match-list">Ładowanie...</div></div>
+      <div id="ligue_1-content" class="liga-subpage"><div id="ligue_1-list" class="match-list">Ładowanie...</div></div>
+      <div id="eredivisie-content" class="liga-subpage"><div id="eredivisie-list" class="match-list">Ładowanie...</div></div>
+      <div id="primeira_liga-content" class="liga-subpage"><div id="primeira_liga-list" class="match-list">Ładowanie...</div></div>
+      <div id="super_lig-content" class="liga-subpage"><div id="super_lig-list" class="match-list">Ładowanie...</div></div>
+      <div id="jupiler_league-content" class="liga-subpage"><div id="jupiler_league-list" class="match-list">Ładowanie...</div></div>
     </section>
 
-    <section id="champions_league" class="page"><h2>Liga Mistrzów</h2><div id="champions_league-list" class="content-grid">Ładowanie...</div></section>
-    <section id="europa_league" class="page"><h2>Liga Europy</h2><div id="europa_league-list" class="content-grid">Ładowanie...</div></section>
-    <section id="conference_league" class="page"><h2>Liga Konferencji</h2><div id="conference_league-list" class="content-grid">Ładowanie...</div></section>
-    <section id="mundial2026" class="page"><h2>Mundial 2026</h2><div id="mundial2026-list" class="content-grid">Ładowanie...</div></section>
+    <!-- EUROPA – MECZE -->
+    <section id="champions_league" class="page"><h2>Liga Mistrzów</h2><div id="champions_league-list" class="match-list">Ładowanie...</div></section>
+    <section id="europa_league" class="page"><h2>Liga Europy</h2><div id="europa_league-list" class="match-list">Ładowanie...</div></section>
+    <section id="conference_league" class="page"><h2>Liga Konferencji</h2><div id="conference_league-list" class="match-list">Ładowanie...</div></section>
+    <section id="mundial2026" class="page"><h2>Mundial 2026</h2><div id="mundial2026-list" class="match-list">Ładowanie...</div></section>
 
+    <!-- 🔐 PANEL ADMINA -->
     <div class="admin-bar" id="adminPanel">
       <h3>Panel administratora</h3>
       <div id="loginForm">
@@ -542,7 +646,8 @@
         <p id="loginErr" class="error"></p>
       </div>
       <div id="adminTools" class="hidden">
-        <button class="btn btn-primary" onclick="openAddForm('news')">+ Dodaj treść</button>
+        <button class="btn btn-primary" onclick="openAddForm('news')">+ Artykuł</button>
+        <button class="btn btn-primary" onclick="openAddForm('ekstraklasa')">+ Mecz</button>
         <button class="btn btn-danger" onclick="logoutAdmin()" style="margin-left:10px;">Wyloguj</button>
       </div>
     </div>
@@ -557,6 +662,15 @@
     let isAdmin = false;
     let currentDocId = null;
     let currentSection = null;
+
+    const articleSections = ['news','results','analysis','media','history','schedule'];
+    const matchSections = [
+      'ekstraklasa','pierwsza_liga','druga_liga',
+      'trzecia_liga_gr1','trzecia_liga_gr2','trzecia_liga_gr3','trzecia_liga_gr4','czwarta_liga_test',
+      'premier_league','laliga','bundesliga','serie_a','ligue_1',
+      'eredivisie','primeira_liga','super_lig','jupiler_league',
+      'champions_league','europa_league','conference_league','mundial2026'
+    ];
 
     function showSection(id) {
       document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -584,15 +698,7 @@
       document.getElementById('loginForm').classList.toggle('hidden', isAdmin);
       document.getElementById('adminTools').classList.toggle('hidden', !isAdmin);
       if (isAdmin) {
-        const allSections = [
-          'news','results','analysis','media','history','schedule',
-          'ekstraklasa','pierwsza_liga','druga_liga',
-          'trzecia_liga_gr1','trzecia_liga_gr2','trzecia_liga_gr3','trzecia_liga_gr4',
-          'premier_league','laliga','bundesliga','serie_a','ligue_1',
-          'eredivisie','primeira_liga','super_lig','jupiler_league',
-          'champions_league','europa_league','conference_league',
-          'mundial2026'
-        ];
+        const allSections = [...articleSections, ...matchSections];
         allSections.forEach(loadSection);
       }
     });
@@ -613,6 +719,19 @@
       currentSection = section;
       document.getElementById('modalSection').value = section;
       resetModal();
+
+      if (articleSections.includes(section)) {
+        document.getElementById('articleFields').style.display = 'block';
+        document.getElementById('matchFields').style.display = 'none';
+        document.getElementById('modalTitleInput').placeholder = 'Tytuł artykułu';
+        document.getElementById('modalSaveBtn').textContent = 'Zapisz artykuł';
+      } else if (matchSections.includes(section)) {
+        document.getElementById('articleFields').style.display = 'none';
+        document.getElementById('matchFields').style.display = 'block';
+        document.getElementById('modalTitleInputMatch').placeholder = 'KOLEJKA 20';
+        document.getElementById('modalSaveBtn').textContent = 'Zapisz mecz';
+      }
+
       document.getElementById('modal').classList.remove('hidden');
     }
 
@@ -621,42 +740,48 @@
       currentDocId = docId;
       currentSection = section;
       document.getElementById('modalSection').value = section;
-      document.getElementById('modalTitleInput').value = data.title || '';
-      document.getElementById('modalContent').value = data.content || '';
-      document.getElementById('modalImage').value = data.imageUrl || '';
-      document.getElementById('modalVideo').value = data.videoUrl || '';
-      document.getElementById('modalDelBtn').style.display = 'inline-block';
-      document.getElementById('modal').classList.remove('hidden');
+
+      if (articleSections.includes(section)) {
+        document.getElementById('modalTitleInput').value = data.title || '';
+        document.getElementById('modalContent').value = data.content || '';
+        document.getElementById('modalImage').value = data.imageUrl || '';
+        document.getElementById('modalVideo').value = data.videoUrl || '';
+        openAddForm(section);
+      } else if (matchSections.includes(section)) {
+        document.getElementById('modalTitleInputMatch').value = data.title || '';
+        document.getElementById('modalHomeTeam').value = data.homeTeam || '';
+        document.getElementById('modalAwayTeam').value = data.awayTeam || '';
+        document.getElementById('modalDate').value = data.date || '';
+        document.getElementById('modalScore').value = data.score || '';
+        document.getElementById('modalLogoHome').value = data.logoHome || '';
+        document.getElementById('modalLogoAway').value = data.logoAway || '';
+        openAddForm(section);
+      }
     }
 
     function resetModal() {
-      document.getElementById('modalTitleInput').value = '';
-      document.getElementById('modalContent').value = '';
-      document.getElementById('modalImage').value = '';
-      document.getElementById('modalVideo').value = '';
       document.getElementById('modalErr').textContent = '';
       document.getElementById('modalDelBtn').style.display = 'none';
     }
 
     function closeModal() {
       document.getElementById('modal').classList.add('hidden');
-      resetModal();
     }
 
-    function embedVideo(url) {
-      if (!url) return '';
-      const yt = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/);
-      if (yt) return `<iframe src="https://www.youtube.com/embed/${yt[1]}" frameborder="0" allowfullscreen></iframe>`;
-      if (url.endsWith('.mp4') || url.endsWith('.webm')) return `<video controls style="width:100%"><source src="${url}" type="video/mp4"></video>`;
-      return `<a href="${url}" target="_blank" style="display:inline-block;padding:6px 12px;background:#ff3b3b;color:white;border-radius:4px;text-decoration:none;">Otwórz film</a>`;
+    function handleSave() {
+      const section = document.getElementById('modalSection').value;
+      if (articleSections.includes(section)) {
+        saveArticle();
+      } else if (matchSections.includes(section)) {
+        saveMatch();
+      }
     }
 
-    async function saveContent() {
+    async function saveArticle() {
       const title = document.getElementById('modalTitleInput').value.trim();
       const content = document.getElementById('modalContent').value;
       const imageUrl = document.getElementById('modalImage').value.trim();
       const videoUrl = document.getElementById('modalVideo').value.trim();
-      const section = document.getElementById('modalSection').value;
 
       const err = document.getElementById('modalErr');
       if (!title || !content) {
@@ -668,25 +793,57 @@
 
       try {
         if (currentDocId) {
-          await db.collection(section).doc(currentDocId).update(data);
+          await db.collection(currentSection).doc(currentDocId).update(data);
         } else {
-          await db.collection(section).add({ ...data, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+          await db.collection(currentSection).add({ ...data, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
         }
         closeModal();
-        loadSection(section);
-        if (section.startsWith('trzecia_liga_gr') || ['ekstraklasa','pierwsza_liga','druga_liga'].includes(section)) {
-          showLiga('polskie', section);
+        loadSection(currentSection);
+      } catch (e) {
+        err.textContent = "Błąd zapisu artykułu.";
+      }
+    }
+
+    async function saveMatch() {
+      const title = document.getElementById('modalTitleInputMatch').value.trim();
+      const homeTeam = document.getElementById('modalHomeTeam').value.trim();
+      const awayTeam = document.getElementById('modalAwayTeam').value.trim();
+      const date = document.getElementById('modalDate').value.trim();
+      const score = document.getElementById('modalScore').value.trim();
+      const logoHome = document.getElementById('modalLogoHome').value.trim();
+      const logoAway = document.getElementById('modalLogoAway').value.trim();
+
+      const err = document.getElementById('modalErr');
+      if (!title || !homeTeam || !awayTeam || !date || !score) {
+        err.textContent = "Wypełnij wszystkie pola meczu.";
+        return;
+      }
+
+      const data = {
+        title, homeTeam, awayTeam, date, score,
+        logoHome: logoHome || null,
+        logoAway: logoAway || null,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      };
+
+      try {
+        if (currentDocId) {
+          await db.collection(currentSection).doc(currentDocId).update(data);
+        } else {
+          await db.collection(currentSection).add(data);
         }
-        if (['premier_league','laliga','bundesliga','serie_a','ligue_1','eredivisie','primeira_liga','super_lig','jupiler_league'].includes(section)) {
-          showLiga('zagraniczne', section);
+        closeModal();
+        loadSection(currentSection);
+        if (['polskie','zagraniczne'].includes(document.querySelector('.page.active').id)) {
+          showLiga(document.querySelector('.page.active').id, currentSection);
         }
       } catch (e) {
-        err.textContent = "Błąd zapisu.";
+        err.textContent = "Błąd zapisu meczu.";
       }
     }
 
     async function deleteContent() {
-      if (!confirm("Na pewno chcesz usunąć tę treść?")) return;
+      if (!confirm("Na pewno chcesz usunąć?")) return;
       try {
         await db.collection(currentSection).doc(currentDocId).delete();
         closeModal();
@@ -694,6 +851,14 @@
       } catch (e) {
         document.getElementById('modalErr').textContent = "Błąd usuwania.";
       }
+    }
+
+    function embedVideo(url) {
+      if (!url) return '';
+      const yt = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/);
+      if (yt) return `<iframe src="https://www.youtube.com/embed/${yt[1]}" frameborder="0" allowfullscreen></iframe>`;
+      if (url.endsWith('.mp4') || url.endsWith('.webm')) return `<video controls style="width:100%"><source src="${url}" type="video/mp4"></video>`;
+      return `<a href="${url}" target="_blank" style="display:inline-block;padding:6px 12px;background:#ff3b3b;color:white;border-radius:4px;text-decoration:none;">Otwórz film</a>`;
     }
 
     async function loadSection(section) {
@@ -706,28 +871,56 @@
           return;
         }
 
-        let html = '';
-        snap.forEach(doc => {
-          const d = doc.data();
-          const editBtn = isAdmin ? 
-            `<button class="edit-btn" onclick="openEditForm('${section}', '${doc.id}', ${JSON.stringify(d).replace(/"/g, '&quot;')})">Edytuj</button>` : '';
+        if (matchSections.includes(section)) {
+          let html = '';
+          let currentRound = '';
+          snap.forEach(doc => {
+            const d = doc.data();
+            const round = d.title || 'Bez kolejki';
+            if (round !== currentRound) {
+              html += `<div class="match-header">${round}</div>`;
+              currentRound = round;
+            }
+            html += `
+              <div class="match-row">
+                <div class="match-date">${d.date || '-'}</div>
+                <div class="team-name">
+                  ${d.logoHome ? `<img class="team-logo" src="${d.logoHome}" onerror="this.style.display='none'">` : ''}
+                  <span>${d.homeTeam || '---'}</span>
+                </div>
+                <div class="score">${d.score || '-'}</div>
+                <div class="team-name">
+                  <span>${d.awayTeam || '---'}</span>
+                  ${d.logoAway ? `<img class="team-logo" src="${d.logoAway}" onerror="this.style.display='none'">` : ''}
+                </div>
+              </div>
+            `;
+          });
+          container.innerHTML = html;
+        } else {
+          let html = '';
+          snap.forEach(doc => {
+            const d = doc.data();
+            const editBtn = isAdmin ? 
+              `<button class="edit-btn" onclick="openEditForm('${section}', '${doc.id}', ${JSON.stringify(d).replace(/"/g, '&quot;')})">Edytuj</button>` : '';
 
-          let media = '';
-          if (d.imageUrl) media += `<img src="${d.imageUrl}" alt="Zdjęcie">`;
-          if (d.videoUrl) media += embedVideo(d.videoUrl);
+            let media = '';
+            if (d.imageUrl) media += `<img src="${d.imageUrl}" alt="Zdjęcie">`;
+            if (d.videoUrl) media += embedVideo(d.videoUrl);
 
-          html += `
-            <div class="content-item">
-              ${editBtn}
-              <h3>${d.title}</h3>
-              <div class="article-content">${d.content}</div>
-              ${media}
-            </div>
-          `;
-        });
-        container.innerHTML = html;
+            html += `
+              <div class="content-item">
+                ${editBtn}
+                <h3>${d.title}</h3>
+                <div class="article-content">${d.content}</div>
+                ${media}
+              </div>
+            `;
+          });
+          container.innerHTML = html;
+        }
       } catch (e) {
-        container.innerHTML = "<p>Błąd ładowania treści.</p>";
+        container.innerHTML = "<p>Błąd ładowania.</p>";
       }
     }
 
