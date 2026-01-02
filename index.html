@@ -196,7 +196,6 @@
       font-size: 0.95rem;
     }
 
-    /* ✅ POPRAWIONE ZDJĘCIA – nie rozciągają się na całość */
     .content-item img {
       max-width: 100%;
       height: auto;
@@ -253,6 +252,58 @@
 
     .liga-subpage.active-liga {
       display: block;
+    }
+
+    /* 📊 STYL DLA MECZÓW – jak Flashscore */
+    .match-list {
+      display: grid;
+      gap: 6px;
+    }
+
+    .match-header {
+      background: #0b0e15;
+      padding: 8px 12px;
+      border-top-left-radius: 6px;
+      border-top-right-radius: 6px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .match-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr 1fr;
+      gap: 8px;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      align-items: center;
+    }
+
+    .match-date {
+      font-size: 0.85rem;
+      color: var(--text-light);
+    }
+
+    .team-name {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.9rem;
+    }
+
+    .team-logo {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+
+    .score {
+      font-weight: 700;
+      font-size: 1rem;
+      text-align: center;
     }
 
     .admin-bar {
@@ -385,6 +436,20 @@
       .liga-btn { padding: 6px 12px; font-size: 0.85rem; }
       .edit-btn { padding: 4px 8px; font-size: 0.8rem; }
       .top-nav a { padding: 10px 12px; font-size: 0.85rem; }
+
+      /* MOBILE: zmiana układu meczów na pionowy */
+      .match-row {
+        grid-template-columns: auto 1fr auto;
+        gap: 8px;
+      }
+
+      .team-name {
+        font-size: 0.85rem;
+      }
+
+      .score {
+        font-size: 0.9rem;
+      }
     }
   </style>
 </head>
@@ -418,10 +483,11 @@
       <img src="https://www.ebilet.pl/now/app/uploads/2024/02/shutterstock_2253076431-1-1280x720.jpg" alt="Piłka nożna" />
     </header>
 
+    <!-- MODAL -->
     <div id="modal" class="modal hidden">
       <div class="modal-content">
         <div class="modal-header">
-          <h2 id="modalTitle">Dodaj treść</h2>
+          <h2 id="modalTitle">Dodaj mecz</h2>
           <button class="close-btn" onclick="closeModal()">&times;</button>
         </div>
         <div class="modal-body">
@@ -439,6 +505,7 @@
             <option value="trzecia_liga_gr2">3 liga gr II</option>
             <option value="trzecia_liga_gr3">3 liga gr III</option>
             <option value="trzecia_liga_gr4">3 liga gr IV</option>
+            <option value="czwarta_liga_test">4 liga test</option>
             <option value="premier_league">Premier League</option>
             <option value="laliga">LaLiga</option>
             <option value="bundesliga">Bundesliga</option>
@@ -453,12 +520,31 @@
             <option value="conference_league">Liga Konferencji</option>
             <option value="mundial2026">Mundial 2026</option>
           </select>
-          <input type="text" id="modalTitleInput" placeholder="Tytuł artykułu" />
-          <textarea id="modalContent" placeholder="Treść... (ENTER = nowa linia)"></textarea>
-          <input type="url" id="modalImage" placeholder="Link do zdjęcia" />
-          <input type="url" id="modalVideo" placeholder="Link do filmu" />
+          <input type="text" id="modalTitleInput" placeholder="Tytuł (np. KOLEJKA 20)" />
+          <div style="margin: 10px 0; padding: 10px; background: #1a1f2c; border-radius: 6px;">
+            <label style="display:block; margin-bottom:5px;">Drużyna gospodarza:</label>
+            <input type="text" id="modalHomeTeam" placeholder="Nazwa drużyny" style="width:100%; margin-bottom:8px;" />
+            <input type="url" id="modalLogoHome" placeholder="URL herbu (opcjonalnie)" style="width:100%;" />
+          </div>
+          <div style="margin: 10px 0; padding: 10px; background: #1a1f2c; border-radius: 6px;">
+            <label style="display:block; margin-bottom:5px;">Drużyna gościa:</label>
+            <input type="text" id="modalAwayTeam" placeholder="Nazwa drużyny" style="width:100%; margin-bottom:8px;" />
+            <input type="url" id="modalLogoAway" placeholder="URL herbu (opcjonalnie)" style="width:100%;" />
+          </div>
+          <div style="margin: 10px 0; padding: 10px; background: #1a1f2c; border-radius: 6px;">
+            <label style="display:block; margin-bottom:5px;">Data i godzina:</label>
+            <input type="text" id="modalDate" placeholder="np. 06.02. 18:00" style="width:100%;" />
+          </div>
+          <div style="margin: 10px 0; padding: 10px; background: #1a1f2c; border-radius: 6px;">
+            <label style="display:block; margin-bottom:5px;">Wynik:</label>
+            <input type="text" id="modalScore" placeholder="np. 2:1 lub -" style="width:100%;" />
+          </div>
+          <div style="margin: 10px 0; padding: 10px; background: #1a1f2c; border-radius: 6px;">
+            <label style="display:block; margin-bottom:5px;">Treść (opcjonalnie):</label>
+            <textarea id="modalContent" placeholder="Dodatkowe informacje..."></textarea>
+          </div>
           <div class="modal-actions">
-            <button class="btn btn-primary" onclick="saveContent()">Zapisz</button>
+            <button class="btn btn-primary" onclick="saveMatch()">Zapisz mecz</button>
             <button class="btn btn-danger" id="modalDelBtn" onclick="deleteContent()" style="display:none;">Usuń</button>
           </div>
           <p id="modalErr" class="error"></p>
@@ -466,6 +552,7 @@
       </div>
     </div>
 
+    <!-- SEKCJE -->
     <section id="home" class="page active">
       <div class="hero">
         <h1>Witaj w StrefieGola</h1>
@@ -495,6 +582,8 @@
         <button class="liga-btn" onclick="showLiga('polskie', 'trzecia_liga_gr2')">3 liga gr II</button>
         <button class="liga-btn" onclick="showLiga('polskie', 'trzecia_liga_gr3')">3 liga gr III</button>
         <button class="liga-btn" onclick="showLiga('polskie', 'trzecia_liga_gr4')">3 liga gr IV</button>
+        <!-- ✅ NOWE: 4 liga test -->
+        <button class="liga-btn" onclick="showLiga('polskie', 'czwarta_liga_test')">4 liga test</button>
       </div>
       <div id="ekstraklasa-content" class="liga-subpage active-liga"><div id="ekstraklasa-list" class="content-grid">Ładowanie...</div></div>
       <div id="pierwsza_liga-content" class="liga-subpage"><div id="pierwsza_liga-list" class="content-grid">Ładowanie...</div></div>
@@ -503,6 +592,10 @@
       <div id="trzecia_liga_gr2-content" class="liga-subpage"><div id="trzecia_liga_gr2-list" class="content-grid">Ładowanie...</div></div>
       <div id="trzecia_liga_gr3-content" class="liga-subpage"><div id="trzecia_liga_gr3-list" class="content-grid">Ładowanie...</div></div>
       <div id="trzecia_liga_gr4-content" class="liga-subpage"><div id="trzecia_liga_gr4-list" class="content-grid">Ładowanie...</div></div>
+      <!-- ✅ NOWY KONTENER DLA 4 LIGI TEST -->
+      <div id="czwarta_liga_test-content" class="liga-subpage">
+        <div id="czwarta_liga_test-list" class="match-list">Ładowanie...</div>
+      </div>
     </section>
 
     <section id="zagraniczne" class="page">
@@ -534,6 +627,7 @@
     <section id="conference_league" class="page"><h2>Liga Konferencji</h2><div id="conference_league-list" class="content-grid">Ładowanie...</div></section>
     <section id="mundial2026" class="page"><h2>Mundial 2026</h2><div id="mundial2026-list" class="content-grid">Ładowanie...</div></section>
 
+    <!-- 🔐 PANEL ADMINA -->
     <div class="admin-bar" id="adminPanel">
       <h3>Panel administratora</h3>
       <div id="loginForm">
@@ -588,6 +682,7 @@
           'news','results','analysis','media','history','schedule',
           'ekstraklasa','pierwsza_liga','druga_liga',
           'trzecia_liga_gr1','trzecia_liga_gr2','trzecia_liga_gr3','trzecia_liga_gr4',
+          'czwarta_liga_test', // ✅ NOWE
           'premier_league','laliga','bundesliga','serie_a','ligue_1',
           'eredivisie','primeira_liga','super_lig','jupiler_league',
           'champions_league','europa_league','conference_league',
@@ -614,6 +709,29 @@
       document.getElementById('modalSection').value = section;
       resetModal();
       document.getElementById('modal').classList.remove('hidden');
+
+      // ✅ Pokaż dodatkowe pola tylko dla "czwarta_liga_test"
+      if (section === 'czwarta_liga_test') {
+        document.getElementById('modalTitleInput').placeholder = 'KOLEJKA 20';
+        document.getElementById('modalTitleInput').parentElement.style.display = 'block';
+        document.getElementById('modalHomeTeam').parentElement.style.display = 'block';
+        document.getElementById('modalAwayTeam').parentElement.style.display = 'block';
+        document.getElementById('modalDate').parentElement.style.display = 'block';
+        document.getElementById('modalScore').parentElement.style.display = 'block';
+        document.getElementById('modalContent').parentElement.style.display = 'block';
+        document.getElementById('modalLogoHome').parentElement.style.display = 'block';
+        document.getElementById('modalLogoAway').parentElement.style.display = 'block';
+      } else {
+        document.getElementById('modalTitleInput').placeholder = 'Tytuł artykułu';
+        document.getElementById('modalTitleInput').parentElement.style.display = 'block';
+        document.getElementById('modalHomeTeam').parentElement.style.display = 'none';
+        document.getElementById('modalAwayTeam').parentElement.style.display = 'none';
+        document.getElementById('modalDate').parentElement.style.display = 'none';
+        document.getElementById('modalScore').parentElement.style.display = 'none';
+        document.getElementById('modalContent').parentElement.style.display = 'block';
+        document.getElementById('modalLogoHome').parentElement.style.display = 'none';
+        document.getElementById('modalLogoAway').parentElement.style.display = 'none';
+      }
     }
 
     function openEditForm(section, docId, data) {
@@ -623,8 +741,17 @@
       document.getElementById('modalSection').value = section;
       document.getElementById('modalTitleInput').value = data.title || '';
       document.getElementById('modalContent').value = data.content || '';
-      document.getElementById('modalImage').value = data.imageUrl || '';
-      document.getElementById('modalVideo').value = data.videoUrl || '';
+
+      // ✅ Jeśli to "czwarta_liga_test", załaduj dane meczu
+      if (section === 'czwarta_liga_test') {
+        document.getElementById('modalHomeTeam').value = data.homeTeam || '';
+        document.getElementById('modalAwayTeam').value = data.awayTeam || '';
+        document.getElementById('modalDate').value = data.date || '';
+        document.getElementById('modalScore').value = data.score || '';
+        document.getElementById('modalLogoHome').value = data.logoHome || '';
+        document.getElementById('modalLogoAway').value = data.logoAway || '';
+      }
+
       document.getElementById('modalDelBtn').style.display = 'inline-block';
       document.getElementById('modal').classList.remove('hidden');
     }
@@ -636,6 +763,14 @@
       document.getElementById('modalVideo').value = '';
       document.getElementById('modalErr').textContent = '';
       document.getElementById('modalDelBtn').style.display = 'none';
+
+      // ✅ Ukryj pola specyficzne dla meczów
+      document.getElementById('modalHomeTeam').parentElement.style.display = 'none';
+      document.getElementById('modalAwayTeam').parentElement.style.display = 'none';
+      document.getElementById('modalDate').parentElement.style.display = 'none';
+      document.getElementById('modalScore').parentElement.style.display = 'none';
+      document.getElementById('modalLogoHome').parentElement.style.display = 'none';
+      document.getElementById('modalLogoAway').parentElement.style.display = 'none';
     }
 
     function closeModal() {
@@ -651,34 +786,45 @@
       return `<a href="${url}" target="_blank" style="display:inline-block;padding:6px 12px;background:#ff3b3b;color:white;border-radius:4px;text-decoration:none;">Otwórz film</a>`;
     }
 
-    async function saveContent() {
+    async function saveMatch() {
       const title = document.getElementById('modalTitleInput').value.trim();
+      const homeTeam = document.getElementById('modalHomeTeam').value.trim();
+      const awayTeam = document.getElementById('modalAwayTeam').value.trim();
+      const date = document.getElementById('modalDate').value.trim();
+      const score = document.getElementById('modalScore').value.trim();
+      const logoHome = document.getElementById('modalLogoHome').value.trim();
+      const logoAway = document.getElementById('modalLogoAway').value.trim();
       const content = document.getElementById('modalContent').value;
-      const imageUrl = document.getElementById('modalImage').value.trim();
-      const videoUrl = document.getElementById('modalVideo').value.trim();
       const section = document.getElementById('modalSection').value;
 
       const err = document.getElementById('modalErr');
-      if (!title || !content) {
-        err.textContent = "Tytuł i treść są wymagane.";
+      if (!title || !homeTeam || !awayTeam || !date || !score) {
+        err.textContent = "Wypełnij wszystkie pola meczu.";
         return;
       }
 
-      const data = { title, content, imageUrl: imageUrl || null, videoUrl: videoUrl || null };
+      const data = {
+        title,
+        homeTeam,
+        awayTeam,
+        date,
+        score,
+        logoHome: logoHome || null,
+        logoAway: logoAway || null,
+        content: content || '',
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      };
 
       try {
         if (currentDocId) {
           await db.collection(section).doc(currentDocId).update(data);
         } else {
-          await db.collection(section).add({ ...data, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+          await db.collection(section).add(data);
         }
         closeModal();
         loadSection(section);
-        if (section.startsWith('trzecia_liga_gr') || ['ekstraklasa','pierwsza_liga','druga_liga'].includes(section)) {
-          showLiga('polskie', section);
-        }
-        if (['premier_league','laliga','bundesliga','serie_a','ligue_1','eredivisie','primeira_liga','super_lig','jupiler_league'].includes(section)) {
-          showLiga('zagraniczne', section);
+        if (section === 'czwarta_liga_test') {
+          showLiga('polskie', 'czwarta_liga_test');
         }
       } catch (e) {
         err.textContent = "Błąd zapisu.";
@@ -706,26 +852,55 @@
           return;
         }
 
-        let html = '';
-        snap.forEach(doc => {
-          const d = doc.data();
-          const editBtn = isAdmin ? 
-            `<button class="edit-btn" onclick="openEditForm('${section}', '${doc.id}', ${JSON.stringify(d).replace(/"/g, '&quot;')})">Edytuj</button>` : '';
+        // ✅ Dla "czwarta_liga_test" używamy specjalnego układu
+        if (section === 'czwarta_liga_test') {
+          let html = '';
+          let currentRound = '';
+          snap.forEach(doc => {
+            const d = doc.data();
+            const round = d.title || 'Bez kolejki';
+            if (round !== currentRound) {
+              html += `<div class="match-header">${round}</div>`;
+              currentRound = round;
+            }
+            html += `
+              <div class="match-row">
+                <div class="match-date">${d.date || '-'}</div>
+                <div class="team-name">
+                  ${d.logoHome ? `<img class="team-logo" src="${d.logoHome}" onerror="this.style.display='none'">` : ''}
+                  <span>${d.homeTeam || '---'}</span>
+                </div>
+                <div class="score">${d.score || '-'}</div>
+                <div class="team-name">
+                  <span>${d.awayTeam || '---'}</span>
+                  ${d.logoAway ? `<img class="team-logo" src="${d.logoAway}" onerror="this.style.display='none'">` : ''}
+                </div>
+              </div>
+            `;
+          });
+          container.innerHTML = html;
+        } else {
+          let html = '';
+          snap.forEach(doc => {
+            const d = doc.data();
+            const editBtn = isAdmin ? 
+              `<button class="edit-btn" onclick="openEditForm('${section}', '${doc.id}', ${JSON.stringify(d).replace(/"/g, '&quot;')})">Edytuj</button>` : '';
 
-          let media = '';
-          if (d.imageUrl) media += `<img src="${d.imageUrl}" alt="Zdjęcie">`;
-          if (d.videoUrl) media += embedVideo(d.videoUrl);
+            let media = '';
+            if (d.imageUrl) media += `<img src="${d.imageUrl}" alt="Zdjęcie">`;
+            if (d.videoUrl) media += embedVideo(d.videoUrl);
 
-          html += `
-            <div class="content-item">
-              ${editBtn}
-              <h3>${d.title}</h3>
-              <div class="article-content">${d.content}</div>
-              ${media}
-            </div>
-          `;
-        });
-        container.innerHTML = html;
+            html += `
+              <div class="content-item">
+                ${editBtn}
+                <h3>${d.title}</h3>
+                <div class="article-content">${d.content}</div>
+                ${media}
+              </div>
+            `;
+          });
+          container.innerHTML = html;
+        }
       } catch (e) {
         container.innerHTML = "<p>Błąd ładowania treści.</p>";
       }
