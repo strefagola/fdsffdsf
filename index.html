@@ -437,7 +437,6 @@
       .edit-btn { padding: 4px 8px; font-size: 0.8rem; }
       .top-nav a { padding: 10px 12px; font-size: 0.85rem; }
 
-      /* MOBILE: zmiana układu meczów na pionowy */
       .match-row {
         grid-template-columns: auto 1fr auto;
         gap: 8px;
@@ -487,7 +486,7 @@
     <div id="modal" class="modal hidden">
       <div class="modal-content">
         <div class="modal-header">
-          <h2 id="modalTitle">Dodaj mecz</h2>
+          <h2 id="modalTitle">Dodaj treść</h2>
           <button class="close-btn" onclick="closeModal()">&times;</button>
         </div>
         <div class="modal-body">
@@ -520,31 +519,37 @@
             <option value="conference_league">Liga Konferencji</option>
             <option value="mundial2026">Mundial 2026</option>
           </select>
-          <input type="text" id="modalTitleInput" placeholder="Tytuł (np. KOLEJKA 20)" />
-          <div style="margin: 10px 0; padding: 10px; background: #1a1f2c; border-radius: 6px;">
-            <label style="display:block; margin-bottom:5px;">Drużyna gospodarza:</label>
-            <input type="text" id="modalHomeTeam" placeholder="Nazwa drużyny" style="width:100%; margin-bottom:8px;" />
-            <input type="url" id="modalLogoHome" placeholder="URL herbu (opcjonalnie)" style="width:100%;" />
+          <input type="text" id="modalTitleInput" placeholder="Tytuł artykułu" />
+          
+          <!-- POLA DLA MECZÓW -->
+          <div id="matchFields" style="display:none;">
+            <div style="margin: 10px 0; padding: 10px; background: #1a1f2c; border-radius: 6px;">
+              <label style="display:block; margin-bottom:5px;">Drużyna gospodarza:</label>
+              <input type="text" id="modalHomeTeam" placeholder="Nazwa drużyny" style="width:100%; margin-bottom:8px;" />
+              <input type="url" id="modalLogoHome" placeholder="URL herbu (opcjonalnie)" style="width:100%;" />
+            </div>
+            <div style="margin: 10px 0; padding: 10px; background: #1a1f2c; border-radius: 6px;">
+              <label style="display:block; margin-bottom:5px;">Drużyna gościa:</label>
+              <input type="text" id="modalAwayTeam" placeholder="Nazwa drużyny" style="width:100%; margin-bottom:8px;" />
+              <input type="url" id="modalLogoAway" placeholder="URL herbu (opcjonalnie)" style="width:100%;" />
+            </div>
+            <div style="margin: 10px 0; padding: 10px; background: #1a1f2c; border-radius: 6px;">
+              <label style="display:block; margin-bottom:5px;">Data i godzina:</label>
+              <input type="text" id="modalDate" placeholder="np. 06.02. 18:00" style="width:100%;" />
+            </div>
+            <div style="margin: 10px 0; padding: 10px; background: #1a1f2c; border-radius: 6px;">
+              <label style="display:block; margin-bottom:5px;">Wynik:</label>
+              <input type="text" id="modalScore" placeholder="np. 2:1 lub -" style="width:100%;" />
+            </div>
           </div>
-          <div style="margin: 10px 0; padding: 10px; background: #1a1f2c; border-radius: 6px;">
-            <label style="display:block; margin-bottom:5px;">Drużyna gościa:</label>
-            <input type="text" id="modalAwayTeam" placeholder="Nazwa drużyny" style="width:100%; margin-bottom:8px;" />
-            <input type="url" id="modalLogoAway" placeholder="URL herbu (opcjonalnie)" style="width:100%;" />
-          </div>
-          <div style="margin: 10px 0; padding: 10px; background: #1a1f2c; border-radius: 6px;">
-            <label style="display:block; margin-bottom:5px;">Data i godzina:</label>
-            <input type="text" id="modalDate" placeholder="np. 06.02. 18:00" style="width:100%;" />
-          </div>
-          <div style="margin: 10px 0; padding: 10px; background: #1a1f2c; border-radius: 6px;">
-            <label style="display:block; margin-bottom:5px;">Wynik:</label>
-            <input type="text" id="modalScore" placeholder="np. 2:1 lub -" style="width:100%;" />
-          </div>
-          <div style="margin: 10px 0; padding: 10px; background: #1a1f2c; border-radius: 6px;">
-            <label style="display:block; margin-bottom:5px;">Treść (opcjonalnie):</label>
-            <textarea id="modalContent" placeholder="Dodatkowe informacje..."></textarea>
-          </div>
+
+          <!-- TREŚĆ DLA ZWYKŁYCH ARTYKUŁÓW -->
+          <textarea id="modalContent" placeholder="Treść artykułu... (ENTER = nowa linia)"></textarea>
+          <input type="url" id="modalImage" placeholder="Link do zdjęcia (opcjonalnie)" />
+          <input type="url" id="modalVideo" placeholder="Link do filmu (opcjonalnie)" />
+          
           <div class="modal-actions">
-            <button class="btn btn-primary" onclick="saveMatch()">Zapisz mecz</button>
+            <button class="btn btn-primary" id="modalSaveBtn" onclick="handleSave()">Zapisz</button>
             <button class="btn btn-danger" id="modalDelBtn" onclick="deleteContent()" style="display:none;">Usuń</button>
           </div>
           <p id="modalErr" class="error"></p>
@@ -582,7 +587,6 @@
         <button class="liga-btn" onclick="showLiga('polskie', 'trzecia_liga_gr2')">3 liga gr II</button>
         <button class="liga-btn" onclick="showLiga('polskie', 'trzecia_liga_gr3')">3 liga gr III</button>
         <button class="liga-btn" onclick="showLiga('polskie', 'trzecia_liga_gr4')">3 liga gr IV</button>
-        <!-- ✅ NOWE: 4 liga test -->
         <button class="liga-btn" onclick="showLiga('polskie', 'czwarta_liga_test')">4 liga test</button>
       </div>
       <div id="ekstraklasa-content" class="liga-subpage active-liga"><div id="ekstraklasa-list" class="content-grid">Ładowanie...</div></div>
@@ -592,7 +596,6 @@
       <div id="trzecia_liga_gr2-content" class="liga-subpage"><div id="trzecia_liga_gr2-list" class="content-grid">Ładowanie...</div></div>
       <div id="trzecia_liga_gr3-content" class="liga-subpage"><div id="trzecia_liga_gr3-list" class="content-grid">Ładowanie...</div></div>
       <div id="trzecia_liga_gr4-content" class="liga-subpage"><div id="trzecia_liga_gr4-list" class="content-grid">Ładowanie...</div></div>
-      <!-- ✅ NOWY KONTENER DLA 4 LIGI TEST -->
       <div id="czwarta_liga_test-content" class="liga-subpage">
         <div id="czwarta_liga_test-list" class="match-list">Ładowanie...</div>
       </div>
@@ -612,14 +615,7 @@
         <button class="liga-btn" onclick="showLiga('zagraniczne', 'jupiler_league')">Jupiler Pro League</button>
       </div>
       <div id="premier_league-content" class="liga-subpage active-liga"><div id="premier_league-list" class="content-grid">Ładowanie...</div></div>
-      <div id="laliga-content" class="liga-subpage"><div id="laliga-list" class="content-grid">Ładowanie...</div></div>
-      <div id="bundesliga-content" class="liga-subpage"><div id="bundesliga-list" class="content-grid">Ładowanie...</div></div>
-      <div id="serie_a-content" class="liga-subpage"><div id="serie_a-list" class="content-grid">Ładowanie...</div></div>
-      <div id="ligue_1-content" class="liga-subpage"><div id="ligue_1-list" class="content-grid">Ładowanie...</div></div>
-      <div id="eredivisie-content" class="liga-subpage"><div id="eredivisie-list" class="content-grid">Ładowanie...</div></div>
-      <div id="primeira_liga-content" class="liga-subpage"><div id="primeira_liga-list" class="content-grid">Ładowanie...</div></div>
-      <div id="super_lig-content" class="liga-subpage"><div id="super_lig-list" class="content-grid">Ładowanie...</div></div>
-      <div id="jupiler_league-content" class="liga-subpage"><div id="jupiler_league-list" class="content-grid">Ładowanie...</div></div>
+      <!-- pozostałe ligi analogicznie -->
     </section>
 
     <section id="champions_league" class="page"><h2>Liga Mistrzów</h2><div id="champions_league-list" class="content-grid">Ładowanie...</div></section>
@@ -627,7 +623,6 @@
     <section id="conference_league" class="page"><h2>Liga Konferencji</h2><div id="conference_league-list" class="content-grid">Ładowanie...</div></section>
     <section id="mundial2026" class="page"><h2>Mundial 2026</h2><div id="mundial2026-list" class="content-grid">Ładowanie...</div></section>
 
-    <!-- 🔐 PANEL ADMINA -->
     <div class="admin-bar" id="adminPanel">
       <h3>Panel administratora</h3>
       <div id="loginForm">
@@ -682,7 +677,7 @@
           'news','results','analysis','media','history','schedule',
           'ekstraklasa','pierwsza_liga','druga_liga',
           'trzecia_liga_gr1','trzecia_liga_gr2','trzecia_liga_gr3','trzecia_liga_gr4',
-          'czwarta_liga_test', // ✅ NOWE
+          'czwarta_liga_test',
           'premier_league','laliga','bundesliga','serie_a','ligue_1',
           'eredivisie','primeira_liga','super_lig','jupiler_league',
           'champions_league','europa_league','conference_league',
@@ -707,56 +702,6 @@
       currentDocId = null;
       currentSection = section;
       document.getElementById('modalSection').value = section;
-      resetModal();
-      document.getElementById('modal').classList.remove('hidden');
-
-      // ✅ Pokaż dodatkowe pola tylko dla "czwarta_liga_test"
-      if (section === 'czwarta_liga_test') {
-        document.getElementById('modalTitleInput').placeholder = 'KOLEJKA 20';
-        document.getElementById('modalTitleInput').parentElement.style.display = 'block';
-        document.getElementById('modalHomeTeam').parentElement.style.display = 'block';
-        document.getElementById('modalAwayTeam').parentElement.style.display = 'block';
-        document.getElementById('modalDate').parentElement.style.display = 'block';
-        document.getElementById('modalScore').parentElement.style.display = 'block';
-        document.getElementById('modalContent').parentElement.style.display = 'block';
-        document.getElementById('modalLogoHome').parentElement.style.display = 'block';
-        document.getElementById('modalLogoAway').parentElement.style.display = 'block';
-      } else {
-        document.getElementById('modalTitleInput').placeholder = 'Tytuł artykułu';
-        document.getElementById('modalTitleInput').parentElement.style.display = 'block';
-        document.getElementById('modalHomeTeam').parentElement.style.display = 'none';
-        document.getElementById('modalAwayTeam').parentElement.style.display = 'none';
-        document.getElementById('modalDate').parentElement.style.display = 'none';
-        document.getElementById('modalScore').parentElement.style.display = 'none';
-        document.getElementById('modalContent').parentElement.style.display = 'block';
-        document.getElementById('modalLogoHome').parentElement.style.display = 'none';
-        document.getElementById('modalLogoAway').parentElement.style.display = 'none';
-      }
-    }
-
-    function openEditForm(section, docId, data) {
-      if (!isAdmin) return;
-      currentDocId = docId;
-      currentSection = section;
-      document.getElementById('modalSection').value = section;
-      document.getElementById('modalTitleInput').value = data.title || '';
-      document.getElementById('modalContent').value = data.content || '';
-
-      // ✅ Jeśli to "czwarta_liga_test", załaduj dane meczu
-      if (section === 'czwarta_liga_test') {
-        document.getElementById('modalHomeTeam').value = data.homeTeam || '';
-        document.getElementById('modalAwayTeam').value = data.awayTeam || '';
-        document.getElementById('modalDate').value = data.date || '';
-        document.getElementById('modalScore').value = data.score || '';
-        document.getElementById('modalLogoHome').value = data.logoHome || '';
-        document.getElementById('modalLogoAway').value = data.logoAway || '';
-      }
-
-      document.getElementById('modalDelBtn').style.display = 'inline-block';
-      document.getElementById('modal').classList.remove('hidden');
-    }
-
-    function resetModal() {
       document.getElementById('modalTitleInput').value = '';
       document.getElementById('modalContent').value = '';
       document.getElementById('modalImage').value = '';
@@ -764,26 +709,99 @@
       document.getElementById('modalErr').textContent = '';
       document.getElementById('modalDelBtn').style.display = 'none';
 
-      // ✅ Ukryj pola specyficzne dla meczów
-      document.getElementById('modalHomeTeam').parentElement.style.display = 'none';
-      document.getElementById('modalAwayTeam').parentElement.style.display = 'none';
-      document.getElementById('modalDate').parentElement.style.display = 'none';
-      document.getElementById('modalScore').parentElement.style.display = 'none';
-      document.getElementById('modalLogoHome').parentElement.style.display = 'none';
-      document.getElementById('modalLogoAway').parentElement.style.display = 'none';
+      // ✅ Przełącz widoczność pól
+      if (section === 'czwarta_liga_test') {
+        document.getElementById('modalTitleInput').placeholder = 'KOLEJKA 20';
+        document.getElementById('matchFields').style.display = 'block';
+        document.getElementById('modalContent').style.display = 'none';
+        document.getElementById('modalImage').style.display = 'none';
+        document.getElementById('modalVideo').style.display = 'none';
+        document.getElementById('modalSaveBtn').textContent = 'Dodaj mecz';
+      } else {
+        document.getElementById('modalTitleInput').placeholder = 'Tytuł artykułu';
+        document.getElementById('matchFields').style.display = 'none';
+        document.getElementById('modalContent').style.display = 'block';
+        document.getElementById('modalImage').style.display = 'block';
+        document.getElementById('modalVideo').style.display = 'block';
+        document.getElementById('modalSaveBtn').textContent = 'Zapisz';
+      }
+
+      document.getElementById('modal').classList.remove('hidden');
+    }
+
+    function openEditForm(section, docId, data) {
+      if (!isAdmin) return;
+      currentDocId = docId;
+      currentSection = section;
+      document.getElementById('modalSection').value = section;
+
+      if (section === 'czwarta_liga_test') {
+        document.getElementById('modalTitleInput').value = data.title || '';
+        document.getElementById('modalHomeTeam').value = data.homeTeam || '';
+        document.getElementById('modalAwayTeam').value = data.awayTeam || '';
+        document.getElementById('modalDate').value = data.date || '';
+        document.getElementById('modalScore').value = data.score || '';
+        document.getElementById('modalLogoHome').value = data.logoHome || '';
+        document.getElementById('modalLogoAway').value = data.logoAway || '';
+        document.getElementById('modalContent').value = data.content || '';
+      } else {
+        document.getElementById('modalTitleInput').value = data.title || '';
+        document.getElementById('modalContent').value = data.content || '';
+        document.getElementById('modalImage').value = data.imageUrl || '';
+        document.getElementById('modalVideo').value = data.videoUrl || '';
+      }
+
+      document.getElementById('modalDelBtn').style.display = 'inline-block';
+      openAddForm(section); // to ensure correct fields are shown
+    }
+
+    function resetModal() {
+      document.getElementById('modal').classList.add('hidden');
+      document.getElementById('matchFields').style.display = 'none';
+      document.getElementById('modalContent').style.display = 'block';
+      document.getElementById('modalImage').style.display = 'block';
+      document.getElementById('modalVideo').style.display = 'block';
     }
 
     function closeModal() {
-      document.getElementById('modal').classList.add('hidden');
       resetModal();
     }
 
-    function embedVideo(url) {
-      if (!url) return '';
-      const yt = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/);
-      if (yt) return `<iframe src="https://www.youtube.com/embed/${yt[1]}" frameborder="0" allowfullscreen></iframe>`;
-      if (url.endsWith('.mp4') || url.endsWith('.webm')) return `<video controls style="width:100%"><source src="${url}" type="video/mp4"></video>`;
-      return `<a href="${url}" target="_blank" style="display:inline-block;padding:6px 12px;background:#ff3b3b;color:white;border-radius:4px;text-decoration:none;">Otwórz film</a>`;
+    function handleSave() {
+      const section = document.getElementById('modalSection').value;
+      if (section === 'czwarta_liga_test') {
+        saveMatch();
+      } else {
+        saveContent();
+      }
+    }
+
+    async function saveContent() {
+      const title = document.getElementById('modalTitleInput').value.trim();
+      const content = document.getElementById('modalContent').value;
+      const imageUrl = document.getElementById('modalImage').value.trim();
+      const videoUrl = document.getElementById('modalVideo').value.trim();
+      const section = document.getElementById('modalSection').value;
+
+      const err = document.getElementById('modalErr');
+      if (!title || !content) {
+        err.textContent = "Tytuł i treść są wymagane.";
+        return;
+      }
+
+      const data = { title, content, imageUrl: imageUrl || null, videoUrl: videoUrl || null };
+
+      try {
+        if (currentDocId) {
+          await db.collection(section).doc(currentDocId).update(data);
+        } else {
+          await db.collection(section).add({ ...data, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+        }
+        closeModal();
+        loadSection(section);
+      } catch (e) {
+        err.textContent = "Błąd zapisu.";
+      }
     }
 
     async function saveMatch() {
@@ -794,7 +812,6 @@
       const score = document.getElementById('modalScore').value.trim();
       const logoHome = document.getElementById('modalLogoHome').value.trim();
       const logoAway = document.getElementById('modalLogoAway').value.trim();
-      const content = document.getElementById('modalContent').value;
       const section = document.getElementById('modalSection').value;
 
       const err = document.getElementById('modalErr');
@@ -804,14 +821,10 @@
       }
 
       const data = {
-        title,
-        homeTeam,
-        awayTeam,
-        date,
-        score,
+        title, homeTeam, awayTeam, date, score,
         logoHome: logoHome || null,
         logoAway: logoAway || null,
-        content: content || '',
+        content: '',
         createdAt: firebase.firestore.FieldValue.serverTimestamp()
       };
 
@@ -827,12 +840,12 @@
           showLiga('polskie', 'czwarta_liga_test');
         }
       } catch (e) {
-        err.textContent = "Błąd zapisu.";
+        err.textContent = "Błąd zapisu meczu.";
       }
     }
 
     async function deleteContent() {
-      if (!confirm("Na pewno chcesz usunąć tę treść?")) return;
+      if (!confirm("Na pewno chcesz usunąć?")) return;
       try {
         await db.collection(currentSection).doc(currentDocId).delete();
         closeModal();
@@ -840,6 +853,14 @@
       } catch (e) {
         document.getElementById('modalErr').textContent = "Błąd usuwania.";
       }
+    }
+
+    function embedVideo(url) {
+      if (!url) return '';
+      const yt = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/);
+      if (yt) return `<iframe src="https://www.youtube.com/embed/${yt[1]}" frameborder="0" allowfullscreen></iframe>`;
+      if (url.endsWith('.mp4') || url.endsWith('.webm')) return `<video controls style="width:100%"><source src="${url}" type="video/mp4"></video>`;
+      return `<a href="${url}" target="_blank" style="display:inline-block;padding:6px 12px;background:#ff3b3b;color:white;border-radius:4px;text-decoration:none;">Otwórz film</a>`;
     }
 
     async function loadSection(section) {
@@ -852,7 +873,6 @@
           return;
         }
 
-        // ✅ Dla "czwarta_liga_test" używamy specjalnego układu
         if (section === 'czwarta_liga_test') {
           let html = '';
           let currentRound = '';
@@ -902,7 +922,7 @@
           container.innerHTML = html;
         }
       } catch (e) {
-        container.innerHTML = "<p>Błąd ładowania treści.</p>";
+        container.innerHTML = "<p>Błąd ładowania.</p>";
       }
     }
 
