@@ -33,7 +33,6 @@
       line-height: 1.6;
     }
 
-    /* 🔴 GÓRNY PASEK */
     .top-nav {
       background: #0b0e15;
       border-bottom: 2px solid var(--accent);
@@ -197,11 +196,13 @@
       font-size: 0.95rem;
     }
 
+    /* ✅ POPRAWIONE ZDJĘCIA – nie rozciągają się na całość */
     .content-item img {
-      width: 100%;
+      max-width: 100%;
       height: auto;
       border-radius: 6px;
       margin: 10px 0;
+      display: block;
     }
 
     .content-item iframe, .content-item video {
@@ -254,7 +255,6 @@
       display: block;
     }
 
-    /* 🔐 PANEL ADMINA */
     .admin-bar {
       background: #090c12;
       padding: 18px 15px;
@@ -298,7 +298,6 @@
       margin-top: 5px;
     }
 
-    /* 🪄 MODAL */
     .modal {
       position: fixed;
       top: 0;
@@ -379,7 +378,6 @@
       font-size: 0.85rem;
     }
 
-    /* 📱 MOBILE OPTIMIZATIONS */
     @media (max-width: 768px) {
       .hero h1 { font-size: 1.8rem; }
       .page h2 { font-size: 1.5rem; }
@@ -391,7 +389,6 @@
   </style>
 </head>
 <body>
-  <!-- 🔴 GÓRNY PASEK Z LOGO -->
   <nav class="top-nav">
     <div class="nav-container">
       <div class="logo-box">
@@ -421,7 +418,6 @@
       <img src="https://www.ebilet.pl/now/app/uploads/2024/02/shutterstock_2253076431-1-1280x720.jpg" alt="Piłka nożna" />
     </header>
 
-    <!-- MODAL -->
     <div id="modal" class="modal hidden">
       <div class="modal-content">
         <div class="modal-header">
@@ -470,7 +466,6 @@
       </div>
     </div>
 
-    <!-- SEKCJE -->
     <section id="home" class="page active">
       <div class="hero">
         <h1>Witaj w StrefieGola</h1>
@@ -490,7 +485,6 @@
     <section id="history" class="page"><h2>Transfery</h2><div id="history-list" class="content-grid">Ładowanie...</div></section>
     <section id="schedule" class="page"><h2>Terminarz</h2><div id="schedule-list" class="content-grid">Ładowanie...</div></section>
 
-    <!-- 🇵🇱 POLSKIE LIGI – Z 4 GRUPAMI 3 LIGI -->
     <section id="polskie" class="page">
       <h2>Polskie ligi</h2>
       <div class="ligi-nav">
@@ -540,7 +534,6 @@
     <section id="conference_league" class="page"><h2>Liga Konferencji</h2><div id="conference_league-list" class="content-grid">Ładowanie...</div></section>
     <section id="mundial2026" class="page"><h2>Mundial 2026</h2><div id="mundial2026-list" class="content-grid">Ładowanie...</div></section>
 
-    <!-- 🔐 PANEL ADMINA -->
     <div class="admin-bar" id="adminPanel">
       <h3>Panel administratora</h3>
       <div id="loginForm">
