@@ -2,23 +2,24 @@
 <html lang="pl">
 <head>
   <meta charset="UTF-8" />
+  <meta name="timezone" content="Europe/Warsaw">
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>StrefaGola (SG)</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;500;600;700&family=Roboto+Slab:wght@500;600&display=swap" rel="stylesheet">
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   <style>
     :root {
-      --bg: #0d101a;
-      --card: #161b26;
-      --text: #e0e0e0;
-      --text-light: #a0a0a0;
-      --accent: #ff3b3b;
-      --sidebar-bg: #0b0e15;
-      --border: #252b3a;
+      --primary: #1e40af;
+      --primary-dark: #1e3a8a;
+      --text: #1e293b;
+      --text-light: #334155;
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --border: #e2e8f0;
     }
 
     * {
@@ -28,263 +29,252 @@
     }
 
     body {
-      font-family: 'Roboto', system-ui, sans-serif;
+      font-family: 'Lato', sans-serif;
       background: var(--bg);
       color: var(--text);
-      display: flex;
-      min-height: 100vh;
-      overflow-x: hidden;
+      line-height: 1.6;
     }
 
-    .menu-toggle {
-      display: none;
-      position: fixed;
-      top: 12px;
-      left: 12px;
-      background: var(--accent);
+    /* 🔴 GÓRNY PASEK — jak PZPN, ale w Twoim kolorze */
+    .top-bar {
+      background: var(--primary);
       color: white;
-      border: none;
-      width: 42px;
-      height: 42px;
-      border-radius: 4px;
-      z-index: 1001;
-      font-size: 1.4rem;
-      cursor: pointer;
+      padding: 8px 0;
     }
 
-    #sidebar {
-      width: 220px;
-      background: var(--sidebar-bg);
-      color: var(--text);
-      padding: 15px 10px;
+    .top-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 20px;
       display: flex;
-      flex-direction: column;
-      position: fixed;
-      height: 100vh;
-      z-index: 100;
-      border-right: 1px solid var(--border);
-    }
-
-    .logo-box {
-      text-align: center;
-      padding-bottom: 15px;
-      margin-bottom: 15px;
-      border-bottom: 1px solid var(--border);
+      align-items: center;
+      justify-content: space-between;
     }
 
     .logo-box img {
-      max-height: 50px;
+      height: 48px;
       max-width: 100%;
     }
 
     nav ul {
+      display: flex;
       list-style: none;
-      margin-bottom: auto;
-      padding: 0 5px;
+      gap: 16px;
+      flex-wrap: wrap;
     }
 
     nav a {
-      display: block;
-      padding: 10px 12px;
-      color: var(--text);
+      color: white;
       text-decoration: none;
-      border-radius: 4px;
-      font-weight: 500;
+      font-weight: 600;
       font-size: 0.95rem;
-      margin-bottom: 2px;
+      padding: 6px 10px;
+      border-radius: 4px;
+      transition: background 0.2s;
     }
 
     nav a:hover, nav a.active {
-      background: #1f2636;
+      background: rgba(255,255,255,0.2);
+    }
+
+    /* 📰 LAYOUT */
+    .container {
+      max-width: 1400px;
+      margin: 25px auto;
+      padding: 0 20px;
+      display: grid;
+      grid-template-columns: 240px 1fr;
+      gap: 25px;
+    }
+
+    /* 📌 PANEL BOCZNY */
+    .sidebar {
+      background: var(--card);
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .sidebar h3 {
+      margin-bottom: 15px;
+      color: var(--primary);
+      font-family: 'Roboto Slab', serif;
+    }
+
+    .sidebar-links {
+      list-style: none;
+    }
+
+    .sidebar-links li {
+      margin-bottom: 8px;
+    }
+
+    .sidebar-links a {
+      color: var(--text);
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .sidebar-links a:hover {
+      color: var(--primary);
     }
 
     .admin-panel {
-      margin-top: auto;
-      padding-top: 15px;
+      margin-top: 25px;
+      padding-top: 20px;
       border-top: 1px solid var(--border);
-      padding: 15px 10px 0;
-    }
-
-    .admin-panel h3 {
-      font-size: 0.95rem;
-      margin-bottom: 12px;
-      color: #ccc;
     }
 
     #adminPass {
       width: 100%;
       padding: 8px;
-      border-radius: 4px;
+      margin: 8px 0 12px;
       border: 1px solid var(--border);
-      background: #1a1f2c;
-      color: white;
-      margin-bottom: 10px;
-      font-size: 0.95rem;
+      border-radius: 6px;
     }
 
     .btn {
       width: 100%;
       padding: 8px;
       border: none;
-      border-radius: 4px;
+      border-radius: 6px;
       font-weight: 600;
       cursor: pointer;
       margin-bottom: 8px;
       font-size: 0.95rem;
     }
 
-    .btn.primary, .btn.add { background: var(--accent); color: white; }
-    .btn.danger { background: #d32f2f; color: white; }
-    .btn:hover { opacity: 0.9; }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-danger { background: #dc2626; color: white; }
 
     .hidden { display: none !important; }
-    .error { color: #ff6b6b; font-size: 0.85rem; margin-top: 6px; }
+    .error { color: #dc2626; font-size: 0.85rem; margin-top: 6px; }
 
-    #main {
-      flex: 1;
-      margin-left: 220px;
-      padding: 20px;
+    /* 📄 GŁÓWNA TREŚĆ */
+    .main-content {
+      background: var(--card);
+      padding: 25px;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
     }
 
-    header img {
-      width: 100%;
-      height: 180px;
-      object-fit: cover;
-      border-radius: 6px;
+    .main-content h1, .main-content h2 {
+      color: var(--primary-dark);
       margin-bottom: 20px;
+      font-family: 'Roboto Slab', serif;
     }
 
-    .page {
-      display: none;
+    .main-content h1 {
+      font-size: 2.2rem;
     }
 
-    .page.active {
-      display: block;
-    }
-
-    .page h2 {
-      font-size: 1.65rem;
-      margin-bottom: 18px;
-      color: white;
-      font-weight: 700;
+    .main-content h2 {
+      font-size: 1.8rem;
       padding-bottom: 8px;
-      border-bottom: 2px solid var(--accent);
+      border-bottom: 2px solid var(--primary);
     }
 
-    .hero {
-      text-align: center;
+    .hero-text {
+      font-size: 1.1rem;
       margin-bottom: 25px;
-    }
-
-    .hero h1 {
-      font-size: 2.1rem;
-      font-weight: 700;
-      margin-bottom: 10px;
-      color: white;
-    }
-
-    .hero p {
-      font-size: 1.05rem;
       color: var(--text-light);
-      max-width: 650px;
-      margin: 0 auto;
-      line-height: 1.5;
     }
 
     .features-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 16px;
-      margin-top: 20px;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin: 25px 0;
     }
 
     .feature-card {
-      background: var(--card);
-      padding: 16px;
-      border-radius: 6px;
+      background: #f1f5f9;
+      padding: 18px;
+      border-radius: 8px;
       text-align: center;
-      border: 1px solid var(--border);
     }
 
     .feature-card h3 {
+      margin-bottom: 10px;
+      color: var(--primary);
       font-size: 1.2rem;
-      margin-bottom: 8px;
-      color: white;
     }
 
     .content-grid {
       display: grid;
-      gap: 18px;
+      gap: 25px;
     }
 
     .content-item {
-      background: var(--card);
-      padding: 18px;
-      border-radius: 6px;
-      border: 1px solid var(--border);
+      padding-bottom: 25px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .content-item:last-child {
+      border-bottom: none;
     }
 
     .content-item h3 {
-      font-size: 1.45rem;
+      font-size: 1.5rem;
       margin-bottom: 12px;
-      color: white;
-      font-weight: 600;
+      color: var(--primary-dark);
+      font-family: 'Roboto Slab', serif;
     }
 
     .content-item .article-content {
-      line-height: 1.6;
-      color: var(--text-light);
-      margin-bottom: 14px;
       white-space: pre-wrap;
-      font-size: 1rem;
+      color: var(--text-light);
+      line-height: 1.7;
     }
 
     .content-item img {
-      width: 100%;
+      max-width: 100%;
       height: auto;
-      border-radius: 6px;
-      margin: 12px 0;
+      border-radius: 8px;
+      margin: 15px 0;
     }
 
     .content-item iframe, .content-item video {
       width: 100%;
-      height: 240px;
-      border-radius: 6px;
-      margin: 12px 0;
+      height: 280px;
+      border-radius: 8px;
+      margin: 15px 0;
     }
 
     .edit-btn {
-      background: var(--accent);
+      background: var(--primary);
       color: white;
       border: none;
       padding: 6px 12px;
-      border-radius: 4px;
+      border-radius: 6px;
       font-weight: 600;
       cursor: pointer;
       float: right;
       font-size: 0.9rem;
     }
 
+    .edit-btn:hover {
+      background: var(--primary-dark);
+    }
+
     .ligi-nav {
       display: flex;
       flex-wrap: wrap;
-      gap: 8px;
-      margin: 14px 0 18px;
+      gap: 10px;
+      margin: 20px 0;
     }
 
     .liga-btn {
-      padding: 8px 14px;
-      background: #1f2636;
-      border: 1px solid var(--border);
-      border-radius: 4px;
-      cursor: pointer;
+      padding: 8px 16px;
+      background: #e2e8f0;
+      border: none;
+      border-radius: 6px;
       font-weight: 600;
-      font-size: 0.95rem;
-      color: var(--text);
+      cursor: pointer;
     }
 
     .liga-btn:hover {
-      background: #2a3245;
+      background: #cbd5e1;
     }
 
     .liga-subpage {
@@ -295,13 +285,75 @@
       display: block;
     }
 
+    /* 🦁 FOOTER */
+    footer {
+      background: #0c0f1a;
+      color: #cbd5e1;
+      padding: 30px 0 20px;
+      margin-top: 40px;
+    }
+
+    .footer-content {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 20px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 30px;
+    }
+
+    .footer-logo img {
+      max-height: 50px;
+      margin-bottom: 15px;
+    }
+
+    .footer-links h4,
+    .footer-info h4 {
+      color: white;
+      margin-bottom: 15px;
+    }
+
+    .footer-links ul {
+      list-style: none;
+    }
+
+    .footer-links li {
+      margin-bottom: 10px;
+    }
+
+    .footer-links a {
+      color: #94a3b8;
+      text-decoration: none;
+    }
+
+    .footer-links a:hover {
+      color: white;
+    }
+
+    /* 📱 RESPONSIVE */
+    @media (max-width: 900px) {
+      .container {
+        grid-template-columns: 1fr;
+      }
+      .sidebar {
+        order: 2;
+      }
+      .main-content {
+        order: 1;
+      }
+      nav ul {
+        gap: 8px;
+      }
+    }
+
+    /* 🪄 MODAL */
     .modal {
       position: fixed;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(0,0,0,0.85);
+      background: rgba(0,0,0,0.7);
       display: flex;
       justify-content: center;
       align-items: center;
@@ -309,17 +361,17 @@
     }
 
     .modal-content {
-      background: var(--card);
+      background: white;
       width: 90%;
-      max-width: 600px;
-      border-radius: 10px;
+      max-width: 650px;
+      border-radius: 16px;
       overflow: hidden;
-      border: 1px solid var(--border);
+      box-shadow: 0 15px 40px rgba(0,0,0,0.25);
     }
 
     .modal-header {
-      padding: 14px 18px;
-      background: var(--accent);
+      padding: 1.4rem 1.8rem;
+      background: var(--primary);
       color: white;
       display: flex;
       justify-content: space-between;
@@ -330,10 +382,10 @@
       background: none;
       border: none;
       color: white;
-      font-size: 1.5rem;
+      font-size: 1.6rem;
       cursor: pointer;
-      width: 32px;
-      height: 32px;
+      width: 36px;
+      height: 36px;
       border-radius: 50%;
       display: flex;
       align-items: center;
@@ -341,356 +393,237 @@
     }
 
     .modal-body {
-      padding: 18px;
+      padding: 2rem;
     }
 
     .modal-body input,
     .modal-body textarea,
     .modal-body select {
       width: 100%;
-      padding: 9px;
-      margin: 9px 0;
+      padding: 0.85rem;
+      margin: 0.75rem 0;
       border: 1px solid var(--border);
-      border-radius: 4px;
+      border-radius: 10px;
       font-size: 1rem;
-      background: #1a1f2c;
-      color: white;
     }
 
     textarea {
-      min-height: 120px;
+      min-height: 140px;
       resize: vertical;
     }
 
     .modal-actions {
       display: flex;
-      gap: 10px;
-      margin-top: 14px;
-    }
-
-    .site-footer {
-      background: #090c12;
-      color: var(--text-light);
-      padding: 20px 0 15px;
-      margin-top: 30px;
-      border-top: 1px solid var(--border);
-    }
-
-    .footer-content {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 0 20px;
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-      gap: 20px;
-    }
-
-    .footer-logo img {
-      max-height: 40px;
-      margin-bottom: 10px;
-    }
-
-    .footer-links h4,
-    .footer-info h4 {
-      color: white;
-      margin-bottom: 12px;
-      font-size: 1.05rem;
-    }
-
-    .footer-links ul {
-      list-style: none;
-    }
-
-    .footer-links li {
-      margin-bottom: 8px;
-    }
-
-    .footer-links a {
-      color: var(--text-light);
-      text-decoration: none;
-      font-size: 0.95rem;
-    }
-
-    .footer-links a:hover {
-      color: white;
-    }
-
-    .admin-note {
-      font-size: 0.8rem;
-      color: #666;
-      margin-top: 12px;
-      font-style: italic;
-    }
-
-    @media (max-width: 768px) {
-      .menu-toggle {
-        display: block;
-      }
-
-      #sidebar {
-        width: 240px;
-        transform: translateX(-100%);
-        transition: transform 0.3s ease;
-        z-index: 1000;
-      }
-
-      #sidebar.active {
-        transform: translateX(0);
-      }
-
-      #main {
-        margin-left: 0;
-        padding: 15px;
-      }
-
-      header img {
-        height: 150px;
-      }
-
-      .hero h1 {
-        font-size: 1.8rem;
-      }
-
-      .page h2 {
-        font-size: 1.5rem;
-      }
-
-      .ligi-nav {
-        flex-direction: column;
-        gap: 7px;
-      }
-
-      .liga-btn {
-        width: 100%;
-        text-align: left;
-      }
-    }
-
-    .overlay {
-      display: none;
-    }
-
-    .overlay.active {
-      display: block;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.6);
-      z-index: 999;
+      gap: 12px;
+      margin-top: 1.2rem;
     }
   </style>
 </head>
 <body>
-  <button class="menu-toggle" id="menuToggle">☰</button>
-  <div class="overlay" id="overlay"></div>
-
-  <aside id="sidebar">
-    <div class="logo-box">
-      <img src="logo.png" alt="StrefaGola" onerror="this.src='image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%2236%22%3E%3Crect width=%22100%25%22 height=%22100%25%22 fill=%22%231f2636%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 fill=%22%23ff3b3b%22 font-size=%2214%22 text-anchor=%22middle%22 dy=%220.35em%22%3EStrefaGola%3C/text%3E%3C/svg%3E'" />
+  <!-- 🔴 GÓRNY PASEK -->
+  <header class="top-bar">
+    <div class="top-container">
+      <div class="logo-box">
+        <img src="logo.png" alt="StrefaGola" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22120%22 height=%2240%22%3E%3Crect width=%22100%25%22 height=%22100%25%22 fill=%22%23334155%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 fill=%22white%22 font-size=%2212%22 text-anchor=%22middle%22 dy=%220.35em%22%3EStrefaGola%3C/text%3E%3C/svg%3E'" />
+      </div>
+      <nav>
+        <ul>
+          <li><a href="#" data-section="home" class="active">Strona główna</a></li>
+          <li><a href="#" data-section="news">Aktualności</a></li>
+          <li><a href="#" data-section="results">Wyniki</a></li>
+          <li><a href="#" data-section="analysis">Analizy</a></li>
+          <li><a href="#" data-section="media">Multimedia</a></li>
+          <li><a href="#" data-section="history">Transfery</a></li>
+          <li><a href="#" data-section="schedule">Terminarz</a></li>
+          <li><a href="#" data-section="polskie">Polskie ligi</a></li>
+          <li><a href="#" data-section="zagraniczne">Ligi zagraniczne</a></li>
+          <li><a href="#" data-section="champions_league">Liga Mistrzów</a></li>
+          <li><a href="#" data-section="europa_league">Liga Europy</a></li>
+          <li><a href="#" data-section="conference_league">Liga Konferencji</a></li>
+          <li><a href="#" data-section="mundial2026">Mundial 2026</a></li>
+        </ul>
+      </nav>
     </div>
-    <nav>
-      <ul>
-        <li><a href="#" data-section="home" class="active">Strona główna</a></li>
-        <li><a href="#" data-section="news">Aktualności</a></li>
-        <li><a href="#" data-section="results">Wyniki</a></li>
-        <li><a href="#" data-section="analysis">Analizy</a></li>
-        <li><a href="#" data-section="media">Multimedia</a></li>
-        <li><a href="#" data-section="history">Historia</a></li>
-        <li><a href="#" data-section="schedule">Terminarz</a></li>
-        <li><a href="#" data-section="polskie">Polskie ligi</a></li>
-        <li><a href="#" data-section="zagraniczne">Ligi zagraniczne</a></li>
-        <li><a href="#" data-section="champions_league">Liga Mistrzów</a></li>
-        <li><a href="#" data-section="europa_league">Liga Europy</a></li>
-        <li><a href="#" data-section="conference_league">Liga Konferencji</a></li>
-        <li><a href="#" data-section="mundial2026">Mundial 2026</a></li>
+  </header>
+
+  <!-- 📰 LAYOUT -->
+  <div class="container">
+    <!-- 📌 PANEL BOCZNY -->
+    <aside class="sidebar">
+      <h3>Nawigacja</h3>
+      <ul class="sidebar-links">
+        <li><a href="#" onclick="showSection('home')">Strona główna</a></li>
+        <li><a href="#" onclick="showSection('news')">Aktualności</a></li>
+        <li><a href="#" onclick="showSection('results')">Wyniki</a></li>
+        <li><a href="#" onclick="showSection('analysis')">Analizy</a></li>
+        <li><a href="#" onclick="showSection('media')">Multimedia</a></li>
+        <li><a href="#" onclick="showSection('history')">Transfery</a></li>
+        <li><a href="#" onclick="showSection('schedule')">Terminarz</a></li>
+        <li><a href="#" onclick="showSection('polskie')">Polskie ligi</a></li>
+        <li><a href="#" onclick="showSection('zagraniczne')">Ligi zagraniczne</a></li>
+        <li><a href="#" onclick="showSection('champions_league')">Liga Mistrzów</a></li>
+        <li><a href="#" onclick="showSection('europa_league')">Liga Europy</a></li>
+        <li><a href="#" onclick="showSection('conference_league')">Liga Konferencji</a></li>
+        <li><a href="#" onclick="showSection('mundial2026')">Mundial 2026</a></li>
       </ul>
-    </nav>
 
-    <div class="admin-panel" id="adminPanel">
-      <div class="login-form" id="loginForm">
-        <h3>Admin</h3>
-        <input type="password" id="adminPass" placeholder="Hasło" />
-        <button class="btn primary" onclick="loginAdmin()">Zaloguj</button>
-        <p id="loginErr" class="error"></p>
-      </div>
-      <div class="tools hidden" id="adminTools">
-        <h3>Narzędzia</h3>
-        <button class="btn add" onclick="openAddForm('news')">+ Aktualności</button>
-        <button class="btn add" onclick="openAddForm('results')">+ Wyniki</button>
-        <button class="btn add" onclick="openAddForm('analysis')">+ Analizy</button>
-        <button class="btn add" onclick="openAddForm('media')">+ Multimedia</button>
-        <button class="btn add" onclick="openAddForm('history')">+ Historia</button>
-        <button class="btn add" onclick="openAddForm('schedule')">+ Terminarz</button>
-        <button class="btn add" onclick="openAddForm('ekstraklasa')">+ Ekstraklasa</button>
-        <button class="btn add" onclick="openAddForm('pierwsza_liga')">+ 1 liga</button>
-        <button class="btn add" onclick="openAddForm('druga_liga')">+ 2 liga</button>
-        <button class="btn add" onclick="openAddForm('trzecia_liga')">+ 3 liga</button>
-        <button class="btn add" onclick="openAddForm('premier_league')">+ Premier League</button>
-        <button class="btn add" onclick="openAddForm('laliga')">+ LaLiga</button>
-        <button class="btn add" onclick="openAddForm('bundesliga')">+ Bundesliga</button>
-        <button class="btn add" onclick="openAddForm('serie_a')">+ Serie A</button>
-        <button class="btn add" onclick="openAddForm('ligue_1')">+ Ligue 1</button>
-        <button class="btn add" onclick="openAddForm('eredivisie')">+ Eredivisie</button>
-        <button class="btn add" onclick="openAddForm('primeira_liga')">+ Primeira Liga</button>
-        <button class="btn add" onclick="openAddForm('super_lig')">+ Süper Lig</button>
-        <button class="btn add" onclick="openAddForm('jupiler_league')">+ Jupiler Pro League</button>
-        <button class="btn add" onclick="openAddForm('champions_league')">+ Liga Mistrzów</button>
-        <button class="btn add" onclick="openAddForm('europa_league')">+ Liga Europy</button>
-        <button class="btn add" onclick="openAddForm('conference_league')">+ Liga Konferencji</button>
-        <button class="btn add" onclick="openAddForm('mundial2026')">+ Mundial 2026</button>
-        <button class="btn danger" onclick="logoutAdmin()">Wyloguj</button>
-      </div>
-    </div>
-  </aside>
-
-  <main id="main">
-    <header>
-      <img src="https://www.ebilet.pl/now/app/uploads/2024/02/shutterstock_2253076431-1-1280x720.jpg" alt="Piłka nożna" />
-    </header>
-
-    <div id="modal" class="modal hidden">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h2 id="modalTitle">Dodaj treść</h2>
-          <button class="close-btn" onclick="closeModal()">&times;</button>
+      <!-- 🔐 PANEL ADMINA -->
+      <div class="admin-panel" id="adminPanel">
+        <h3>Panel administratora</h3>
+        <div id="loginForm">
+          <input type="password" id="adminPass" placeholder="Hasło" />
+          <button class="btn btn-primary" onclick="loginAdmin()">Zaloguj</button>
+          <p id="loginErr" class="error"></p>
         </div>
-        <div class="modal-body">
-          <select id="modalSection">
-            <option value="news">Aktualności</option>
-            <option value="results">Wyniki</option>
-            <option value="analysis">Analizy</option>
-            <option value="media">Multimedia</option>
-            <option value="history">Historia</option>
-            <option value="schedule">Terminarz</option>
-            <option value="ekstraklasa">Ekstraklasa</option>
-            <option value="pierwsza_liga">1 liga</option>
-            <option value="druga_liga">2 liga</option>
-            <option value="trzecia_liga">3 liga</option>
-            <option value="premier_league">Premier League</option>
-            <option value="laliga">LaLiga</option>
-            <option value="bundesliga">Bundesliga</option>
-            <option value="serie_a">Serie A</option>
-            <option value="ligue_1">Ligue 1</option>
-            <option value="eredivisie">Eredivisie</option>
-            <option value="primeira_liga">Primeira Liga</option>
-            <option value="super_lig">Süper Lig</option>
-            <option value="jupiler_league">Jupiler Pro League</option>
-            <option value="champions_league">Liga Mistrzów</option>
-            <option value="europa_league">Liga Europy</option>
-            <option value="conference_league">Liga Konferencji</option>
-            <option value="mundial2026">Mundial 2026</option>
-          </select>
-          <input type="text" id="modalTitleInput" placeholder="Tytuł" />
-          <textarea id="modalContent" placeholder="Treść... (ENTER = nowa linia)"></textarea>
-          <input type="url" id="modalImage" placeholder="Link do zdjęcia" />
-          <input type="url" id="modalVideo" placeholder="Link do filmu (YouTube itp.)" />
-          <div class="modal-actions">
-            <button class="btn primary" onclick="saveContent()">Zapisz</button>
-            <button class="btn danger hidden" id="modalDelBtn" onclick="deleteContent()">Usuń</button>
+        <div id="adminTools" class="hidden">
+          <button class="btn btn-primary" onclick="openAddForm('news')">+ Treści</button>
+          <button class="btn btn-danger" onclick="logoutAdmin()">Wyloguj</button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- 📄 GŁÓWNA TREŚĆ -->
+    <main class="main-content">
+      <!-- MODAL -->
+      <div id="modal" class="modal hidden">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h2 id="modalTitle">Dodaj treść</h2>
+            <button class="close-btn" onclick="closeModal()">&times;</button>
           </div>
-          <p id="modalErr" class="error"></p>
+          <div class="modal-body">
+            <select id="modalSection">
+              <option value="news">Aktualności</option>
+              <option value="results">Wyniki</option>
+              <option value="analysis">Analizy</option>
+              <option value="media">Multimedia</option>
+              <option value="history">Transfery</option>
+              <option value="schedule">Terminarz</option>
+              <option value="ekstraklasa">Ekstraklasa</option>
+              <option value="pierwsza_liga">1 liga</option>
+              <option value="druga_liga">2 liga</option>
+              <option value="trzecia_liga">3 liga</option>
+              <option value="premier_league">Premier League</option>
+              <option value="laliga">LaLiga</option>
+              <option value="bundesliga">Bundesliga</option>
+              <option value="serie_a">Serie A</option>
+              <option value="ligue_1">Ligue 1</option>
+              <option value="eredivisie">Eredivisie</option>
+              <option value="primeira_liga">Primeira Liga</option>
+              <option value="super_lig">Süper Lig</option>
+              <option value="jupiler_league">Jupiler Pro League</option>
+              <option value="champions_league">Liga Mistrzów</option>
+              <option value="europa_league">Liga Europy</option>
+              <option value="conference_league">Liga Konferencji</option>
+              <option value="mundial2026">Mundial 2026</option>
+            </select>
+            <input type="text" id="modalTitleInput" placeholder="Tytuł artykułu" />
+            <textarea id="modalContent" placeholder="Treść... (ENTER = nowa linia)"></textarea>
+            <input type="url" id="modalImage" placeholder="Link do zdjęcia" />
+            <input type="url" id="modalVideo" placeholder="Link do filmu" />
+            <div class="modal-actions">
+              <button class="btn btn-primary" onclick="saveContent()">Zapisz</button>
+              <button class="btn btn-danger" id="modalDelBtn" onclick="deleteContent()" style="display:none;">Usuń</button>
+            </div>
+            <p id="modalErr" class="error"></p>
+          </div>
         </div>
+      </div>
+
+      <!-- SEKCJE -->
+      <section id="home" class="page active">
+        <h1>Witaj w StrefieGola</h1>
+        <p class="hero-text">Profesjonalne informacje piłkarskie – aktualności, wyniki, analizy i multimedia w jednym miejscu.</p>
+        <div class="features-grid">
+          <div class="feature-card">
+            <h3>Polskie ligi</h3>
+            <p>Ekstraklasa, I liga i niższe szczeble na bieżąco.</p>
+          </div>
+          <div class="feature-card">
+            <h3>Liga Mistrzów</h3>
+            <p>Najważniejsze europejskie rozgrywki – analizy i wyniki.</p>
+          </div>
+          <div class="feature-card">
+            <h3>Mundial 2026</h3>
+            <p>Przygotowania, grupy i terminarz mistrzostw świata.</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="news" class="page"><h2>Aktualności</h2><div id="news-list" class="content-grid">Ładowanie...</div></section>
+      <section id="results" class="page"><h2>Wyniki</h2><div id="results-list" class="content-grid">Ładowanie...</div></section>
+      <section id="analysis" class="page"><h2>Analizy</h2><div id="analysis-list" class="content-grid">Ładowanie...</div></section>
+      <section id="media" class="page"><h2>Multimedia</h2><div id="media-list" class="content-grid">Ładowanie...</div></section>
+      <section id="history" class="page"><h2>Transfery</h2><div id="history-list" class="content-grid">Ładowanie...</div></section>
+      <section id="schedule" class="page"><h2>Terminarz</h2><div id="schedule-list" class="content-grid">Ładowanie...</div></section>
+
+      <section id="polskie" class="page">
+        <h2>Polskie ligi</h2>
+        <div class="ligi-nav">
+          <button class="liga-btn" onclick="showLiga('polskie', 'ekstraklasa')">Ekstraklasa</button>
+          <button class="liga-btn" onclick="showLiga('polskie', 'pierwsza_liga')">1 liga</button>
+          <button class="liga-btn" onclick="showLiga('polskie', 'druga_liga')">2 liga</button>
+          <button class="liga-btn" onclick="showLiga('polskie', 'trzecia_liga')">3 liga</button>
+        </div>
+        <div id="ekstraklasa-content" class="liga-subpage active-liga"><div id="ekstraklasa-list" class="content-grid">Ładowanie...</div></div>
+        <div id="pierwsza_liga-content" class="liga-subpage"><div id="pierwsza_liga-list" class="content-grid">Ładowanie...</div></div>
+        <div id="druga_liga-content" class="liga-subpage"><div id="druga_liga-list" class="content-grid">Ładowanie...</div></div>
+        <div id="trzecia_liga-content" class="liga-subpage"><div id="trzecia_liga-list" class="content-grid">Ładowanie...</div></div>
+      </section>
+
+      <section id="zagraniczne" class="page">
+        <h2>Ligi zagraniczne</h2>
+        <div class="ligi-nav">
+          <button class="liga-btn" onclick="showLiga('zagraniczne', 'premier_league')">Premier League</button>
+          <button class="liga-btn" onclick="showLiga('zagraniczne', 'laliga')">LaLiga</button>
+          <button class="liga-btn" onclick="showLiga('zagraniczne', 'bundesliga')">Bundesliga</button>
+          <button class="liga-btn" onclick="showLiga('zagraniczne', 'serie_a')">Serie A</button>
+          <button class="liga-btn" onclick="showLiga('zagraniczne', 'ligue_1')">Ligue 1</button>
+          <button class="liga-btn" onclick="showLiga('zagraniczne', 'eredivisie')">Eredivisie</button>
+          <button class="liga-btn" onclick="showLiga('zagraniczne', 'primeira_liga')">Primeira Liga</button>
+          <button class="liga-btn" onclick="showLiga('zagraniczne', 'super_lig')">Süper Lig</button>
+          <button class="liga-btn" onclick="showLiga('zagraniczne', 'jupiler_league')">Jupiler Pro League</button>
+        </div>
+        <div id="premier_league-content" class="liga-subpage active-liga"><div id="premier_league-list" class="content-grid">Ładowanie...</div></div>
+        <div id="laliga-content" class="liga-subpage"><div id="laliga-list" class="content-grid">Ładowanie...</div></div>
+        <div id="bundesliga-content" class="liga-subpage"><div id="bundesliga-list" class="content-grid">Ładowanie...</div></div>
+        <div id="serie_a-content" class="liga-subpage"><div id="serie_a-list" class="content-grid">Ładowanie...</div></div>
+        <div id="ligue_1-content" class="liga-subpage"><div id="ligue_1-list" class="content-grid">Ładowanie...</div></div>
+        <div id="eredivisie-content" class="liga-subpage"><div id="eredivisie-list" class="content-grid">Ładowanie...</div></div>
+        <div id="primeira_liga-content" class="liga-subpage"><div id="primeira_liga-list" class="content-grid">Ładowanie...</div></div>
+        <div id="super_lig-content" class="liga-subpage"><div id="super_lig-list" class="content-grid">Ładowanie...</div></div>
+        <div id="jupiler_league-content" class="liga-subpage"><div id="jupiler_league-list" class="content-grid">Ładowanie...</div></div>
+      </section>
+
+      <section id="champions_league" class="page"><h2>Liga Mistrzów</h2><div id="champions_league-list" class="content-grid">Ładowanie...</div></section>
+      <section id="europa_league" class="page"><h2>Liga Europy</h2><div id="europa_league-list" class="content-grid">Ładowanie...</div></section>
+      <section id="conference_league" class="page"><h2>Liga Konferencji</h2><div id="conference_league-list" class="content-grid">Ładowanie...</div></section>
+      <section id="mundial2026" class="page"><h2>Mundial 2026</h2><div id="mundial2026-list" class="content-grid">Ładowanie...</div></section>
+    </main>
+  </div>
+
+  <footer>
+    <div class="footer-content">
+      <div class="footer-logo">
+        <img src="logo.png" alt="StrefaGola" onerror="this.style.display='none'" />
+        <div>StrefaGola (SG)</div>
+      </div>
+      <div class="footer-links">
+        <h4>Linki</h4>
+        <ul>
+          <li><a href="#" onclick="showSection('home')">Strona główna</a></li>
+          <li><a href="#" onclick="showSection('polskie')">Polskie ligi</a></li>
+          <li><a href="#" onclick="showSection('champions_league')">Liga Mistrzów</a></li>
+          <li><a href="#" onclick="showSection('mundial2026')">Mundial 2026</a></li>
+        </ul>
+      </div>
+      <div class="footer-info">
+        <h4>Kontakt</h4>
+        <p>Email: kontakt@strefagola.pl</p>
+        <p>© 2026 StrefaGola. Wszelkie prawa zastrzeżone.</p>
       </div>
     </div>
-
-    <section id="home" class="page active">
-      <div class="hero">
-        <h1>StrefaGola</h1>
-        <p>Aktualne wyniki, analizy i multimedia – jak na Flashscore.</p>
-      </div>
-      <div class="features-grid">
-        <div class="feature-card">
-          <h3>Polskie ligi</h3>
-          <p>Ekstraklasa, I liga i więcej – na żywo.</p>
-        </div>
-        <div class="feature-card">
-          <h3>Ligi europejskie</h3>
-          <p>Premier League, LaLiga, Bundesliga – wszystko w jednym miejscu.</p>
-        </div>
-        <div class="feature-card">
-          <h3>Mundial 2026</h3>
-          <p>Kalendarz, grupy, wyniki – śledź mistrzostwa świata.</p>
-        </div>
-      </div>
-    </section>
-
-    <section id="news" class="page"><h2>Aktualności</h2><div id="news-list" class="content-grid">Ładowanie...</div></section>
-    <section id="results" class="page"><h2>Wyniki</h2><div id="results-list" class="content-grid">Ładowanie...</div></section>
-    <section id="analysis" class="page"><h2>Analizy</h2><div id="analysis-list" class="content-grid">Ładowanie...</div></section>
-    <section id="media" class="page"><h2>Multimedia</h2><div id="media-list" class="content-grid">Ładowanie...</div></section>
-    <section id="history" class="page"><h2>Historia</h2><div id="history-list" class="content-grid">Ładowanie...</div></section>
-    <section id="schedule" class="page"><h2>Terminarz</h2><div id="schedule-list" class="content-grid">Ładowanie...</div></section>
-
-    <section id="polskie" class="page">
-      <h2>Polskie ligi</h2>
-      <div class="ligi-nav">
-        <button class="liga-btn" onclick="showLiga('polskie', 'ekstraklasa')">Ekstraklasa</button>
-        <button class="liga-btn" onclick="showLiga('polskie', 'pierwsza_liga')">1 liga</button>
-        <button class="liga-btn" onclick="showLiga('polskie', 'druga_liga')">2 liga</button>
-        <button class="liga-btn" onclick="showLiga('polskie', 'trzecia_liga')">3 liga</button>
-      </div>
-      <div id="ekstraklasa-content" class="liga-subpage active-liga"><div id="ekstraklasa-list" class="content-grid">Ładowanie...</div></div>
-      <div id="pierwsza_liga-content" class="liga-subpage"><div id="pierwsza_liga-list" class="content-grid">Ładowanie...</div></div>
-      <div id="druga_liga-content" class="liga-subpage"><div id="druga_liga-list" class="content-grid">Ładowanie...</div></div>
-      <div id="trzecia_liga-content" class="liga-subpage"><div id="trzecia_liga-list" class="content-grid">Ładowanie...</div></div>
-    </section>
-
-    <section id="zagraniczne" class="page">
-      <h2>Ligi zagraniczne</h2>
-      <div class="ligi-nav">
-        <button class="liga-btn" onclick="showLiga('zagraniczne', 'premier_league')">Premier League</button>
-        <button class="liga-btn" onclick="showLiga('zagraniczne', 'laliga')">LaLiga</button>
-        <button class="liga-btn" onclick="showLiga('zagraniczne', 'bundesliga')">Bundesliga</button>
-        <button class="liga-btn" onclick="showLiga('zagraniczne', 'serie_a')">Serie A</button>
-        <button class="liga-btn" onclick="showLiga('zagraniczne', 'ligue_1')">Ligue 1</button>
-        <button class="liga-btn" onclick="showLiga('zagraniczne', 'eredivisie')">Eredivisie</button>
-        <button class="liga-btn" onclick="showLiga('zagraniczne', 'primeira_liga')">Primeira Liga</button>
-        <button class="liga-btn" onclick="showLiga('zagraniczne', 'super_lig')">Süper Lig</button>
-        <button class="liga-btn" onclick="showLiga('zagraniczne', 'jupiler_league')">Jupiler Pro League</button>
-      </div>
-      <div id="premier_league-content" class="liga-subpage active-liga"><div id="premier_league-list" class="content-grid">Ładowanie...</div></div>
-      <div id="laliga-content" class="liga-subpage"><div id="laliga-list" class="content-grid">Ładowanie...</div></div>
-      <div id="bundesliga-content" class="liga-subpage"><div id="bundesliga-list" class="content-grid">Ładowanie...</div></div>
-      <div id="serie_a-content" class="liga-subpage"><div id="serie_a-list" class="content-grid">Ładowanie...</div></div>
-      <div id="ligue_1-content" class="liga-subpage"><div id="ligue_1-list" class="content-grid">Ładowanie...</div></div>
-      <div id="eredivisie-content" class="liga-subpage"><div id="eredivisie-list" class="content-grid">Ładowanie...</div></div>
-      <div id="primeira_liga-content" class="liga-subpage"><div id="primeira_liga-list" class="content-grid">Ładowanie...</div></div>
-      <div id="super_lig-content" class="liga-subpage"><div id="super_lig-list" class="content-grid">Ładowanie...</div></div>
-      <div id="jupiler_league-content" class="liga-subpage"><div id="jupiler_league-list" class="content-grid">Ładowanie...</div></div>
-    </section>
-
-    <section id="champions_league" class="page"><h2>Liga Mistrzów</h2><div id="champions_league-list" class="content-grid">Ładowanie...</div></section>
-    <section id="europa_league" class="page"><h2>Liga Europy</h2><div id="europa_league-list" class="content-grid">Ładowanie...</div></section>
-    <section id="conference_league" class="page"><h2>Liga Konferencji</h2><div id="conference_league-list" class="content-grid">Ładowanie...</div></section>
-    <section id="mundial2026" class="page"><h2>Mundial 2026</h2><div id="mundial2026-list" class="content-grid">Ładowanie...</div></section>
-
-    <footer class="site-footer">
-      <div class="footer-content">
-        <div class="footer-logo">
-          <img src="logo.png" alt="StrefaGola" onerror="this.style.display='none'" />
-          <div>StrefaGola (SG)</div>
-        </div>
-        <div class="footer-links">
-          <h4>Menu</h4>
-          <ul>
-            <li><a href="#" onclick="showSection('home')">Strona główna</a></li>
-            <li><a href="#" onclick="showSection('polskie')">Polskie ligi</a></li>
-            <li><a href="#" onclick="showSection('champions_league')">Liga Mistrzów</a></li>
-            <li><a href="#" onclick="showSection('europa_league')">Liga Europy</a></li>
-            <li><a href="#" onclick="showSection('mundial2026')">Mundial 2026</a></li>
-          </ul>
-        </div>
-        <div class="footer-info">
-          <h4>Kontakt</h4>
-          <p>kontakt@strefagola.pl</p>
-          <p>© 2025 StrefaGola</p>
-          <p class="admin-note">Tylko admin@sgstrefagola.pl ma dostęp do edycji.</p>
-        </div>
-      </div>
-    </footer>
-  </main>
+  </footer>
 
   <script src="firebase-config.js"></script>
   <script>
@@ -698,29 +631,15 @@
     let currentDocId = null;
     let currentSection = null;
 
-    document.getElementById('menuToggle').addEventListener('click', () => {
-      document.getElementById('sidebar').classList.add('active');
-      document.getElementById('overlay').classList.add('active');
-    });
-
-    document.getElementById('overlay').addEventListener('click', () => {
-      document.getElementById('sidebar').classList.remove('active');
-      document.getElementById('overlay').classList.remove('active');
-    });
-
     function showSection(id) {
       document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-      document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
+      document.querySelectorAll('nav a, .sidebar-links a').forEach(a => a.classList.remove('active'));
       document.getElementById(id).classList.add('active');
-      document.querySelector(`nav a[data-section="${id}"]`).classList.add('active');
+      document.querySelector(`nav a[data-section="${id}"]`)?.classList.add('active');
       if (id !== 'home') {
         if (id === 'polskie') showLiga('polskie', 'ekstraklasa');
         else if (id === 'zagraniczne') showLiga('zagraniczne', 'premier_league');
         else loadSection(id);
-      }
-      if (window.innerWidth <= 768) {
-        document.getElementById('sidebar').classList.remove('active');
-        document.getElementById('overlay').classList.remove('active');
       }
     }
 
@@ -778,7 +697,7 @@
       document.getElementById('modalContent').value = data.content || '';
       document.getElementById('modalImage').value = data.imageUrl || '';
       document.getElementById('modalVideo').value = data.videoUrl || '';
-      document.getElementById('modalDelBtn').classList.remove('hidden');
+      document.getElementById('modalDelBtn').style.display = 'inline-block';
       document.getElementById('modal').classList.remove('hidden');
     }
 
@@ -788,7 +707,7 @@
       document.getElementById('modalImage').value = '';
       document.getElementById('modalVideo').value = '';
       document.getElementById('modalErr').textContent = '';
-      document.getElementById('modalDelBtn').classList.add('hidden');
+      document.getElementById('modalDelBtn').style.display = 'none';
     }
 
     function closeModal() {
@@ -803,7 +722,7 @@
       const vimeo = url.match(/vimeo\.com\/(\d+)/);
       if (vimeo) return `<iframe src="https://player.vimeo.com/video/${vimeo[1]}" frameborder="0" allowfullscreen></iframe>`;
       if (url.endsWith('.mp4') || url.endsWith('.webm')) return `<video controls style="width:100%"><source src="${url}" type="video/mp4"></video>`;
-      return `<a href="${url}" target="_blank" style="display:inline-block;padding:6px 12px;background:#ff3b3b;color:white;border-radius:4px;text-decoration:none;">Otwórz film</a>`;
+      return `<a href="${url}" target="_blank" style="display:inline-block;padding:8px 16px;background:#1e40af;color:white;border-radius:6px;text-decoration:none;">Otwórz film</a>`;
     }
 
     async function saveContent() {
@@ -815,7 +734,7 @@
 
       const err = document.getElementById('modalErr');
       if (!title || !content) {
-        err.textContent = "Wymagany tytuł i treść.";
+        err.textContent = "Tytuł i treść są wymagane.";
         return;
       }
 
@@ -841,7 +760,7 @@
     }
 
     async function deleteContent() {
-      if (!confirm("Usunąć treść?")) return;
+      if (!confirm("Na pewno chcesz usunąć tę treść?")) return;
       try {
         await db.collection(currentSection).doc(currentDocId).delete();
         closeModal();
@@ -882,14 +801,14 @@
         });
         container.innerHTML = html;
       } catch (e) {
-        container.innerHTML = "<p>Błąd ładowania.</p>";
+        container.innerHTML = "<p>Błąd ładowania treści.</p>";
       }
     }
 
-    document.querySelectorAll('nav a').forEach(link => {
+    document.querySelectorAll('nav a, .sidebar-links a').forEach(link => {
       link.addEventListener('click', (e) => {
         e.preventDefault();
-        showSection(link.getAttribute('data-section'));
+        showSection(link.getAttribute('data-section') || link.onclick.toString().match(/'([^']+)'/)?.[1]);
       });
     });
     showSection('home');
