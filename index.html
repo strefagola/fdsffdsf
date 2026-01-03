@@ -953,18 +953,17 @@ if (!title || !homeTeam || !awayTeam || !date || !score) {
 err.textContent = "Wypełnij wszystkie pola meczu.";
 return;
 }
+const section = document.getElementById('modalSection').value;
 const data = {
 title, homeTeam, awayTeam, date, score,
 logoHome: logoHome || null,
-logoAway: logoAway || null,
-createdAt: firebase.firestore.FieldValue.serverTimestamp()
+logoAway: logoAway || null
 };
 try {
-const section = document.getElementById('modalSection').value;
 if (currentDocId) {
 await db.collection(section).doc(currentDocId).update(data);
 } else {
-await db.collection(section).add(data);
+await db.collection(section).add({ ...data, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
 }
 closeModal();
 loadSection(section);
