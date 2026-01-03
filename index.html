@@ -749,8 +749,8 @@ height: 18px;
 </div>
 <div id="adminTools" class="hidden">
 <button class="btn btn-primary" onclick="openAddForm('news')">+ Artykuł</button>
-<button class="btn btn-primary" onclick="openAddForm('ekstraklasa')">+ Mecz Ekstraklasa</button>
-<button class="btn btn-primary" onclick="openAddForm('ekstraklasa_table')">+ Tabela Ekstraklasa</button>
+<button class="btn btn-primary" onclick="openAddMatchOrTable('match')">+ Mecz</button>
+<button class="btn btn-primary" onclick="openAddMatchOrTable('table')">+ Tabela</button>
 <button class="btn btn-danger" onclick="logoutAdmin()" style="margin-left:10px;">Wyloguj</button>
 </div>
 </div>
@@ -829,22 +829,57 @@ document.getElementById('articleFields').style.display = 'block';
 document.getElementById('matchFields').style.display = 'none';
 document.getElementById('tableFields').style.display = 'none';
 document.getElementById('modalSaveBtn').textContent = 'Zapisz artykuł';
+document.getElementById('modalTitle').textContent = 'Dodaj artykuł';
 } else if (matchSections.includes(section)) {
 document.getElementById('articleFields').style.display = 'none';
 document.getElementById('matchFields').style.display = 'block';
 document.getElementById('tableFields').style.display = 'none';
 document.getElementById('modalSaveBtn').textContent = 'Zapisz mecz';
+document.getElementById('modalTitle').textContent = 'Dodaj mecz';
 } else if (tableSections.includes(section)) {
 document.getElementById('articleFields').style.display = 'none';
 document.getElementById('matchFields').style.display = 'none';
 document.getElementById('tableFields').style.display = 'block';
 document.getElementById('modalSaveBtn').textContent = 'Zapisz drużynę';
+document.getElementById('modalTitle').textContent = 'Dodaj drużynę';
 }
 document.getElementById('modalDelBtn').style.display = 'none';
 document.getElementById('modal').classList.remove('hidden');
 }
 
-// ✅ NAPRAWIONA FUNKCJA – NIE WYWOŁUJE openAddForm!
+// ✅ NOWA FUNKCJA: OTWIERA MODAL Z WYBOREM LIGI
+function openAddMatchOrTable(type) {
+  if (!isAdmin) return;
+  currentDocId = null;
+  currentSection = null;
+  resetModal();
+
+  const select = document.getElementById('modalSection');
+  const allowedSections = type === 'match' ? matchSections : tableSections;
+
+  // Pokaż tylko odpowiednie opcje
+  Array.from(select.options).forEach(opt => {
+    opt.style.display = allowedSections.includes(opt.value) ? 'block' : 'none';
+  });
+
+  // Ustaw domyślną wartość
+  select.value = allowedSections[0];
+
+  // Pokaż odpowiednie pola
+  document.getElementById('articleFields').style.display = 'none';
+  document.getElementById('matchFields').style.display = type === 'match' ? 'block' : 'none';
+  document.getElementById('tableFields').style.display = type === 'table' ? 'block' : 'none';
+
+  // Ukryj przycisk usuwania
+  document.getElementById('modalDelBtn').style.display = 'none';
+
+  // Ustaw teksty
+  document.getElementById('modalSaveBtn').textContent = type === 'match' ? 'Dodaj mecz' : 'Dodaj drużynę';
+  document.getElementById('modalTitle').textContent = type === 'match' ? 'Dodaj mecz' : 'Dodaj drużynę do tabeli';
+
+  document.getElementById('modal').classList.remove('hidden');
+}
+
 function openEditForm(section, docId, data) {
 if (!isAdmin) return;
 currentDocId = docId;
@@ -924,10 +959,10 @@ try {
 if (currentDocId) {
 await db.collection(currentSection).doc(currentDocId).update(data);
 } else {
-await db.collection(currentSection).add({ ...data, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+await db.collection(section).add({ ...data, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
 }
 closeModal();
-loadSection(currentSection);
+loadSection(section);
 } catch (e) {
 err.textContent = "Błąd zapisu.";
 }
@@ -953,16 +988,17 @@ logoAway: logoAway || null,
 createdAt: firebase.firestore.FieldValue.serverTimestamp()
 };
 try {
+const section = document.getElementById('modalSection').value;
 if (currentDocId) {
-await db.collection(currentSection).doc(currentDocId).update(data);
+await db.collection(section).doc(currentDocId).update(data);
 } else {
-await db.collection(currentSection).add(data);
+await db.collection(section).add(data);
 }
 closeModal();
-loadSection(currentSection);
+loadSection(section);
 const activePageId = document.querySelector('.page.active')?.id;
 if (['polskie','zagraniczne'].includes(activePageId)) {
-showLiga(activePageId, currentSection);
+showLiga(activePageId, section);
 }
 } catch (e) {
 err.textContent = "Błąd zapisu meczu.";
@@ -989,13 +1025,14 @@ points: parseInt(points),
 createdAt: firebase.firestore.FieldValue.serverTimestamp()
 };
 try {
+const section = document.getElementById('modalSection').value;
 if (currentDocId) {
-await db.collection(currentSection).doc(currentDocId).update(data);
+await db.collection(section).doc(currentDocId).update(data);
 } else {
-await db.collection(currentSection).add(data);
+await db.collection(section).add(data);
 }
 closeModal();
-loadSection(currentSection);
+loadSection(section);
 } catch (e) {
 err.textContent = "Błąd zapisu drużyny.";
 }
@@ -1004,16 +1041,17 @@ err.textContent = "Błąd zapisu drużyny.";
 async function deleteContent() {
 if (!confirm("Na pewno chcesz usunąć?")) return;
 try {
-await db.collection(currentSection).doc(currentDocId).delete();
+const section = document.getElementById('modalSection').value;
+await db.collection(section).doc(currentDocId).delete();
 closeModal();
-loadSection(currentSection);
+loadSection(section);
 const activePageId = document.querySelector('.page.active')?.id;
-if (currentSection.endsWith('_table')) {
-const base = currentSection.replace('_table', '');
+if (section.endsWith('_table')) {
+const base = section.replace('_table', '');
 loadSection(base);
 }
-if (['polskie','zagraniczne'].includes(activePageId) && matchSections.includes(currentSection)) {
-showLiga(activePageId, currentSection);
+if (['polskie','zagraniczne'].includes(activePageId) && matchSections.includes(section)) {
+showLiga(activePageId, section);
 }
 } catch (e) {
 document.getElementById('modalErr').textContent = "Błąd usuwania.";
@@ -1079,7 +1117,6 @@ if (round !== currentRound) {
 html += `<div class="match-header">${round}</div>`;
 currentRound = round;
 }
-// ✅ DODANO PRZYCISK USUŃ PRZY MECZACH
 const actions = isAdmin ?
 `<button class="edit-btn" style="position:absolute;top:10px;right:10px;" onclick="openEditForm('${section}', '${doc.id}', ${JSON.stringify(d).replace(/"/g, '&quot;')})">Edytuj</button>
 <button class="delete-btn" style="position:absolute;top:10px;right:70px;" onclick="openEditForm('${section}', '${doc.id}', ${JSON.stringify(d).replace(/"/g, '&quot;')})">Usuń</button>` : '';
