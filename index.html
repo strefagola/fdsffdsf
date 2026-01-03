@@ -332,7 +332,6 @@ cursor: pointer;
 font-size: 0.95rem;
 }
 .btn-primary { background: var(--accent); color: white; }
-.btn-secondary { background: #5a67d8; color: white; }
 .btn-danger { background: #d32f2f; color: white; }
 .error {
 color: #ff6b6b;
@@ -437,21 +436,6 @@ width: 18px;
 height: 18px;
 }
 }
-/* Admin dropdown */
-.admin-dropdown {
-margin-top: 10px;
-}
-.dropdown-label {
-display: block;
-font-weight: 600;
-margin: 8px 0 4px;
-color: #ff8c8c;
-}
-.admin-section {
-display: flex;
-flex-wrap: wrap;
-gap: 8px;
-}
 </style>
 </head>
 <body>
@@ -482,7 +466,7 @@ gap: 8px;
 <header>
 <img src="https://www.ebilet.pl/now/app/uploads/2024/02/shutterstock_2253076431-1-1280x720.jpg" alt="Piłka nożna" />
 </header>
-<!-- MODAL (bez zmian) -->
+<!-- MODAL -->
 <div id="modal" class="modal hidden">
 <div class="modal-content">
 <div class="modal-header">
@@ -541,12 +525,14 @@ gap: 8px;
 <option value="conference_league_table">Liga Konferencji (tabela)</option>
 <option value="mundial2026_table">Mundial 2026 (tabela)</option>
 </select>
+<!-- Artykuły -->
 <div id="articleFields">
 <input type="text" id="modalTitleInput" placeholder="Tytuł artykułu" />
 <textarea id="modalContent" placeholder="Treść..."></textarea>
 <input type="url" id="modalImage" placeholder="Link do zdjęcia" />
 <input type="url" id="modalVideo" placeholder="Link do filmu" />
 </div>
+<!-- Mecze -->
 <div id="matchFields" style="display:none;">
 <input type="text" id="modalTitleInputMatch" placeholder="KOLEJKA 20" />
 <div style="margin:10px 0;padding:10px;background:#1a1f2c;border-radius:6px;">
@@ -562,6 +548,7 @@ gap: 8px;
 <input type="text" id="modalDate" placeholder="Data i godzina" />
 <input type="text" id="modalScore" placeholder="Wynik (np. 2:1)" />
 </div>
+<!-- Tabele -->
 <div id="tableFields" style="display:none;">
 <input type="number" id="modalPosition" placeholder="Pozycja (1-20)" min="1" max="100" />
 <input type="text" id="modalTeamName" placeholder="Nazwa drużyny" />
@@ -577,7 +564,7 @@ gap: 8px;
 </div>
 </div>
 </div>
-<!-- SEKCJE (bez zmian – skopiowane z oryginału) -->
+<!-- SEKCJE -->
 <section id="home" class="page active">
 <div class="hero">
 <h1>Witaj w StrefieGola</h1>
@@ -589,6 +576,7 @@ gap: 8px;
 <div class="feature-card"><h3>Mundial 2026</h3><p>Przygotowania i terminarz.</p></div>
 </div>
 </section>
+<!-- Artykuły -->
 <section id="news" class="page"><h2>Aktualności</h2><div id="news-list" class="content-grid">Ładowanie...</div></section>
 <section id="results" class="page"><h2>Wyniki</h2><div id="results-list" class="content-grid">Ładowanie...</div></section>
 <section id="analysis" class="page"><h2>Analizy</h2><div id="analysis-list" class="content-grid">Ładowanie...</div></section>
@@ -607,7 +595,6 @@ gap: 8px;
 <button class="liga-btn" onclick="showLiga('polskie', 'trzecia_liga_gr3')">3 liga gr III</button>
 <button class="liga-btn" onclick="showLiga('polskie', 'trzecia_liga_gr4')">3 liga gr IV</button>
 </div>
-<!-- Ekstraklasa -->
 <div id="ekstraklasa-content" class="liga-subpage active-liga">
 <h3>Tabela Ekstraklasy</h3>
 <table id="ekstraklasa_table-list" class="table-list">
@@ -617,7 +604,6 @@ gap: 8px;
 <h3>Mecze Ekstraklasy</h3>
 <div id="ekstraklasa-list" class="match-list">Ładowanie...</div>
 </div>
-<!-- 1 liga -->
 <div id="pierwsza_liga-content" class="liga-subpage">
 <h3>Tabela 1 ligi</h3>
 <table id="pierwsza_liga_table-list" class="table-list">
@@ -627,7 +613,6 @@ gap: 8px;
 <h3>Mecze 1 ligi</h3>
 <div id="pierwsza_liga-list" class="match-list">Ładowanie...</div>
 </div>
-<!-- 2 liga -->
 <div id="druga_liga-content" class="liga-subpage">
 <h3>Tabela 2 ligi</h3>
 <table id="druga_liga_table-list" class="table-list">
@@ -637,7 +622,6 @@ gap: 8px;
 <h3>Mecze 2 ligi</h3>
 <div id="druga_liga-list" class="match-list">Ładowanie...</div>
 </div>
-<!-- 3 liga gr I -->
 <div id="trzecia_liga_gr1-content" class="liga-subpage">
 <h3>Tabela 3 ligi gr I</h3>
 <table id="trzecia_liga_gr1_table-list" class="table-list">
@@ -647,7 +631,6 @@ gap: 8px;
 <h3>Mecze 3 ligi gr I</h3>
 <div id="trzecia_liga_gr1-list" class="match-list">Ładowanie...</div>
 </div>
-<!-- 3 liga gr II -->
 <div id="trzecia_liga_gr2-content" class="liga-subpage">
 <h3>Tabela 3 ligi gr II</h3>
 <table id="trzecia_liga_gr2_table-list" class="table-list">
@@ -657,7 +640,6 @@ gap: 8px;
 <h3>Mecze 3 ligi gr II</h3>
 <div id="trzecia_liga_gr2-list" class="match-list">Ładowanie...</div>
 </div>
-<!-- 3 liga gr III -->
 <div id="trzecia_liga_gr3-content" class="liga-subpage">
 <h3>Tabela 3 ligi gr III</h3>
 <table id="trzecia_liga_gr3_table-list" class="table-list">
@@ -667,7 +649,6 @@ gap: 8px;
 <h3>Mecze 3 ligi gr III</h3>
 <div id="trzecia_liga_gr3-list" class="match-list">Ładowanie...</div>
 </div>
-<!-- 3 liga gr IV -->
 <div id="trzecia_liga_gr4-content" class="liga-subpage">
 <h3>Tabela 3 ligi gr IV</h3>
 <table id="trzecia_liga_gr4_table-list" class="table-list">
@@ -766,7 +747,7 @@ gap: 8px;
 <h3>Mecze Mundialu 2026</h3>
 <div id="mundial2026-list" class="match-list">Ładowanie...</div>
 </section>
-<!-- 🔐 PANEL ADMINA – ZAKTUALIZOWANY -->
+<!-- 🔐 PANEL ADMINA -->
 <div class="admin-bar" id="adminPanel">
 <h3>Panel administratora</h3>
 <div id="loginForm">
@@ -776,65 +757,9 @@ gap: 8px;
 </div>
 <div id="adminTools" class="hidden">
 <button class="btn btn-primary" onclick="openAddForm('news')">+ Artykuł</button>
+<button class="btn btn-primary" onclick="openAddForm('ekstraklasa')">+ Mecz</button>
+<button class="btn btn-primary" onclick="openAddForm('ekstraklasa_table')">+ Tabela</button>
 <button class="btn btn-danger" onclick="logoutAdmin()" style="margin-left:10px;">Wyloguj</button>
-
-<div class="admin-dropdown">
-<span class="dropdown-label">🇵🇱 Polskie ligi</span>
-<div class="admin-section">
-<button class="btn btn-secondary" onclick="openAddForm('ekstraklasa')">Mecz: Ekstraklasa</button>
-<button class="btn btn-secondary" onclick="openAddForm('ekstraklasa_table')">Tabela: Ekstraklasa</button>
-<button class="btn btn-secondary" onclick="openAddForm('pierwsza_liga')">Mecz: 1 liga</button>
-<button class="btn btn-secondary" onclick="openAddForm('pierwsza_liga_table')">Tabela: 1 liga</button>
-<button class="btn btn-secondary" onclick="openAddForm('druga_liga')">Mecz: 2 liga</button>
-<button class="btn btn-secondary" onclick="openAddForm('druga_liga_table')">Tabela: 2 liga</button>
-<button class="btn btn-secondary" onclick="openAddForm('trzecia_liga_gr1')">Mecz: 3 liga gr I</button>
-<button class="btn btn-secondary" onclick="openAddForm('trzecia_liga_gr1_table')">Tabela: 3 liga gr I</button>
-<button class="btn btn-secondary" onclick="openAddForm('trzecia_liga_gr2')">Mecz: 3 liga gr II</button>
-<button class="btn btn-secondary" onclick="openAddForm('trzecia_liga_gr2_table')">Tabela: 3 liga gr II</button>
-<button class="btn btn-secondary" onclick="openAddForm('trzecia_liga_gr3')">Mecz: 3 liga gr III</button>
-<button class="btn btn-secondary" onclick="openAddForm('trzecia_liga_gr3_table')">Tabela: 3 liga gr III</button>
-<button class="btn btn-secondary" onclick="openAddForm('trzecia_liga_gr4')">Mecz: 3 liga gr IV</button>
-<button class="btn btn-secondary" onclick="openAddForm('trzecia_liga_gr4_table')">Tabela: 3 liga gr IV</button>
-</div>
-</div>
-
-<div class="admin-dropdown">
-<span class="dropdown-label">🌍 Zagraniczne ligi</span>
-<div class="admin-section">
-<button class="btn btn-secondary" onclick="openAddForm('premier_league')">Mecz: Premier League</button>
-<button class="btn btn-secondary" onclick="openAddForm('premier_league_table')">Tabela: Premier League</button>
-<button class="btn btn-secondary" onclick="openAddForm('laliga')">Mecz: LaLiga</button>
-<button class="btn btn-secondary" onclick="openAddForm('laliga_table')">Tabela: LaLiga</button>
-<button class="btn btn-secondary" onclick="openAddForm('bundesliga')">Mecz: Bundesliga</button>
-<button class="btn btn-secondary" onclick="openAddForm('bundesliga_table')">Tabela: Bundesliga</button>
-<button class="btn btn-secondary" onclick="openAddForm('serie_a')">Mecz: Serie A</button>
-<button class="btn btn-secondary" onclick="openAddForm('serie_a_table')">Tabela: Serie A</button>
-<button class="btn btn-secondary" onclick="openAddForm('ligue_1')">Mecz: Ligue 1</button>
-<button class="btn btn-secondary" onclick="openAddForm('ligue_1_table')">Tabela: Ligue 1</button>
-<button class="btn btn-secondary" onclick="openAddForm('eredivisie')">Mecz: Eredivisie</button>
-<button class="btn btn-secondary" onclick="openAddForm('eredivisie_table')">Tabela: Eredivisie</button>
-<button class="btn btn-secondary" onclick="openAddForm('primeira_liga')">Mecz: Primeira Liga</button>
-<button class="btn btn-secondary" onclick="openAddForm('primeira_liga_table')">Tabela: Primeira Liga</button>
-<button class="btn btn-secondary" onclick="openAddForm('super_lig')">Mecz: Süper Lig</button>
-<button class="btn btn-secondary" onclick="openAddForm('super_lig_table')">Tabela: Süper Lig</button>
-<button class="btn btn-secondary" onclick="openAddForm('jupiler_league')">Mecz: Jupiler Pro League</button>
-<button class="btn btn-secondary" onclick="openAddForm('jupiler_league_table')">Tabela: Jupiler Pro League</button>
-</div>
-</div>
-
-<div class="admin-dropdown">
-<span class="dropdown-label">🏆 Rozgrywki europejskie i Mundial</span>
-<div class="admin-section">
-<button class="btn btn-secondary" onclick="openAddForm('champions_league')">Mecz: Liga Mistrzów</button>
-<button class="btn btn-secondary" onclick="openAddForm('champions_league_table')">Tabela: Liga Mistrzów</button>
-<button class="btn btn-secondary" onclick="openAddForm('europa_league')">Mecz: Liga Europy</button>
-<button class="btn btn-secondary" onclick="openAddForm('europa_league_table')">Tabela: Liga Europy</button>
-<button class="btn btn-secondary" onclick="openAddForm('conference_league')">Mecz: Liga Konferencji</button>
-<button class="btn btn-secondary" onclick="openAddForm('conference_league_table')">Tabela: Liga Konferencji</button>
-<button class="btn btn-secondary" onclick="openAddForm('mundial2026')">Mecz: Mundial 2026</button>
-<button class="btn btn-secondary" onclick="openAddForm('mundial2026_table')">Tabela: Mundial 2026</button>
-</div>
-</div>
 </div>
 </div>
 </main>
@@ -879,6 +804,7 @@ if (target) target.classList.add('active-liga');
 loadSection(ligaId);
 loadSection(ligaId + '_table');
 }
+
 auth.onAuthStateChanged(user => {
 isAdmin = user && user.email === "admin@sgstrefagola.pl";
 document.getElementById('loginForm').classList.toggle('hidden', isAdmin);
@@ -888,53 +814,55 @@ const allSections = [...articleSections, ...matchSections, ...tableSections];
 allSections.forEach(loadSection);
 }
 });
+
 function loginAdmin() {
 const pass = document.getElementById('adminPass').value;
 auth.signInWithEmailAndPassword("admin@sgstrefagola.pl", pass)
 .catch(() => document.getElementById('loginErr').textContent = "Błędne hasło");
 }
+
 function logoutAdmin() {
 auth.signOut();
 }
+
+// ✅ POPRAWIONA FUNKCJA – nie kasuje currentDocId przy edycji
 function openAddForm(section) {
 if (!isAdmin) return;
 currentDocId = null;
-currentSection = section;
-document.getElementById('modalSection').value = section;
-resetModal();
-if (articleSections.includes(section)) {
-document.getElementById('articleFields').style.display = 'block';
-document.getElementById('matchFields').style.display = 'none';
-document.getElementById('tableFields').style.display = 'none';
-document.getElementById('modalSaveBtn').textContent = 'Zapisz artykuł';
-} else if (matchSections.includes(section)) {
-document.getElementById('articleFields').style.display = 'none';
-document.getElementById('matchFields').style.display = 'block';
-document.getElementById('tableFields').style.display = 'none';
-document.getElementById('modalSaveBtn').textContent = 'Zapisz mecz';
-} else if (tableSections.includes(section)) {
-document.getElementById('articleFields').style.display = 'none';
-document.getElementById('matchFields').style.display = 'none';
-document.getElementById('tableFields').style.display = 'block';
-document.getElementById('modalSaveBtn').textContent = 'Zapisz drużynę';
+openForm(section, null, false);
 }
-document.getElementById('modalDelBtn').style.display = 'none';
-document.getElementById('modal').classList.remove('hidden');
-}
+
 function openEditForm(section, docId, data) {
 if (!isAdmin) return;
 currentDocId = docId;
+openForm(section, data, true);
+}
+
+function openForm(section, data, isEditMode) {
 currentSection = section;
-resetModal();
 document.getElementById('modalSection').value = section;
-if (articleSections.includes(section)) {
+resetModal();
+
+const isArticle = articleSections.includes(section);
+const isMatch = matchSections.includes(section);
+const isTable = tableSections.includes(section);
+
+document.getElementById('articleFields').style.display = 'none';
+document.getElementById('matchFields').style.display = 'none';
+document.getElementById('tableFields').style.display = 'none';
+
+if (isArticle) {
+document.getElementById('articleFields').style.display = 'block';
+if (data) {
 document.getElementById('modalTitleInput').value = data.title || '';
 document.getElementById('modalContent').value = data.content || '';
 document.getElementById('modalImage').value = data.imageUrl || '';
 document.getElementById('modalVideo').value = data.videoUrl || '';
-openAddForm(section);
-document.getElementById('modalDelBtn').style.display = 'inline-block';
-} else if (matchSections.includes(section)) {
+}
+document.getElementById('modalSaveBtn').textContent = isEditMode ? 'Zapisz artykuł' : 'Dodaj artykuł';
+} else if (isMatch) {
+document.getElementById('matchFields').style.display = 'block';
+if (data) {
 document.getElementById('modalTitleInputMatch').value = data.title || '';
 document.getElementById('modalHomeTeam').value = data.homeTeam || '';
 document.getElementById('modalAwayTeam').value = data.awayTeam || '';
@@ -942,24 +870,32 @@ document.getElementById('modalDate').value = data.date || '';
 document.getElementById('modalScore').value = data.score || '';
 document.getElementById('modalLogoHome').value = data.logoHome || '';
 document.getElementById('modalLogoAway').value = data.logoAway || '';
-openAddForm(section);
-document.getElementById('modalDelBtn').style.display = 'inline-block';
-} else if (tableSections.includes(section)) {
+}
+document.getElementById('modalSaveBtn').textContent = isEditMode ? 'Zapisz mecz' : 'Dodaj mecz';
+} else if (isTable) {
+document.getElementById('tableFields').style.display = 'block';
+if (data) {
 document.getElementById('modalPosition').value = data.position || '';
 document.getElementById('modalTeamName').value = data.teamName || '';
 document.getElementById('modalTeamLogo').value = data.teamLogo || '';
 document.getElementById('modalMatches').value = data.matches || '';
 document.getElementById('modalPoints').value = data.points || '';
-openAddForm(section);
-document.getElementById('modalDelBtn').style.display = 'inline-block';
 }
+document.getElementById('modalSaveBtn').textContent = isEditMode ? 'Zapisz drużynę' : 'Dodaj drużynę';
 }
+
+document.getElementById('modalDelBtn').style.display = isEditMode ? 'inline-block' : 'none';
+document.getElementById('modal').classList.remove('hidden');
+}
+
 function resetModal() {
 document.getElementById('modalErr').textContent = '';
 }
+
 function closeModal() {
 document.getElementById('modal').classList.add('hidden');
 }
+
 function handleSave() {
 const section = document.getElementById('modalSection').value;
 if (articleSections.includes(section)) {
@@ -970,6 +906,7 @@ saveMatch();
 saveTableEntry();
 }
 }
+
 async function saveArticle() {
 const title = document.getElementById('modalTitleInput').value.trim();
 const content = document.getElementById('modalContent').value;
@@ -990,9 +927,10 @@ await db.collection(currentSection).add({ ...data, createdAt: firebase.firestore
 closeModal();
 loadSection(currentSection);
 } catch (e) {
-err.textContent = "Błąd zapisu: " + (e.message || e);
+err.textContent = "Błąd zapisu: " + (e.message || "nieznany błąd");
 }
 }
+
 async function saveMatch() {
 const title = document.getElementById('modalTitleInputMatch').value.trim();
 const homeTeam = document.getElementById('modalHomeTeam').value.trim();
@@ -1020,14 +958,16 @@ await db.collection(currentSection).add(data);
 }
 closeModal();
 loadSection(currentSection);
-const activePageId = document.querySelector('.page.active').id;
-if (['polskie','zagraniczne'].includes(activePageId)) {
-showLiga(activePageId, currentSection);
+const activePage = document.querySelector('.page.active');
+if (activePage && ['polskie','zagraniczne'].includes(activePage.id)) {
+const liga = currentSection;
+showLiga(activePage.id, liga);
 }
 } catch (e) {
-err.textContent = "Błąd zapisu: " + (e.message || e);
+err.textContent = "Błąd zapisu: " + (e.message || "nieznany błąd");
 }
 }
+
 async function saveTableEntry() {
 const position = document.getElementById('modalPosition').value.trim();
 const teamName = document.getElementById('modalTeamName').value.trim();
@@ -1056,9 +996,10 @@ await db.collection(currentSection).add(data);
 closeModal();
 loadSection(currentSection);
 } catch (e) {
-err.textContent = "Błąd zapisu: " + (e.message || e);
+err.textContent = "Błąd zapisu: " + (e.message || "nieznany błąd");
 }
 }
+
 async function deleteContent() {
 if (!currentDocId || !currentSection) {
 document.getElementById('modalErr').textContent = "Nie wybrano elementu.";
@@ -1069,18 +1010,19 @@ try {
 await db.collection(currentSection).doc(currentDocId).delete();
 closeModal();
 loadSection(currentSection);
-const activePageId = document.querySelector('.page.active').id;
 if (currentSection.endsWith('_table')) {
 const base = currentSection.replace('_table', '');
 loadSection(base);
 }
-if (['polskie','zagraniczne'].includes(activePageId) && matchSections.includes(currentSection)) {
-showLiga(activePageId, currentSection);
+const activePage = document.querySelector('.page.active');
+if (activePage && ['polskie','zagraniczne'].includes(activePage.id) && matchSections.includes(currentSection)) {
+showLiga(activePage.id, currentSection);
 }
 } catch (e) {
-document.getElementById('modalErr').textContent = "Błąd usuwania: " + (e.message || e);
+document.getElementById('modalErr').textContent = "Błąd usuwania: " + (e.message || "nieznany błąd");
 }
 }
+
 function embedVideo(url) {
 if (!url) return '';
 const yt = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/);
@@ -1088,6 +1030,7 @@ if (yt) return `<iframe src="https://www.youtube.com/embed/${yt[1]}" frameborder
 if (url.endsWith('.mp4') || url.endsWith('.webm')) return `<video controls style="width:100%"><source src="${url}" type="video/mp4"></video>`;
 return `<a href="${url}" target="_blank" style="display:inline-block;padding:6px 12px;background:#ff3b3b;color:white;border-radius:4px;text-decoration:none;">Otwórz film</a>`;
 }
+
 async function loadSection(section) {
 if (articleSections.includes(section)) {
 const container = document.getElementById(section + '-list');
@@ -1194,12 +1137,14 @@ container.querySelector('tbody').innerHTML = `<tr><td colspan="4">Błąd ładowa
 }
 }
 }
+
 document.querySelectorAll('.top-nav a').forEach(link => {
 link.addEventListener('click', (e) => {
 e.preventDefault();
 showSection(link.getAttribute('data-section'));
 });
 });
+
 showSection('home');
 </script>
 </body>
