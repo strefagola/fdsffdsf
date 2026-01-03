@@ -121,9 +121,9 @@
       display: block;
     }
 
-    .page h2 {
+    .page h2, .liga-subpage h3 {
       font-size: 1.7rem;
-      margin-bottom: 20px;
+      margin: 20px 0 15px;
       color: white;
       font-weight: 700;
       padding-bottom: 8px;
@@ -179,6 +179,7 @@
       padding: 18px;
       border-radius: 6px;
       border: 1px solid var(--border);
+      position: relative;
     }
 
     .content-item h3 {
@@ -211,7 +212,7 @@
       margin: 10px 0;
     }
 
-    .edit-btn {
+    .edit-btn, .delete-btn {
       background: var(--accent);
       color: white;
       border: none;
@@ -219,8 +220,12 @@
       border-radius: 4px;
       font-weight: 600;
       cursor: pointer;
-      float: right;
       font-size: 0.85rem;
+      margin-left: 8px;
+    }
+
+    .delete-btn {
+      background: #dc2626;
     }
 
     .ligi-nav {
@@ -254,7 +259,47 @@
       display: block;
     }
 
-    /* 📊 STYL DLA MECZÓW – jak Flashscore */
+    /* 📊 TABELA LIGI */
+    .table-list {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+      background: var(--card);
+      border-radius: 6px;
+      overflow: hidden;
+    }
+
+    .table-list th,
+    .table-list td {
+      padding: 10px 12px;
+      text-align: center;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .table-list th {
+      background: #0b0e15;
+      font-weight: 600;
+    }
+
+    .table-list tr:last-child td {
+      border-bottom: none;
+    }
+
+    .team-cell {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      justify-content: center;
+    }
+
+    .team-logo-small {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+
+    /* 📊 MECZE */
     .match-list {
       display: grid;
       gap: 6px;
@@ -431,10 +476,10 @@
 
     @media (max-width: 768px) {
       .hero h1 { font-size: 1.8rem; }
-      .page h2 { font-size: 1.5rem; }
+      .page h2, .liga-subpage h3 { font-size: 1.5rem; }
       .content-item h3 { font-size: 1.3rem; }
       .liga-btn { padding: 6px 12px; font-size: 0.85rem; }
-      .edit-btn { padding: 4px 8px; font-size: 0.8rem; }
+      .edit-btn, .delete-btn { padding: 4px 8px; font-size: 0.8rem; margin-left: 4px; }
       .top-nav a { padding: 10px 12px; font-size: 0.85rem; }
 
       .match-row {
@@ -448,6 +493,19 @@
 
       .score {
         font-size: 0.9rem;
+      }
+
+      .table-list {
+        font-size: 0.85rem;
+      }
+
+      .team-cell {
+        gap: 6px;
+      }
+
+      .team-logo-small {
+        width: 18px;
+        height: 18px;
       }
     }
   </style>
@@ -498,59 +556,82 @@
             <option value="media">Multimedia</option>
             <option value="history">Transfery</option>
             <option value="schedule">Terminarz</option>
-            <!-- Mecze – ligi -->
-            <option value="ekstraklasa">Ekstraklasa</option>
-            <option value="pierwsza_liga">1 liga</option>
-            <option value="druga_liga">2 liga</option>
-            <option value="trzecia_liga_gr1">3 liga gr I</option>
-            <option value="trzecia_liga_gr2">3 liga gr II</option>
-            <option value="trzecia_liga_gr3">3 liga gr III</option>
-            <option value="trzecia_liga_gr4">3 liga gr IV</option>
-            <option value="czwarta_liga_test">4 liga test</option>
-            <option value="premier_league">Premier League</option>
-            <option value="laliga">LaLiga</option>
-            <option value="bundesliga">Bundesliga</option>
-            <option value="serie_a">Serie A</option>
-            <option value="ligue_1">Ligue 1</option>
-            <option value="eredivisie">Eredivisie</option>
-            <option value="primeira_liga">Primeira Liga</option>
-            <option value="super_lig">Süper Lig</option>
-            <option value="jupiler_league">Jupiler Pro League</option>
-            <option value="champions_league">Liga Mistrzów</option>
-            <option value="europa_league">Liga Europy</option>
-            <option value="conference_league">Liga Konferencji</option>
-            <option value="mundial2026">Mundial 2026</option>
+            <!-- Mecze -->
+            <option value="ekstraklasa">Ekstraklasa (mecz)</option>
+            <option value="pierwsza_liga">1 liga (mecz)</option>
+            <option value="druga_liga">2 liga (mecz)</option>
+            <option value="trzecia_liga_gr1">3 liga gr I (mecz)</option>
+            <option value="trzecia_liga_gr2">3 liga gr II (mecz)</option>
+            <option value="trzecia_liga_gr3">3 liga gr III (mecz)</option>
+            <option value="trzecia_liga_gr4">3 liga gr IV (mecz)</option>
+            <option value="premier_league">Premier League (mecz)</option>
+            <option value="laliga">LaLiga (mecz)</option>
+            <option value="bundesliga">Bundesliga (mecz)</option>
+            <option value="serie_a">Serie A (mecz)</option>
+            <option value="ligue_1">Ligue 1 (mecz)</option>
+            <option value="eredivisie">Eredivisie (mecz)</option>
+            <option value="primeira_liga">Primeira Liga (mecz)</option>
+            <option value="super_lig">Süper Lig (mecz)</option>
+            <option value="jupiler_league">Jupiler Pro League (mecz)</option>
+            <option value="champions_league">Liga Mistrzów (mecz)</option>
+            <option value="europa_league">Liga Europy (mecz)</option>
+            <option value="conference_league">Liga Konferencji (mecz)</option>
+            <option value="mundial2026">Mundial 2026 (mecz)</option>
+            <!-- Tabele -->
+            <option value="ekstraklasa_table">Ekstraklasa (tabela)</option>
+            <option value="pierwsza_liga_table">1 liga (tabela)</option>
+            <option value="druga_liga_table">2 liga (tabela)</option>
+            <option value="trzecia_liga_gr1_table">3 liga gr I (tabela)</option>
+            <option value="trzecia_liga_gr2_table">3 liga gr II (tabela)</option>
+            <option value="trzecia_liga_gr3_table">3 liga gr III (tabela)</option>
+            <option value="trzecia_liga_gr4_table">3 liga gr IV (tabela)</option>
+            <option value="premier_league_table">Premier League (tabela)</option>
+            <option value="laliga_table">LaLiga (tabela)</option>
+            <option value="bundesliga_table">Bundesliga (tabela)</option>
+            <option value="serie_a_table">Serie A (tabela)</option>
+            <option value="ligue_1_table">Ligue 1 (tabela)</option>
+            <option value="eredivisie_table">Eredivisie (tabela)</option>
+            <option value="primeira_liga_table">Primeira Liga (tabela)</option>
+            <option value="super_lig_table">Süper Lig (tabela)</option>
+            <option value="jupiler_league_table">Jupiler Pro League (tabela)</option>
+            <option value="champions_league_table">Liga Mistrzów (tabela)</option>
+            <option value="europa_league_table">Liga Europy (tabela)</option>
+            <option value="conference_league_table">Liga Konferencji (tabela)</option>
+            <option value="mundial2026_table">Mundial 2026 (tabela)</option>
           </select>
 
-          <!-- POLA DLA ARTYKUŁÓW -->
+          <!-- Artykuły -->
           <div id="articleFields">
             <input type="text" id="modalTitleInput" placeholder="Tytuł artykułu" />
-            <textarea id="modalContent" placeholder="Treść artykułu... (ENTER = nowa linia)"></textarea>
-            <input type="url" id="modalImage" placeholder="Link do zdjęcia (opcjonalnie)" />
-            <input type="url" id="modalVideo" placeholder="Link do filmu (opcjonalnie)" />
+            <textarea id="modalContent" placeholder="Treść..."></textarea>
+            <input type="url" id="modalImage" placeholder="Link do zdjęcia" />
+            <input type="url" id="modalVideo" placeholder="Link do filmu" />
           </div>
 
-          <!-- POLA DLA MECZÓW -->
+          <!-- Mecze -->
           <div id="matchFields" style="display:none;">
             <input type="text" id="modalTitleInputMatch" placeholder="KOLEJKA 20" />
-            <div style="margin: 10px 0; padding: 10px; background: #1a1f2c; border-radius: 6px;">
-              <label style="display:block; margin-bottom:5px;">Gospodarz:</label>
-              <input type="text" id="modalHomeTeam" placeholder="Nazwa drużyny" style="width:100%; margin-bottom:8px;" />
+            <div style="margin:10px 0;padding:10px;background:#1a1f2c;border-radius:6px;">
+              <label>Gospodarz</label>
+              <input type="text" id="modalHomeTeam" placeholder="Drużyna" style="width:100%;margin:5px 0;" />
               <input type="url" id="modalLogoHome" placeholder="URL herbu" style="width:100%;" />
             </div>
-            <div style="margin: 10px 0; padding: 10px; background: #1a1f2c; border-radius: 6px;">
-              <label style="display:block; margin-bottom:5px;">Gość:</label>
-              <input type="text" id="modalAwayTeam" placeholder="Nazwa drużyny" style="width:100%; margin-bottom:8px;" />
+            <div style="margin:10px 0;padding:10px;background:#1a1f2c;border-radius:6px;">
+              <label>Gość</label>
+              <input type="text" id="modalAwayTeam" placeholder="Drużyna" style="width:100%;margin:5px 0;" />
               <input type="url" id="modalLogoAway" placeholder="URL herbu" style="width:100%;" />
             </div>
-            <div style="margin: 10px 0; padding: 10px; background: #1a1f2c; border-radius: 6px;">
-              <label style="display:block; margin-bottom:5px;">Data i godzina:</label>
-              <input type="text" id="modalDate" placeholder="np. 06.02. 18:00" style="width:100%;" />
-            </div>
-            <div style="margin: 10px 0; padding: 10px; background: #1a1f2c; border-radius: 6px;">
-              <label style="display:block; margin-bottom:5px;">Wynik:</label>
-              <input type="text" id="modalScore" placeholder="np. 2:1 lub -" style="width:100%;" />
-            </div>
+            <input type="text" id="modalDate" placeholder="Data i godzina" />
+            <input type="text" id="modalScore" placeholder="Wynik (np. 2:1)" />
+          </div>
+
+          <!-- Tabele -->
+          <div id="tableFields" style="display:none;">
+            <input type="number" id="modalPosition" placeholder="Pozycja (1-20)" min="1" max="100" />
+            <input type="text" id="modalTeamName" placeholder="Nazwa drużyny" />
+            <input type="url" id="modalTeamLogo" placeholder="URL herbu drużyny" />
+            <input type="text" id="modalMatches" placeholder="Mecze (np. WWPPW)" />
+            <input type="number" id="modalPoints" placeholder="Liczba punktów" min="0" />
           </div>
 
           <div class="modal-actions">
@@ -575,7 +656,7 @@
       </div>
     </section>
 
-    <!-- ARTYKUŁY -->
+    <!-- Artykuły -->
     <section id="news" class="page"><h2>Aktualności</h2><div id="news-list" class="content-grid">Ładowanie...</div></section>
     <section id="results" class="page"><h2>Wyniki</h2><div id="results-list" class="content-grid">Ładowanie...</div></section>
     <section id="analysis" class="page"><h2>Analizy</h2><div id="analysis-list" class="content-grid">Ładowanie...</div></section>
@@ -583,7 +664,7 @@
     <section id="history" class="page"><h2>Transfery</h2><div id="history-list" class="content-grid">Ładowanie...</div></section>
     <section id="schedule" class="page"><h2>Terminarz</h2><div id="schedule-list" class="content-grid">Ładowanie...</div></section>
 
-    <!-- POLSKIE LIGI – MECZE -->
+    <!-- POLSKIE LIGI -->
     <section id="polskie" class="page">
       <h2>Polskie ligi</h2>
       <div class="ligi-nav">
@@ -594,19 +675,87 @@
         <button class="liga-btn" onclick="showLiga('polskie', 'trzecia_liga_gr2')">3 liga gr II</button>
         <button class="liga-btn" onclick="showLiga('polskie', 'trzecia_liga_gr3')">3 liga gr III</button>
         <button class="liga-btn" onclick="showLiga('polskie', 'trzecia_liga_gr4')">3 liga gr IV</button>
-        <button class="liga-btn" onclick="showLiga('polskie', 'czwarta_liga_test')">4 liga test</button>
       </div>
-      <div id="ekstraklasa-content" class="liga-subpage active-liga"><div id="ekstraklasa-list" class="match-list">Ładowanie...</div></div>
-      <div id="pierwsza_liga-content" class="liga-subpage"><div id="pierwsza_liga-list" class="match-list">Ładowanie...</div></div>
-      <div id="druga_liga-content" class="liga-subpage"><div id="druga_liga-list" class="match-list">Ładowanie...</div></div>
-      <div id="trzecia_liga_gr1-content" class="liga-subpage"><div id="trzecia_liga_gr1-list" class="match-list">Ładowanie...</div></div>
-      <div id="trzecia_liga_gr2-content" class="liga-subpage"><div id="trzecia_liga_gr2-list" class="match-list">Ładowanie...</div></div>
-      <div id="trzecia_liga_gr3-content" class="liga-subpage"><div id="trzecia_liga_gr3-list" class="match-list">Ładowanie...</div></div>
-      <div id="trzecia_liga_gr4-content" class="liga-subpage"><div id="trzecia_liga_gr4-list" class="match-list">Ładowanie...</div></div>
-      <div id="czwarta_liga_test-content" class="liga-subpage"><div id="czwarta_liga_test-list" class="match-list">Ładowanie...</div></div>
+      
+      <!-- Ekstraklasa -->
+      <div id="ekstraklasa-content" class="liga-subpage active-liga">
+        <h3>Tabela Ekstraklasy</h3>
+        <table id="ekstraklasa_table-list" class="table-list">
+          <thead><tr><th>#</th><th>Drużyna</th><th>Mecze</th><th>Punkty</th></tr></thead>
+          <tbody><tr><td colspan="4">Ładowanie...</td></tr></tbody>
+        </table>
+        <h3>Mecze Ekstraklasy</h3>
+        <div id="ekstraklasa-list" class="match-list">Ładowanie...</div>
+      </div>
+      
+      <!-- 1 liga -->
+      <div id="pierwsza_liga-content" class="liga-subpage">
+        <h3>Tabela 1 ligi</h3>
+        <table id="pierwsza_liga_table-list" class="table-list">
+          <thead><tr><th>#</th><th>Drużyna</th><th>Mecze</th><th>Punkty</th></tr></thead>
+          <tbody><tr><td colspan="4">Ładowanie...</td></tr></tbody>
+        </table>
+        <h3>Mecze 1 ligi</h3>
+        <div id="pierwsza_liga-list" class="match-list">Ładowanie...</div>
+      </div>
+      
+      <!-- 2 liga -->
+      <div id="druga_liga-content" class="liga-subpage">
+        <h3>Tabela 2 ligi</h3>
+        <table id="druga_liga_table-list" class="table-list">
+          <thead><tr><th>#</th><th>Drużyna</th><th>Mecze</th><th>Punkty</th></tr></thead>
+          <tbody><tr><td colspan="4">Ładowanie...</td></tr></tbody>
+        </table>
+        <h3>Mecze 2 ligi</h3>
+        <div id="druga_liga-list" class="match-list">Ładowanie...</div>
+      </div>
+      
+      <!-- 3 liga gr I -->
+      <div id="trzecia_liga_gr1-content" class="liga-subpage">
+        <h3>Tabela 3 ligi gr I</h3>
+        <table id="trzecia_liga_gr1_table-list" class="table-list">
+          <thead><tr><th>#</th><th>Drużyna</th><th>Mecze</th><th>Punkty</th></tr></thead>
+          <tbody><tr><td colspan="4">Ładowanie...</td></tr></tbody>
+        </table>
+        <h3>Mecze 3 ligi gr I</h3>
+        <div id="trzecia_liga_gr1-list" class="match-list">Ładowanie...</div>
+      </div>
+      
+      <!-- 3 liga gr II -->
+      <div id="trzecia_liga_gr2-content" class="liga-subpage">
+        <h3>Tabela 3 ligi gr II</h3>
+        <table id="trzecia_liga_gr2_table-list" class="table-list">
+          <thead><tr><th>#</th><th>Drużyna</th><th>Mecze</th><th>Punkty</th></tr></thead>
+          <tbody><tr><td colspan="4">Ładowanie...</td></tr></tbody>
+        </table>
+        <h3>Mecze 3 ligi gr II</h3>
+        <div id="trzecia_liga_gr2-list" class="match-list">Ładowanie...</div>
+      </div>
+      
+      <!-- 3 liga gr III -->
+      <div id="trzecia_liga_gr3-content" class="liga-subpage">
+        <h3>Tabela 3 ligi gr III</h3>
+        <table id="trzecia_liga_gr3_table-list" class="table-list">
+          <thead><tr><th>#</th><th>Drużyna</th><th>Mecze</th><th>Punkty</th></tr></thead>
+          <tbody><tr><td colspan="4">Ładowanie...</td></tr></tbody>
+        </table>
+        <h3>Mecze 3 ligi gr III</h3>
+        <div id="trzecia_liga_gr3-list" class="match-list">Ładowanie...</div>
+      </div>
+      
+      <!-- 3 liga gr IV -->
+      <div id="trzecia_liga_gr4-content" class="liga-subpage">
+        <h3>Tabela 3 ligi gr IV</h3>
+        <table id="trzecia_liga_gr4_table-list" class="table-list">
+          <thead><tr><th>#</th><th>Drużyna</th><th>Mecze</th><th>Punkty</th></tr></thead>
+          <tbody><tr><td colspan="4">Ładowanie...</td></tr></tbody>
+        </table>
+        <h3>Mecze 3 ligi gr IV</h3>
+        <div id="trzecia_liga_gr4-list" class="match-list">Ładowanie...</div>
+      </div>
     </section>
 
-    <!-- ZAGRANICZNE LIGI – MECZE -->
+    <!-- ZAGRANICZNE LIGI -->
     <section id="zagraniczne" class="page">
       <h2>Ligi zagraniczne</h2>
       <div class="ligi-nav">
@@ -620,22 +769,88 @@
         <button class="liga-btn" onclick="showLiga('zagraniczne', 'super_lig')">Süper Lig</button>
         <button class="liga-btn" onclick="showLiga('zagraniczne', 'jupiler_league')">Jupiler Pro League</button>
       </div>
-      <div id="premier_league-content" class="liga-subpage active-liga"><div id="premier_league-list" class="match-list">Ładowanie...</div></div>
-      <div id="laliga-content" class="liga-subpage"><div id="laliga-list" class="match-list">Ładowanie...</div></div>
-      <div id="bundesliga-content" class="liga-subpage"><div id="bundesliga-list" class="match-list">Ładowanie...</div></div>
-      <div id="serie_a-content" class="liga-subpage"><div id="serie_a-list" class="match-list">Ładowanie...</div></div>
-      <div id="ligue_1-content" class="liga-subpage"><div id="ligue_1-list" class="match-list">Ładowanie...</div></div>
-      <div id="eredivisie-content" class="liga-subpage"><div id="eredivisie-list" class="match-list">Ładowanie...</div></div>
-      <div id="primeira_liga-content" class="liga-subpage"><div id="primeira_liga-list" class="match-list">Ładowanie...</div></div>
-      <div id="super_lig-content" class="liga-subpage"><div id="super_lig-list" class="match-list">Ładowanie...</div></div>
-      <div id="jupiler_league-content" class="liga-subpage"><div id="jupiler_league-list" class="match-list">Ładowanie...</div></div>
+      
+      <div id="premier_league-content" class="liga-subpage active-liga">
+        <h3>Tabela Premier League</h3>
+        <table id="premier_league_table-list" class="table-list">
+          <thead><tr><th>#</th><th>Drużyna</th><th>Mecze</th><th>Punkty</th></tr></thead>
+          <tbody><tr><td colspan="4">Ładowanie...</td></tr></tbody>
+        </table>
+        <h3>Mecze Premier League</h3>
+        <div id="premier_league-list" class="match-list">Ładowanie...</div>
+      </div>
+      
+      <div id="laliga-content" class="liga-subpage">
+        <h3>Tabela LaLiga</h3>
+        <table id="laliga_table-list" class="table-list">
+          <thead><tr><th>#</th><th>Drużyna</th><th>Mecze</th><th>Punkty</th></tr></thead>
+          <tbody><tr><td colspan="4">Ładowanie...</td></tr></tbody>
+        </table>
+        <h3>Mecze LaLiga</h3>
+        <div id="laliga-list" class="match-list">Ładowanie...</div>
+      </div>
+      
+      <div id="bundesliga-content" class="liga-subpage">
+        <h3>Tabela Bundesliga</h3>
+        <table id="bundesliga_table-list" class="table-list">
+          <thead><tr><th>#</th><th>Drużyna</th><th>Mecze</th><th>Punkty</th></tr></thead>
+          <tbody><tr><td colspan="4">Ładowanie...</td></tr></tbody>
+        </table>
+        <h3>Mecze Bundesliga</h3>
+        <div id="bundesliga-list" class="match-list">Ładowanie...</div>
+      </div>
+      
+      <div id="serie_a-content" class="liga-subpage">
+        <h3>Tabela Serie A</h3>
+        <table id="serie_a_table-list" class="table-list">
+          <thead><tr><th>#</th><th>Drużyna</th><th>Mecze</th><th>Punkty</th></tr></thead>
+          <tbody><tr><td colspan="4">Ładowanie...</td></tr></tbody>
+        </table>
+        <h3>Mecze Serie A</h3>
+        <div id="serie_a-list" class="match-list">Ładowanie...</div>
+      </div>
     </section>
 
-    <!-- EUROPA – MECZE -->
-    <section id="champions_league" class="page"><h2>Liga Mistrzów</h2><div id="champions_league-list" class="match-list">Ładowanie...</div></section>
-    <section id="europa_league" class="page"><h2>Liga Europy</h2><div id="europa_league-list" class="match-list">Ładowanie...</div></section>
-    <section id="conference_league" class="page"><h2>Liga Konferencji</h2><div id="conference_league-list" class="match-list">Ładowanie...</div></section>
-    <section id="mundial2026" class="page"><h2>Mundial 2026</h2><div id="mundial2026-list" class="match-list">Ładowanie...</div></section>
+    <!-- EUROPA -->
+    <section id="champions_league" class="page">
+      <h3>Tabela Ligi Mistrzów</h3>
+      <table id="champions_league_table-list" class="table-list">
+        <thead><tr><th>#</th><th>Drużyna</th><th>Mecze</th><th>Punkty</th></tr></thead>
+        <tbody><tr><td colspan="4">Ładowanie...</td></tr></tbody>
+      </table>
+      <h3>Mecze Ligi Mistrzów</h3>
+      <div id="champions_league-list" class="match-list">Ładowanie...</div>
+    </section>
+
+    <section id="europa_league" class="page">
+      <h3>Tabela Ligi Europy</h3>
+      <table id="europa_league_table-list" class="table-list">
+        <thead><tr><th>#</th><th>Drużyna</th><th>Mecze</th><th>Punkty</th></tr></thead>
+        <tbody><tr><td colspan="4">Ładowanie...</td></tr></tbody>
+      </table>
+      <h3>Mecze Ligi Europy</h3>
+      <div id="europa_league-list" class="match-list">Ładowanie...</div>
+    </section>
+
+    <section id="conference_league" class="page">
+      <h3>Tabela Ligi Konferencji</h3>
+      <table id="conference_league_table-list" class="table-list">
+        <thead><tr><th>#</th><th>Drużyna</th><th>Mecze</th><th>Punkty</th></tr></thead>
+        <tbody><tr><td colspan="4">Ładowanie...</td></tr></tbody>
+      </table>
+      <h3>Mecze Ligi Konferencji</h3>
+      <div id="conference_league-list" class="match-list">Ładowanie...</div>
+    </section>
+
+    <section id="mundial2026" class="page">
+      <h3>Tabela Mundialu 2026</h3>
+      <table id="mundial2026_table-list" class="table-list">
+        <thead><tr><th>#</th><th>Drużyna</th><th>Mecze</th><th>Punkty</th></tr></thead>
+        <tbody><tr><td colspan="4">Ładowanie...</td></tr></tbody>
+      </table>
+      <h3>Mecze Mundialu 2026</h3>
+      <div id="mundial2026-list" class="match-list">Ładowanie...</div>
+    </section>
 
     <!-- 🔐 PANEL ADMINA -->
     <div class="admin-bar" id="adminPanel">
@@ -647,7 +862,8 @@
       </div>
       <div id="adminTools" class="hidden">
         <button class="btn btn-primary" onclick="openAddForm('news')">+ Artykuł</button>
-        <button class="btn btn-primary" onclick="openAddForm('ekstraklasa')">+ Mecz</button>
+        <button class="btn btn-primary" onclick="openAddForm('ekstraklasa')">+ Mecz Ekstraklasa</button>
+        <button class="btn btn-primary" onclick="openAddForm('ekstraklasa_table')">+ Tabela Ekstraklasa</button>
         <button class="btn btn-danger" onclick="logoutAdmin()" style="margin-left:10px;">Wyloguj</button>
       </div>
     </div>
@@ -666,11 +882,12 @@
     const articleSections = ['news','results','analysis','media','history','schedule'];
     const matchSections = [
       'ekstraklasa','pierwsza_liga','druga_liga',
-      'trzecia_liga_gr1','trzecia_liga_gr2','trzecia_liga_gr3','trzecia_liga_gr4','czwarta_liga_test',
+      'trzecia_liga_gr1','trzecia_liga_gr2','trzecia_liga_gr3','trzecia_liga_gr4',
       'premier_league','laliga','bundesliga','serie_a','ligue_1',
       'eredivisie','primeira_liga','super_lig','jupiler_league',
       'champions_league','europa_league','conference_league','mundial2026'
     ];
+    const tableSections = matchSections.map(s => s + '_table');
 
     function showSection(id) {
       document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -680,7 +897,10 @@
       if (id !== 'home') {
         if (id === 'polskie') showLiga('polskie', 'ekstraklasa');
         else if (id === 'zagraniczne') showLiga('zagraniczne', 'premier_league');
-        else loadSection(id);
+        else {
+          loadSection(id);
+          if (tableSections.includes(id)) loadSection(id.replace('_table', ''));
+        }
       }
     }
 
@@ -691,6 +911,7 @@
       const target = document.getElementById(ligaId + '-content');
       if (target) target.classList.add('active-liga');
       loadSection(ligaId);
+      loadSection(ligaId + '_table');
     }
 
     auth.onAuthStateChanged(user => {
@@ -698,7 +919,7 @@
       document.getElementById('loginForm').classList.toggle('hidden', isAdmin);
       document.getElementById('adminTools').classList.toggle('hidden', !isAdmin);
       if (isAdmin) {
-        const allSections = [...articleSections, ...matchSections];
+        const allSections = [...articleSections, ...matchSections, ...tableSections];
         allSections.forEach(loadSection);
       }
     });
@@ -723,13 +944,18 @@
       if (articleSections.includes(section)) {
         document.getElementById('articleFields').style.display = 'block';
         document.getElementById('matchFields').style.display = 'none';
-        document.getElementById('modalTitleInput').placeholder = 'Tytuł artykułu';
+        document.getElementById('tableFields').style.display = 'none';
         document.getElementById('modalSaveBtn').textContent = 'Zapisz artykuł';
       } else if (matchSections.includes(section)) {
         document.getElementById('articleFields').style.display = 'none';
         document.getElementById('matchFields').style.display = 'block';
-        document.getElementById('modalTitleInputMatch').placeholder = 'KOLEJKA 20';
+        document.getElementById('tableFields').style.display = 'none';
         document.getElementById('modalSaveBtn').textContent = 'Zapisz mecz';
+      } else if (tableSections.includes(section)) {
+        document.getElementById('articleFields').style.display = 'none';
+        document.getElementById('matchFields').style.display = 'none';
+        document.getElementById('tableFields').style.display = 'block';
+        document.getElementById('modalSaveBtn').textContent = 'Zapisz drużynę';
       }
 
       document.getElementById('modal').classList.remove('hidden');
@@ -756,6 +982,13 @@
         document.getElementById('modalLogoHome').value = data.logoHome || '';
         document.getElementById('modalLogoAway').value = data.logoAway || '';
         openAddForm(section);
+      } else if (tableSections.includes(section)) {
+        document.getElementById('modalPosition').value = data.position || '';
+        document.getElementById('modalTeamName').value = data.teamName || '';
+        document.getElementById('modalTeamLogo').value = data.teamLogo || '';
+        document.getElementById('modalMatches').value = data.matches || '';
+        document.getElementById('modalPoints').value = data.points || '';
+        openAddForm(section);
       }
     }
 
@@ -774,6 +1007,8 @@
         saveArticle();
       } else if (matchSections.includes(section)) {
         saveMatch();
+      } else if (tableSections.includes(section)) {
+        saveTableEntry();
       }
     }
 
@@ -842,12 +1077,52 @@
       }
     }
 
+    async function saveTableEntry() {
+      const position = document.getElementById('modalPosition').value.trim();
+      const teamName = document.getElementById('modalTeamName').value.trim();
+      const teamLogo = document.getElementById('modalTeamLogo').value.trim();
+      const matches = document.getElementById('modalMatches').value.trim();
+      const points = document.getElementById('modalPoints').value.trim();
+
+      const err = document.getElementById('modalErr');
+      if (!position || !teamName || !matches || points === '') {
+        err.textContent = "Wypełnij wszystkie pola tabeli.";
+        return;
+      }
+
+      const data = {
+        position: parseInt(position),
+        teamName,
+        teamLogo: teamLogo || null,
+        matches,
+        points: parseInt(points),
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      };
+
+      try {
+        if (currentDocId) {
+          await db.collection(currentSection).doc(currentDocId).update(data);
+        } else {
+          await db.collection(currentSection).add(data);
+        }
+        closeModal();
+        loadSection(currentSection);
+      } catch (e) {
+        err.textContent = "Błąd zapisu drużyny.";
+      }
+    }
+
     async function deleteContent() {
       if (!confirm("Na pewno chcesz usunąć?")) return;
       try {
         await db.collection(currentSection).doc(currentDocId).delete();
         closeModal();
         loadSection(currentSection);
+        // Jeśli usunięto z tabeli, odśwież też mecze
+        if (currentSection.endsWith('_table')) {
+          const baseSection = currentSection.replace('_table', '');
+          loadSection(baseSection);
+        }
       } catch (e) {
         document.getElementById('modalErr').textContent = "Błąd usuwania.";
       }
@@ -862,16 +1137,51 @@
     }
 
     async function loadSection(section) {
-      const container = document.getElementById(section + '-list');
-      if (!container) return;
-      try {
-        const snap = await db.collection(section).orderBy("createdAt", "desc").get();
-        if (snap.empty) {
-          container.innerHTML = "<p>Brak treści.</p>";
-          return;
-        }
+      if (articleSections.includes(section)) {
+        const container = document.getElementById(section + '-list');
+        if (!container) return;
+        try {
+          const snap = await db.collection(section).orderBy("createdAt", "desc").get();
+          if (snap.empty) {
+            container.innerHTML = "<p>Brak treści.</p>";
+            return;
+          }
 
-        if (matchSections.includes(section)) {
+          let html = '';
+          snap.forEach(doc => {
+            const d = doc.data();
+            const editBtn = isAdmin ? 
+              `<button class="edit-btn" onclick="openEditForm('${section}', '${doc.id}', ${JSON.stringify(d).replace(/"/g, '&quot;')})">Edytuj</button>` : '';
+            const delBtn = isAdmin ? 
+              `<button class="delete-btn" onclick="openEditForm('${section}', '${doc.id}', ${JSON.stringify(d).replace(/"/g, '&quot;')}); document.getElementById('modalDelBtn').style.display='inline-block';">Usuń</button>` : '';
+
+            let media = '';
+            if (d.imageUrl) media += `<img src="${d.imageUrl}" alt="Zdjęcie">`;
+            if (d.videoUrl) media += embedVideo(d.videoUrl);
+
+            html += `
+              <div class="content-item">
+                ${editBtn}${delBtn}
+                <h3>${d.title}</h3>
+                <div class="article-content">${d.content}</div>
+                ${media}
+              </div>
+            `;
+          });
+          container.innerHTML = html;
+        } catch (e) {
+          container.innerHTML = "<p>Błąd ładowania treści.</p>";
+        }
+      } else if (matchSections.includes(section)) {
+        const container = document.getElementById(section + '-list');
+        if (!container) return;
+        try {
+          const snap = await db.collection(section).orderBy("createdAt", "desc").get();
+          if (snap.empty) {
+            container.innerHTML = "<p>Brak meczów.</p>";
+            return;
+          }
+
           let html = '';
           let currentRound = '';
           snap.forEach(doc => {
@@ -893,34 +1203,44 @@
                   <span>${d.awayTeam || '---'}</span>
                   ${d.logoAway ? `<img class="team-logo" src="${d.logoAway}" onerror="this.style.display='none'">` : ''}
                 </div>
+                ${isAdmin ? `<button class="edit-btn" style="position:absolute;top:10px;right:10px;" onclick="openEditForm('${section}', '${doc.id}', ${JSON.stringify(d).replace(/"/g, '&quot;')})">Edytuj</button>` : ''}
               </div>
             `;
           });
           container.innerHTML = html;
-        } else {
+        } catch (e) {
+          container.innerHTML = "<p>Błąd ładowania meczów.</p>";
+        }
+      } else if (tableSections.includes(section)) {
+        const container = document.getElementById(section + '-list');
+        if (!container) return;
+        try {
+          const snap = await db.collection(section).orderBy("position", "asc").get();
+          if (snap.empty) {
+            container.querySelector('tbody').innerHTML = `<tr><td colspan="4">Brak drużyn.</td></tr>`;
+            return;
+          }
+
           let html = '';
           snap.forEach(doc => {
             const d = doc.data();
-            const editBtn = isAdmin ? 
-              `<button class="edit-btn" onclick="openEditForm('${section}', '${doc.id}', ${JSON.stringify(d).replace(/"/g, '&quot;')})">Edytuj</button>` : '';
-
-            let media = '';
-            if (d.imageUrl) media += `<img src="${d.imageUrl}" alt="Zdjęcie">`;
-            if (d.videoUrl) media += embedVideo(d.videoUrl);
-
             html += `
-              <div class="content-item">
-                ${editBtn}
-                <h3>${d.title}</h3>
-                <div class="article-content">${d.content}</div>
-                ${media}
-              </div>
+              <tr>
+                <td>${d.position || '-'}</td>
+                <td class="team-cell">
+                  ${d.teamLogo ? `<img class="team-logo-small" src="${d.teamLogo}" onerror="this.style.display='none'">` : ''}
+                  <span>${d.teamName || '---'}</span>
+                </td>
+                <td>${d.matches || '-'}</td>
+                <td>${d.points || '-'}</td>
+                ${isAdmin ? `<td><button class="edit-btn" onclick="openEditForm('${section}', '${doc.id}', ${JSON.stringify(d).replace(/"/g, '&quot;')})">Edytuj</button> <button class="delete-btn" onclick="openEditForm('${section}', '${doc.id}', ${JSON.stringify(d).replace(/"/g, '&quot;')}); document.getElementById('modalDelBtn').style.display='inline-block';">Usuń</button></td>` : ''}
+              </tr>
             `;
           });
-          container.innerHTML = html;
+          container.querySelector('tbody').innerHTML = html;
+        } catch (e) {
+          container.querySelector('tbody').innerHTML = `<tr><td colspan="4">Błąd ładowania tabeli.</td></tr>`;
         }
-      } catch (e) {
-        container.innerHTML = "<p>Błąd ładowania.</p>";
       }
     }
 
@@ -930,6 +1250,8 @@
         showSection(link.getAttribute('data-section'));
       });
     });
+
+    // Init
     showSection('home');
   </script>
 </body>
