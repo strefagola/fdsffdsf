@@ -945,27 +945,28 @@ saveTableEntry();
 }
 
 async function saveArticle() {
-const title = document.getElementById('modalTitleInput').value.trim();
-const content = document.getElementById('modalContent').value;
-const imageUrl = document.getElementById('modalImage').value.trim();
-const videoUrl = document.getElementById('modalVideo').value.trim();
-const err = document.getElementById('modalErr');
-if (!title || !content) {
-err.textContent = "Tytuł i treść są wymagane.";
-return;
-}
-const data = { title, content, imageUrl: imageUrl || null, videoUrl: videoUrl || null };
-try {
-if (currentDocId) {
-await db.collection(currentSection).doc(currentDocId).update(data);
-} else {
-await db.collection(section).add({ ...data, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
-}
-closeModal();
-loadSection(section);
-} catch (e) {
-err.textContent = "Błąd zapisu.";
-}
+  const title = document.getElementById('modalTitleInput').value.trim();
+  const content = document.getElementById('modalContent').value;
+  const imageUrl = document.getElementById('modalImage').value.trim();
+  const videoUrl = document.getElementById('modalVideo').value.trim();
+  const err = document.getElementById('modalErr');
+  if (!title || !content) {
+    err.textContent = "Tytuł i treść są wymagane.";
+    return;
+  }
+  const section = document.getElementById('modalSection').value;
+  const data = { title, content, imageUrl: imageUrl || null, videoUrl: videoUrl || null };
+  try {
+    if (currentDocId) {
+      await db.collection(currentSection).doc(currentDocId).update(data);
+    } else {
+      await db.collection(section).add({ ...data, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+    }
+    closeModal();
+    loadSection(section);
+  } catch (e) {
+    err.textContent = "Błąd zapisu.";
+  }
 }
 
 async function saveMatch() {
