@@ -93,10 +93,10 @@ padding: 0 15px;
 }
 header img {
 width: 100%;
-	height: 160px;
-	object-fit: cover;
-	border-radius: 6px;
-	margin-bottom: 20px;
+height: 160px;
+object-fit: cover;
+border-radius: 6px;
+margin-bottom: 20px;
 }
 .page {
 display: none;
@@ -152,9 +152,9 @@ gap: 20px;
 .content-item {
 background: var(--card);
 padding: 18px;
-	border-radius: 6px;
-	border: 1px solid var(--border);
-	position: relative;
+border-radius: 6px;
+border: 1px solid var(--border);
+position: relative;
 }
 .content-item h3 {
 font-size: 1.4rem;
@@ -171,16 +171,16 @@ font-size: 0.95rem;
 }
 .content-item img {
 max-width: 100%;
-	height: auto;
-	border-radius: 6px;
-	margin: 10px 0;
-	display: block;
+height: auto;
+border-radius: 6px;
+margin: 10px 0;
+display: block;
 }
 .content-item iframe, .content-item video {
 width: 100%;
-	height: 220px;
-	border-radius: 6px;
-	margin: 10px 0;
+height: 220px;
+border-radius: 6px;
+margin: 10px 0;
 }
 .edit-btn, .delete-btn {
 background: var(--accent);
@@ -204,17 +204,17 @@ margin: 15px 0 20px;
 }
 .liga-btn {
 padding: 7px 14px;
-	background: #1f2636;
-	border: 1px solid var(--border);
-	border-radius: 4px;
-	color: var(--text);
-	font-weight: 600;
-	font-size: 0.9rem;
-	cursor: pointer;
-	white-space: nowrap;
+background: #1f2636;
+border: 1px solid var(--border);
+border-radius: 4px;
+color: var(--text);
+font-weight: 600;
+font-size: 0.9rem;
+cursor: pointer;
+white-space: nowrap;
 }
 .liga-btn:hover {
-	background: #2a3245;
+background: #2a3245;
 }
 .liga-subpage {
 display: none;
@@ -409,7 +409,10 @@ footer {
 }
 /* 🎨 KOLORY TABELI */
 .table-list tr.promotion {
-	background: #1a5e1a; /* Zielony – awans */
+	background: #1a5e1a; /* Zielony – awans bezpośredni */
+}
+.table-list tr.playoff {
+	background: #1a4a5e; /* Niebieski – play-off */
 }
 .table-list tr.relegation {
 	background: #5e1a1a; /* Czerwony – spadek */
@@ -430,6 +433,9 @@ footer {
 }
 .legend .promotion {
 	background: #1a5e1a;
+}
+.legend .playoff {
+	background: #1a4a5e;
 }
 .legend .relegation {
 	background: #5e1a1a;
@@ -610,6 +616,8 @@ footer {
 <thead><tr><th>#</th><th>Drużyna</th><th>Mecze</th><th>Punkty</th></tr></thead>
 <tbody><tr><td colspan="4">Ładowanie...</td></tr></tbody>
 </table>
+<h3>Mecze Ekstraklasy</h3>
+<div id="ekstraklasa-list" class="match-list">Ładowanie...</div>
 </div>
 <div id="pierwsza_liga-content" class="liga-subpage">
 <h3>Tabela 1. ligi</h3>
@@ -617,6 +625,8 @@ footer {
 <thead><tr><th>#</th><th>Drużyna</th><th>Mecze</th><th>Punkty</th></tr></thead>
 <tbody><tr><td colspan="4">Ładowanie...</td></tr></tbody>
 </table>
+<h3>Mecze 1. ligi</h3>
+<div id="pierwsza_liga-list" class="match-list">Ładowanie...</div>
 </div>
 <div id="druga_liga-content" class="liga-subpage">
 <h3>Tabela 2. ligi</h3>
@@ -624,6 +634,8 @@ footer {
 <thead><tr><th>#</th><th>Drużyna</th><th>Mecze</th><th>Punkty</th></tr></thead>
 <tbody><tr><td colspan="4">Ładowanie...</td></tr></tbody>
 </table>
+<h3>Mecze 2. ligi</h3>
+<div id="druga_liga-list" class="match-list">Ładowanie...</div>
 </div>
 <div id="trzecia_liga_gr1-content" class="liga-subpage">
 <h3>Tabela 3. ligi gr I</h3>
@@ -631,6 +643,8 @@ footer {
 <thead><tr><th>#</th><th>Drużyna</th><th>Mecze</th><th>Punkty</th></tr></thead>
 <tbody><tr><td colspan="4">Ładowanie...</td></tr></tbody>
 </table>
+<h3>Mecze 3. ligi gr I</h3>
+<div id="trzecia_liga_gr1-list" class="match-list">Ładowanie...</div>
 </div>
 <div id="trzecia_liga_gr2-content" class="liga-subpage">
 <h3>Tabela 3. ligi gr II</h3>
@@ -638,6 +652,8 @@ footer {
 <thead><tr><th>#</th><th>Drużyna</th><th>Mecze</th><th>Punkty</th></tr></thead>
 <tbody><tr><td colspan="4">Ładowanie...</td></tr></tbody>
 </table>
+<h3>Mecze 3. ligi gr II</h3>
+<div id="trzecia_liga_gr2-list" class="match-list">Ładowanie...</div>
 </div>
 <div id="trzecia_liga_gr3-content" class="liga-subpage">
 <h3>Tabela 3. ligi gr III</h3>
@@ -645,6 +661,8 @@ footer {
 <thead><tr><th>#</th><th>Drużyna</th><th>Mecze</th><th>Punkty</th></tr></thead>
 <tbody><tr><td colspan="4">Ładowanie...</td></tr></tbody>
 </table>
+<h3>Mecze 3. ligi gr III</h3>
+<div id="trzecia_liga_gr3-list" class="match-list">Ładowanie...</div>
 </div>
 <div id="trzecia_liga_gr4-content" class="liga-subpage">
 <h3>Tabela 3. ligi gr IV</h3>
@@ -652,6 +670,8 @@ footer {
 <thead><tr><th>#</th><th>Drużyna</th><th>Mecze</th><th>Punkty</th></tr></thead>
 <tbody><tr><td colspan="4">Ładowanie...</td></tr></tbody>
 </table>
+<h3>Mecze 3. ligi gr IV</h3>
+<div id="trzecia_liga_gr4-list" class="match-list">Ładowanie...</div>
 </div>
 </section>
 <!-- PUCHARY -->
@@ -1106,19 +1126,19 @@ snap.forEach(doc => {
 const d = doc.data();
 let rowClass = '';
 const pos = parseInt(d.position);
-// ✅ ZASADY ZGODNIE Z TWOIM ZAŻĄDANIEM
-if (section === 'ekstraklasa_table' || section === 'pierwsza_liga_table') {
-// Awans: 1-2 | Spadek: 16-18
+
+// ✅ ZASADY ZGODNIE Z REGULAMINEM
+if (section === 'ekstraklasa_table') {
+// Tylko spadek (16-18)
+if (pos >= 16) rowClass = 'relegation';
+} else if (section === 'pierwsza_liga_table' || section === 'druga_liga_table') {
 if (pos <= 2) rowClass = 'promotion';
+else if (pos >= 3 && pos <= 6) rowClass = 'playoff';
 else if (pos >= 16) rowClass = 'relegation';
-} else if (section === 'druga_liga_table' || section.startsWith('trzecia_liga')) {
-// Awans: 1-2 (2. liga), 1 (3. liga) | Spadek: 15-18
-if (section === 'druga_liga_table' && pos <= 2) {
-rowClass = 'promotion';
-} else if (section.startsWith('trzecia_liga') && pos === 1) {
-rowClass = 'promotion';
-}
-if (pos >= 15) rowClass = 'relegation';
+} else if (section.startsWith('trzecia_liga')) {
+if (pos === 1) rowClass = 'promotion';
+else if (pos === 2) rowClass = 'playoff';
+else if (pos >= 15) rowClass = 'relegation';
 }
 
 const actions = isAdmin ?
@@ -1145,13 +1165,31 @@ container.querySelector('tbody').innerHTML = html;
 // ✅ LEGENDA
 let legendHTML = '';
 if (section === 'ekstraklasa_table') {
-legendHTML = '<div class="legend"><span class="promotion"></span> Awans (1-2)<br><span class="relegation"></span> Spadek (16-18)</div>';
+legendHTML = '<div class="legend"><span class="relegation"></span> Spadek do 1. ligi (16–18)</div>';
 } else if (section === 'pierwsza_liga_table') {
-legendHTML = '<div class="legend"><span class="promotion"></span> Awans do ekstraklasy (1-2)<br><span class="relegation"></span> Spadek do 2. ligi (16-18)</div>';
+legendHTML = `
+<div class="legend">
+<span class="promotion"></span> Awans do ekstraklasy (1–2)
+<span class="playoff"></span> Play-off o awans: Półfinał (3–6)
+<span class="relegation"></span> Spadek do 2. ligi (16–18)
+</div>
+`;
 } else if (section === 'druga_liga_table') {
-legendHTML = '<div class="legend"><span class="promotion"></span> Awans do 1. ligi (1-2)<br><span class="relegation"></span> Spadek do 3. ligi (15-18)</div>';
+legendHTML = `
+<div class="legend">
+<span class="promotion"></span> Awans do 1. ligi (1–2)
+<span class="playoff"></span> Play-off o awans: Półfinał (3–6)
+<span class="relegation"></span> Spadek do 3. ligi (16–18)
+</div>
+`;
 } else if (section.startsWith('trzecia_liga')) {
-legendHTML = '<div class="legend"><span class="promotion"></span> Awans do 2. ligi (1)<br><span class="relegation"></span> Spadek do 4. ligi (15-18)</div>';
+legendHTML = `
+<div class="legend">
+<span class="promotion"></span> Awans do 2. ligi (1)
+<span class="playoff"></span> Betclic 2. Liga – Play-off o awans (2)
+<span class="relegation"></span> Spadek do 4. ligi (15–18)
+</div>
+`;
 }
 
 // Usuwam starą legendę
