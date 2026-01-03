@@ -279,7 +279,6 @@ gap: 8px;
 padding: 10px 12px;
 border: 1px solid var(--border);
 align-items: center;
-position: relative;
 }
 .match-date {
 font-size: 0.85rem;
@@ -333,6 +332,7 @@ cursor: pointer;
 font-size: 0.95rem;
 }
 .btn-primary { background: var(--accent); color: white; }
+.btn-secondary { background: #5a67d8; color: white; }
 .btn-danger { background: #d32f2f; color: white; }
 .error {
 color: #ff6b6b;
@@ -437,6 +437,21 @@ width: 18px;
 height: 18px;
 }
 }
+/* Admin dropdown */
+.admin-dropdown {
+margin-top: 10px;
+}
+.dropdown-label {
+display: block;
+font-weight: 600;
+margin: 8px 0 4px;
+color: #ff8c8c;
+}
+.admin-section {
+display: flex;
+flex-wrap: wrap;
+gap: 8px;
+}
 </style>
 </head>
 <body>
@@ -467,7 +482,7 @@ height: 18px;
 <header>
 <img src="https://www.ebilet.pl/now/app/uploads/2024/02/shutterstock_2253076431-1-1280x720.jpg" alt="Piłka nożna" />
 </header>
-<!-- MODAL -->
+<!-- MODAL (bez zmian) -->
 <div id="modal" class="modal hidden">
 <div class="modal-content">
 <div class="modal-header">
@@ -526,14 +541,12 @@ height: 18px;
 <option value="conference_league_table">Liga Konferencji (tabela)</option>
 <option value="mundial2026_table">Mundial 2026 (tabela)</option>
 </select>
-<!-- Artykuły -->
 <div id="articleFields">
 <input type="text" id="modalTitleInput" placeholder="Tytuł artykułu" />
 <textarea id="modalContent" placeholder="Treść..."></textarea>
 <input type="url" id="modalImage" placeholder="Link do zdjęcia" />
 <input type="url" id="modalVideo" placeholder="Link do filmu" />
 </div>
-<!-- Mecze -->
 <div id="matchFields" style="display:none;">
 <input type="text" id="modalTitleInputMatch" placeholder="KOLEJKA 20" />
 <div style="margin:10px 0;padding:10px;background:#1a1f2c;border-radius:6px;">
@@ -549,7 +562,6 @@ height: 18px;
 <input type="text" id="modalDate" placeholder="Data i godzina" />
 <input type="text" id="modalScore" placeholder="Wynik (np. 2:1)" />
 </div>
-<!-- Tabele -->
 <div id="tableFields" style="display:none;">
 <input type="number" id="modalPosition" placeholder="Pozycja (1-20)" min="1" max="100" />
 <input type="text" id="modalTeamName" placeholder="Nazwa drużyny" />
@@ -565,7 +577,7 @@ height: 18px;
 </div>
 </div>
 </div>
-<!-- SEKCJE -->
+<!-- SEKCJE (bez zmian – skopiowane z oryginału) -->
 <section id="home" class="page active">
 <div class="hero">
 <h1>Witaj w StrefieGola</h1>
@@ -577,7 +589,6 @@ height: 18px;
 <div class="feature-card"><h3>Mundial 2026</h3><p>Przygotowania i terminarz.</p></div>
 </div>
 </section>
-<!-- Artykuły -->
 <section id="news" class="page"><h2>Aktualności</h2><div id="news-list" class="content-grid">Ładowanie...</div></section>
 <section id="results" class="page"><h2>Wyniki</h2><div id="results-list" class="content-grid">Ładowanie...</div></section>
 <section id="analysis" class="page"><h2>Analizy</h2><div id="analysis-list" class="content-grid">Ładowanie...</div></section>
@@ -755,7 +766,7 @@ height: 18px;
 <h3>Mecze Mundialu 2026</h3>
 <div id="mundial2026-list" class="match-list">Ładowanie...</div>
 </section>
-<!-- 🔐 PANEL ADMINA -->
+<!-- 🔐 PANEL ADMINA – ZAKTUALIZOWANY -->
 <div class="admin-bar" id="adminPanel">
 <h3>Panel administratora</h3>
 <div id="loginForm">
@@ -765,9 +776,65 @@ height: 18px;
 </div>
 <div id="adminTools" class="hidden">
 <button class="btn btn-primary" onclick="openAddForm('news')">+ Artykuł</button>
-<button class="btn btn-primary" onclick="openAddForm('ekstraklasa')">+ Mecz Ekstraklasa</button>
-<button class="btn btn-primary" onclick="openAddForm('ekstraklasa_table')">+ Tabela Ekstraklasa</button>
 <button class="btn btn-danger" onclick="logoutAdmin()" style="margin-left:10px;">Wyloguj</button>
+
+<div class="admin-dropdown">
+<span class="dropdown-label">🇵🇱 Polskie ligi</span>
+<div class="admin-section">
+<button class="btn btn-secondary" onclick="openAddForm('ekstraklasa')">Mecz: Ekstraklasa</button>
+<button class="btn btn-secondary" onclick="openAddForm('ekstraklasa_table')">Tabela: Ekstraklasa</button>
+<button class="btn btn-secondary" onclick="openAddForm('pierwsza_liga')">Mecz: 1 liga</button>
+<button class="btn btn-secondary" onclick="openAddForm('pierwsza_liga_table')">Tabela: 1 liga</button>
+<button class="btn btn-secondary" onclick="openAddForm('druga_liga')">Mecz: 2 liga</button>
+<button class="btn btn-secondary" onclick="openAddForm('druga_liga_table')">Tabela: 2 liga</button>
+<button class="btn btn-secondary" onclick="openAddForm('trzecia_liga_gr1')">Mecz: 3 liga gr I</button>
+<button class="btn btn-secondary" onclick="openAddForm('trzecia_liga_gr1_table')">Tabela: 3 liga gr I</button>
+<button class="btn btn-secondary" onclick="openAddForm('trzecia_liga_gr2')">Mecz: 3 liga gr II</button>
+<button class="btn btn-secondary" onclick="openAddForm('trzecia_liga_gr2_table')">Tabela: 3 liga gr II</button>
+<button class="btn btn-secondary" onclick="openAddForm('trzecia_liga_gr3')">Mecz: 3 liga gr III</button>
+<button class="btn btn-secondary" onclick="openAddForm('trzecia_liga_gr3_table')">Tabela: 3 liga gr III</button>
+<button class="btn btn-secondary" onclick="openAddForm('trzecia_liga_gr4')">Mecz: 3 liga gr IV</button>
+<button class="btn btn-secondary" onclick="openAddForm('trzecia_liga_gr4_table')">Tabela: 3 liga gr IV</button>
+</div>
+</div>
+
+<div class="admin-dropdown">
+<span class="dropdown-label">🌍 Zagraniczne ligi</span>
+<div class="admin-section">
+<button class="btn btn-secondary" onclick="openAddForm('premier_league')">Mecz: Premier League</button>
+<button class="btn btn-secondary" onclick="openAddForm('premier_league_table')">Tabela: Premier League</button>
+<button class="btn btn-secondary" onclick="openAddForm('laliga')">Mecz: LaLiga</button>
+<button class="btn btn-secondary" onclick="openAddForm('laliga_table')">Tabela: LaLiga</button>
+<button class="btn btn-secondary" onclick="openAddForm('bundesliga')">Mecz: Bundesliga</button>
+<button class="btn btn-secondary" onclick="openAddForm('bundesliga_table')">Tabela: Bundesliga</button>
+<button class="btn btn-secondary" onclick="openAddForm('serie_a')">Mecz: Serie A</button>
+<button class="btn btn-secondary" onclick="openAddForm('serie_a_table')">Tabela: Serie A</button>
+<button class="btn btn-secondary" onclick="openAddForm('ligue_1')">Mecz: Ligue 1</button>
+<button class="btn btn-secondary" onclick="openAddForm('ligue_1_table')">Tabela: Ligue 1</button>
+<button class="btn btn-secondary" onclick="openAddForm('eredivisie')">Mecz: Eredivisie</button>
+<button class="btn btn-secondary" onclick="openAddForm('eredivisie_table')">Tabela: Eredivisie</button>
+<button class="btn btn-secondary" onclick="openAddForm('primeira_liga')">Mecz: Primeira Liga</button>
+<button class="btn btn-secondary" onclick="openAddForm('primeira_liga_table')">Tabela: Primeira Liga</button>
+<button class="btn btn-secondary" onclick="openAddForm('super_lig')">Mecz: Süper Lig</button>
+<button class="btn btn-secondary" onclick="openAddForm('super_lig_table')">Tabela: Süper Lig</button>
+<button class="btn btn-secondary" onclick="openAddForm('jupiler_league')">Mecz: Jupiler Pro League</button>
+<button class="btn btn-secondary" onclick="openAddForm('jupiler_league_table')">Tabela: Jupiler Pro League</button>
+</div>
+</div>
+
+<div class="admin-dropdown">
+<span class="dropdown-label">🏆 Rozgrywki europejskie i Mundial</span>
+<div class="admin-section">
+<button class="btn btn-secondary" onclick="openAddForm('champions_league')">Mecz: Liga Mistrzów</button>
+<button class="btn btn-secondary" onclick="openAddForm('champions_league_table')">Tabela: Liga Mistrzów</button>
+<button class="btn btn-secondary" onclick="openAddForm('europa_league')">Mecz: Liga Europy</button>
+<button class="btn btn-secondary" onclick="openAddForm('europa_league_table')">Tabela: Liga Europy</button>
+<button class="btn btn-secondary" onclick="openAddForm('conference_league')">Mecz: Liga Konferencji</button>
+<button class="btn btn-secondary" onclick="openAddForm('conference_league_table')">Tabela: Liga Konferencji</button>
+<button class="btn btn-secondary" onclick="openAddForm('mundial2026')">Mecz: Mundial 2026</button>
+<button class="btn btn-secondary" onclick="openAddForm('mundial2026_table')">Tabela: Mundial 2026</button>
+</div>
+</div>
 </div>
 </div>
 </main>
@@ -790,305 +857,258 @@ const matchSections = [
 const tableSections = matchSections.map(s => s + '_table');
 
 function showSection(id) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.top-nav a').forEach(a => a.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-  document.querySelector(`.top-nav a[data-section="${id}"]`).classList.add('active');
-  if (id !== 'home') {
-    if (id === 'polskie') showLiga('polskie', 'ekstraklasa');
-    else if (id === 'zagraniczne') showLiga('zagraniczne', 'premier_league');
-    else {
-      loadSection(id);
-      if (tableSections.includes(id)) loadSection(id.replace('_table', ''));
-    }
-  }
+document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+document.querySelectorAll('.top-nav a').forEach(a => a.classList.remove('active'));
+document.getElementById(id).classList.add('active');
+document.querySelector(`.top-nav a[data-section="${id}"]`).classList.add('active');
+if (id !== 'home') {
+if (id === 'polskie') showLiga('polskie', 'ekstraklasa');
+else if (id === 'zagraniczne') showLiga('zagraniczne', 'premier_league');
+else {
+loadSection(id);
+if (tableSections.includes(id)) loadSection(id.replace('_table', ''));
 }
-
+}
+}
 function showLiga(context, ligaId) {
-  const container = document.getElementById(context);
-  if (!container) return;
-  container.querySelectorAll('.liga-subpage').forEach(el => el.classList.remove('active-liga'));
-  const target = document.getElementById(ligaId + '-content');
-  if (target) target.classList.add('active-liga');
-  loadSection(ligaId);
-  loadSection(ligaId + '_table');
+const container = document.getElementById(context);
+if (!container) return;
+container.querySelectorAll('.liga-subpage').forEach(el => el.classList.remove('active-liga'));
+const target = document.getElementById(ligaId + '-content');
+if (target) target.classList.add('active-liga');
+loadSection(ligaId);
+loadSection(ligaId + '_table');
 }
-
 auth.onAuthStateChanged(user => {
-  isAdmin = user && user.email === "admin@sgstrefagola.pl";
-  document.getElementById('loginForm').classList.toggle('hidden', isAdmin);
-  document.getElementById('adminTools').classList.toggle('hidden', !isAdmin);
-  if (isAdmin) {
-    const allSections = [...articleSections, ...matchSections, ...tableSections];
-    allSections.forEach(loadSection);
-  }
+isAdmin = user && user.email === "admin@sgstrefagola.pl";
+document.getElementById('loginForm').classList.toggle('hidden', isAdmin);
+document.getElementById('adminTools').classList.toggle('hidden', !isAdmin);
+if (isAdmin) {
+const allSections = [...articleSections, ...matchSections, ...tableSections];
+allSections.forEach(loadSection);
+}
 });
-
 function loginAdmin() {
-  const pass = document.getElementById('adminPass').value;
-  auth.signInWithEmailAndPassword("admin@sgstrefagola.pl", pass)
-    .catch(() => document.getElementById('loginErr').textContent = "Błędne hasło");
+const pass = document.getElementById('adminPass').value;
+auth.signInWithEmailAndPassword("admin@sgstrefagola.pl", pass)
+.catch(() => document.getElementById('loginErr').textContent = "Błędne hasło");
 }
-
 function logoutAdmin() {
-  auth.signOut();
+auth.signOut();
 }
-
-// ✅ Poprawiona wersja: openAddForm NIGDY nie kasuje currentDocId – tylko ustawia null przy dodawaniu
 function openAddForm(section) {
-  if (!isAdmin) return;
-  currentDocId = null; // ✅ tylko przy DODAWANIU
-  currentSection = section;
-  _configureModal(section, null, false);
+if (!isAdmin) return;
+currentDocId = null;
+currentSection = section;
+document.getElementById('modalSection').value = section;
+resetModal();
+if (articleSections.includes(section)) {
+document.getElementById('articleFields').style.display = 'block';
+document.getElementById('matchFields').style.display = 'none';
+document.getElementById('tableFields').style.display = 'none';
+document.getElementById('modalSaveBtn').textContent = 'Zapisz artykuł';
+} else if (matchSections.includes(section)) {
+document.getElementById('articleFields').style.display = 'none';
+document.getElementById('matchFields').style.display = 'block';
+document.getElementById('tableFields').style.display = 'none';
+document.getElementById('modalSaveBtn').textContent = 'Zapisz mecz';
+} else if (tableSections.includes(section)) {
+document.getElementById('articleFields').style.display = 'none';
+document.getElementById('matchFields').style.display = 'none';
+document.getElementById('tableFields').style.display = 'block';
+document.getElementById('modalSaveBtn').textContent = 'Zapisz drużynę';
 }
-
-// ✅ Poprawiona wersja: openEditForm NIE WYWOŁUJE openAddForm
+document.getElementById('modalDelBtn').style.display = 'none';
+document.getElementById('modal').classList.remove('hidden');
+}
 function openEditForm(section, docId, data) {
-  if (!isAdmin) return;
-  currentDocId = docId; // ✅ ustalamy ID dokumentu
-  currentSection = section;
-  _configureModal(section, data, false);
+if (!isAdmin) return;
+currentDocId = docId;
+currentSection = section;
+resetModal();
+document.getElementById('modalSection').value = section;
+if (articleSections.includes(section)) {
+document.getElementById('modalTitleInput').value = data.title || '';
+document.getElementById('modalContent').value = data.content || '';
+document.getElementById('modalImage').value = data.imageUrl || '';
+document.getElementById('modalVideo').value = data.videoUrl || '';
+openAddForm(section);
+document.getElementById('modalDelBtn').style.display = 'inline-block';
+} else if (matchSections.includes(section)) {
+document.getElementById('modalTitleInputMatch').value = data.title || '';
+document.getElementById('modalHomeTeam').value = data.homeTeam || '';
+document.getElementById('modalAwayTeam').value = data.awayTeam || '';
+document.getElementById('modalDate').value = data.date || '';
+document.getElementById('modalScore').value = data.score || '';
+document.getElementById('modalLogoHome').value = data.logoHome || '';
+document.getElementById('modalLogoAway').value = data.logoAway || '';
+openAddForm(section);
+document.getElementById('modalDelBtn').style.display = 'inline-block';
+} else if (tableSections.includes(section)) {
+document.getElementById('modalPosition').value = data.position || '';
+document.getElementById('modalTeamName').value = data.teamName || '';
+document.getElementById('modalTeamLogo').value = data.teamLogo || '';
+document.getElementById('modalMatches').value = data.matches || '';
+document.getElementById('modalPoints').value = data.points || '';
+openAddForm(section);
+document.getElementById('modalDelBtn').style.display = 'inline-block';
 }
-
-// ✅ NOWA funkcja: konfiguruje modal bez kasowania currentDocId
-function _configureModal(section, data, isDeleteMode) {
-  document.getElementById('modalSection').value = section;
-  resetModal();
-
-  const isArticle = articleSections.includes(section);
-  const isMatch = matchSections.includes(section);
-  const isTable = tableSections.includes(section);
-
-  document.getElementById('articleFields').style.display = 'none';
-  document.getElementById('matchFields').style.display = 'none';
-  document.getElementById('tableFields').style.display = 'none';
-
-  if (isArticle) {
-    document.getElementById('articleFields').style.display = 'block';
-    if (data) {
-      document.getElementById('modalTitleInput').value = data.title || '';
-      document.getElementById('modalContent').value = data.content || '';
-      document.getElementById('modalImage').value = data.imageUrl || '';
-      document.getElementById('modalVideo').value = data.videoUrl || '';
-    } else {
-      document.getElementById('modalTitleInput').value = '';
-      document.getElementById('modalContent').value = '';
-      document.getElementById('modalImage').value = '';
-      document.getElementById('modalVideo').value = '';
-    }
-    document.getElementById('modalSaveBtn').textContent = 'Zapisz artykuł';
-  }
-  else if (isMatch) {
-    document.getElementById('matchFields').style.display = 'block';
-    if (data) {
-      document.getElementById('modalTitleInputMatch').value = data.title || '';
-      document.getElementById('modalHomeTeam').value = data.homeTeam || '';
-      document.getElementById('modalAwayTeam').value = data.awayTeam || '';
-      document.getElementById('modalDate').value = data.date || '';
-      document.getElementById('modalScore').value = data.score || '';
-      document.getElementById('modalLogoHome').value = data.logoHome || '';
-      document.getElementById('modalLogoAway').value = data.logoAway || '';
-    } else {
-      document.getElementById('modalTitleInputMatch').value = '';
-      document.getElementById('modalHomeTeam').value = '';
-      document.getElementById('modalAwayTeam').value = '';
-      document.getElementById('modalDate').value = '';
-      document.getElementById('modalScore').value = '';
-      document.getElementById('modalLogoHome').value = '';
-      document.getElementById('modalLogoAway').value = '';
-    }
-    document.getElementById('modalSaveBtn').textContent = 'Zapisz mecz';
-  }
-  else if (isTable) {
-    document.getElementById('tableFields').style.display = 'block';
-    if (data) {
-      document.getElementById('modalPosition').value = data.position || '';
-      document.getElementById('modalTeamName').value = data.teamName || '';
-      document.getElementById('modalTeamLogo').value = data.teamLogo || '';
-      document.getElementById('modalMatches').value = data.matches || '';
-      document.getElementById('modalPoints').value = data.points || '';
-    } else {
-      document.getElementById('modalPosition').value = '';
-      document.getElementById('modalTeamName').value = '';
-      document.getElementById('modalTeamLogo').value = '';
-      document.getElementById('modalMatches').value = '';
-      document.getElementById('modalPoints').value = '';
-    }
-    document.getElementById('modalSaveBtn').textContent = 'Zapisz drużynę';
-  }
-
-  // Przycisk usuwania – pokazujemy go tylko przy edycji (lub oddzielnej akcji usuwania)
-  document.getElementById('modalDelBtn').style.display = isDeleteMode || (currentDocId !== null) ? 'inline-block' : 'none';
-
-  document.getElementById('modal').classList.remove('hidden');
 }
-
-// ✅ Przycisk "Usuń" – nowa funkcja do otwierania trybu usuwania (opcjonalnie)
-// Ale w tej wersji: po prostu ustawiamy modalDelBtn widoczny przy edycji
-
 function resetModal() {
-  document.getElementById('modalErr').textContent = '';
+document.getElementById('modalErr').textContent = '';
 }
-
 function closeModal() {
-  document.getElementById('modal').classList.add('hidden');
+document.getElementById('modal').classList.add('hidden');
 }
-
 function handleSave() {
-  const section = document.getElementById('modalSection').value;
-  if (articleSections.includes(section)) {
-    saveArticle();
-  } else if (matchSections.includes(section)) {
-    saveMatch();
-  } else if (tableSections.includes(section)) {
-    saveTableEntry();
-  }
+const section = document.getElementById('modalSection').value;
+if (articleSections.includes(section)) {
+saveArticle();
+} else if (matchSections.includes(section)) {
+saveMatch();
+} else if (tableSections.includes(section)) {
+saveTableEntry();
 }
-
+}
 async function saveArticle() {
-  const title = document.getElementById('modalTitleInput').value.trim();
-  const content = document.getElementById('modalContent').value;
-  const imageUrl = document.getElementById('modalImage').value.trim();
-  const videoUrl = document.getElementById('modalVideo').value.trim();
-  const err = document.getElementById('modalErr');
-  if (!title || !content) {
-    err.textContent = "Tytuł i treść są wymagane.";
-    return;
-  }
-  const data = { title, content, imageUrl: imageUrl || null, videoUrl: videoUrl || null };
-  try {
-    if (currentDocId) {
-      await db.collection(currentSection).doc(currentDocId).update(data);
-    } else {
-      await db.collection(currentSection).add({ ...data, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
-    }
-    closeModal();
-    loadSection(currentSection);
-  } catch (e) {
-    err.textContent = "Błąd zapisu: " + (e.message || e);
-  }
+const title = document.getElementById('modalTitleInput').value.trim();
+const content = document.getElementById('modalContent').value;
+const imageUrl = document.getElementById('modalImage').value.trim();
+const videoUrl = document.getElementById('modalVideo').value.trim();
+const err = document.getElementById('modalErr');
+if (!title || !content) {
+err.textContent = "Tytuł i treść są wymagane.";
+return;
 }
-
+const data = { title, content, imageUrl: imageUrl || null, videoUrl: videoUrl || null };
+try {
+if (currentDocId) {
+await db.collection(currentSection).doc(currentDocId).update(data);
+} else {
+await db.collection(currentSection).add({ ...data, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+}
+closeModal();
+loadSection(currentSection);
+} catch (e) {
+err.textContent = "Błąd zapisu: " + (e.message || e);
+}
+}
 async function saveMatch() {
-  const title = document.getElementById('modalTitleInputMatch').value.trim();
-  const homeTeam = document.getElementById('modalHomeTeam').value.trim();
-  const awayTeam = document.getElementById('modalAwayTeam').value.trim();
-  const date = document.getElementById('modalDate').value.trim();
-  const score = document.getElementById('modalScore').value.trim();
-  const logoHome = document.getElementById('modalLogoHome').value.trim();
-  const logoAway = document.getElementById('modalLogoAway').value.trim();
-  const err = document.getElementById('modalErr');
-  if (!title || !homeTeam || !awayTeam || !date || !score) {
-    err.textContent = "Wypełnij wszystkie pola meczu.";
-    return;
-  }
-  const data = {
-    title, homeTeam, awayTeam, date, score,
-    logoHome: logoHome || null,
-    logoAway: logoAway || null,
-    createdAt: firebase.firestore.FieldValue.serverTimestamp()
-  };
-  try {
-    if (currentDocId) {
-      await db.collection(currentSection).doc(currentDocId).update(data);
-    } else {
-      await db.collection(currentSection).add(data);
-    }
-    closeModal();
-    loadSection(currentSection);
-    const activePageId = document.querySelector('.page.active')?.id;
-    if (['polskie','zagraniczne'].includes(activePageId)) {
-      showLiga(activePageId, currentSection);
-    }
-  } catch (e) {
-    err.textContent = "Błąd zapisu: " + (e.message || e);
-  }
+const title = document.getElementById('modalTitleInputMatch').value.trim();
+const homeTeam = document.getElementById('modalHomeTeam').value.trim();
+const awayTeam = document.getElementById('modalAwayTeam').value.trim();
+const date = document.getElementById('modalDate').value.trim();
+const score = document.getElementById('modalScore').value.trim();
+const logoHome = document.getElementById('modalLogoHome').value.trim();
+const logoAway = document.getElementById('modalLogoAway').value.trim();
+const err = document.getElementById('modalErr');
+if (!title || !homeTeam || !awayTeam || !date || !score) {
+err.textContent = "Wypełnij wszystkie pola meczu.";
+return;
 }
-
+const data = {
+title, homeTeam, awayTeam, date, score,
+logoHome: logoHome || null,
+logoAway: logoAway || null,
+createdAt: firebase.firestore.FieldValue.serverTimestamp()
+};
+try {
+if (currentDocId) {
+await db.collection(currentSection).doc(currentDocId).update(data);
+} else {
+await db.collection(currentSection).add(data);
+}
+closeModal();
+loadSection(currentSection);
+const activePageId = document.querySelector('.page.active').id;
+if (['polskie','zagraniczne'].includes(activePageId)) {
+showLiga(activePageId, currentSection);
+}
+} catch (e) {
+err.textContent = "Błąd zapisu: " + (e.message || e);
+}
+}
 async function saveTableEntry() {
-  const position = document.getElementById('modalPosition').value.trim();
-  const teamName = document.getElementById('modalTeamName').value.trim();
-  const teamLogo = document.getElementById('modalTeamLogo').value.trim();
-  const matches = document.getElementById('modalMatches').value.trim();
-  const points = document.getElementById('modalPoints').value.trim();
-  const err = document.getElementById('modalErr');
-  if (!position || !teamName || !matches || points === '') {
-    err.textContent = "Wypełnij wszystkie pola tabeli.";
-    return;
-  }
-  const data = {
-    position: parseInt(position),
-    teamName,
-    teamLogo: teamLogo || null,
-    matches,
-    points: parseInt(points),
-    createdAt: firebase.firestore.FieldValue.serverTimestamp()
-  };
-  try {
-    if (currentDocId) {
-      await db.collection(currentSection).doc(currentDocId).update(data);
-    } else {
-      await db.collection(currentSection).add(data);
-    }
-    closeModal();
-    loadSection(currentSection);
-  } catch (e) {
-    err.textContent = "Błąd zapisu: " + (e.message || e);
-  }
+const position = document.getElementById('modalPosition').value.trim();
+const teamName = document.getElementById('modalTeamName').value.trim();
+const teamLogo = document.getElementById('modalTeamLogo').value.trim();
+const matches = document.getElementById('modalMatches').value.trim();
+const points = document.getElementById('modalPoints').value.trim();
+const err = document.getElementById('modalErr');
+if (!position || !teamName || !matches || points === '') {
+err.textContent = "Wypełnij wszystkie pola tabeli.";
+return;
 }
-
+const data = {
+position: parseInt(position),
+teamName,
+teamLogo: teamLogo || null,
+matches,
+points: parseInt(points),
+createdAt: firebase.firestore.FieldValue.serverTimestamp()
+};
+try {
+if (currentDocId) {
+await db.collection(currentSection).doc(currentDocId).update(data);
+} else {
+await db.collection(currentSection).add(data);
+}
+closeModal();
+loadSection(currentSection);
+} catch (e) {
+err.textContent = "Błąd zapisu: " + (e.message || e);
+}
+}
 async function deleteContent() {
-  if (!currentDocId || !currentSection) {
-    document.getElementById('modalErr').textContent = "Nie wybrano elementu.";
-    return;
-  }
-  if (!confirm("Na pewno chcesz usunąć?")) return;
-  try {
-    await db.collection(currentSection).doc(currentDocId).delete();
-    closeModal();
-    loadSection(currentSection);
-    const activePageId = document.querySelector('.page.active')?.id;
-    if (['polskie','zagraniczne'].includes(activePageId) && matchSections.includes(currentSection)) {
-      showLiga(activePageId, currentSection);
-    }
-    if (currentSection.endsWith('_table')) {
-      const base = currentSection.replace('_table', '');
-      loadSection(base);
-    }
-  } catch (e) {
-    document.getElementById('modalErr').textContent = "Błąd usuwania: " + (e.message || e);
-  }
+if (!currentDocId || !currentSection) {
+document.getElementById('modalErr').textContent = "Nie wybrano elementu.";
+return;
 }
-
+if (!confirm("Na pewno chcesz usunąć?")) return;
+try {
+await db.collection(currentSection).doc(currentDocId).delete();
+closeModal();
+loadSection(currentSection);
+const activePageId = document.querySelector('.page.active').id;
+if (currentSection.endsWith('_table')) {
+const base = currentSection.replace('_table', '');
+loadSection(base);
+}
+if (['polskie','zagraniczne'].includes(activePageId) && matchSections.includes(currentSection)) {
+showLiga(activePageId, currentSection);
+}
+} catch (e) {
+document.getElementById('modalErr').textContent = "Błąd usuwania: " + (e.message || e);
+}
+}
 function embedVideo(url) {
-  if (!url) return '';
-  const yt = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/);
-  if (yt) return `<iframe src="https://www.youtube.com/embed/${yt[1]}" frameborder="0" allowfullscreen></iframe>`;
-  if (url.endsWith('.mp4') || url.endsWith('.webm')) return `<video controls style="width:100%"><source src="${url}" type="video/mp4"></video>`;
-  return `<a href="${url}" target="_blank" style="display:inline-block;padding:6px 12px;background:#ff3b3b;color:white;border-radius:4px;text-decoration:none;">Otwórz film</a>`;
+if (!url) return '';
+const yt = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/);
+if (yt) return `<iframe src="https://www.youtube.com/embed/${yt[1]}" frameborder="0" allowfullscreen></iframe>`;
+if (url.endsWith('.mp4') || url.endsWith('.webm')) return `<video controls style="width:100%"><source src="${url}" type="video/mp4"></video>`;
+return `<a href="${url}" target="_blank" style="display:inline-block;padding:6px 12px;background:#ff3b3b;color:white;border-radius:4px;text-decoration:none;">Otwórz film</a>`;
 }
-
 async function loadSection(section) {
-  if (articleSections.includes(section)) {
-    const container = document.getElementById(section + '-list');
-    if (!container) return;
-    try {
-      const snap = await db.collection(section).orderBy("createdAt", "desc").get();
-      if (snap.empty) {
-        container.innerHTML = "<p>Brak treści.</p>";
-        return;
-      }
-      let html = '';
-      snap.forEach(doc => {
-        const d = doc.data();
-        const editBtn = isAdmin ?
-          `<button class="edit-btn" onclick="openEditForm('${section}', '${doc.id}', ${JSON.stringify(d).replace(/"/g, '&quot;')})">Edytuj</button>` : '';
-        const delBtn = isAdmin ?
-          `<button class="delete-btn" onclick="openEditForm('${section}', '${doc.id}', ${JSON.stringify(d).replace(/"/g, '&quot;')})">Usuń</button>` : '';
-        let media = '';
-        if (d.imageUrl) media += `<img src="${d.imageUrl}" alt="Zdjęcie">`;
-        if (d.videoUrl) media += embedVideo(d.videoUrl);
-        html += `
+if (articleSections.includes(section)) {
+const container = document.getElementById(section + '-list');
+if (!container) return;
+try {
+const snap = await db.collection(section).orderBy("createdAt", "desc").get();
+if (snap.empty) {
+container.innerHTML = "<p>Brak treści.</p>";
+return;
+}
+let html = '';
+snap.forEach(doc => {
+const d = doc.data();
+const editBtn = isAdmin ?
+`<button class="edit-btn" onclick="openEditForm('${section}', '${doc.id}', ${JSON.stringify(d).replace(/"/g, '&quot;')})">Edytuj</button>` : '';
+const delBtn = isAdmin ?
+`<button class="delete-btn" onclick="openEditForm('${section}', '${doc.id}', ${JSON.stringify(d).replace(/"/g, '&quot;')})">Usuń</button>` : '';
+let media = '';
+if (d.imageUrl) media += `<img src="${d.imageUrl}" alt="Zdjęcie">`;
+if (d.videoUrl) media += embedVideo(d.videoUrl);
+html += `
 <div class="content-item">
 ${editBtn}${delBtn}
 <h3>${d.title}</h3>
@@ -1096,30 +1116,30 @@ ${editBtn}${delBtn}
 ${media}
 </div>
 `;
-      });
-      container.innerHTML = html;
-    } catch (e) {
-      container.innerHTML = "<p>Błąd ładowania treści.</p>";
-    }
-  } else if (matchSections.includes(section)) {
-    const container = document.getElementById(section + '-list');
-    if (!container) return;
-    try {
-      const snap = await db.collection(section).orderBy("createdAt", "desc").get();
-      if (snap.empty) {
-        container.innerHTML = "<p>Brak meczów.</p>";
-        return;
-      }
-      let html = '';
-      let currentRound = '';
-      snap.forEach(doc => {
-        const d = doc.data();
-        const round = d.title || 'Bez kolejki';
-        if (round !== currentRound) {
-          html += `<div class="match-header">${round}</div>`;
-          currentRound = round;
-        }
-        html += `
+});
+container.innerHTML = html;
+} catch (e) {
+container.innerHTML = "<p>Błąd ładowania treści.</p>";
+}
+} else if (matchSections.includes(section)) {
+const container = document.getElementById(section + '-list');
+if (!container) return;
+try {
+const snap = await db.collection(section).orderBy("createdAt", "desc").get();
+if (snap.empty) {
+container.innerHTML = "<p>Brak meczów.</p>";
+return;
+}
+let html = '';
+let currentRound = '';
+snap.forEach(doc => {
+const d = doc.data();
+const round = d.title || 'Bez kolejki';
+if (round !== currentRound) {
+html += `<div class="match-header">${round}</div>`;
+currentRound = round;
+}
+html += `
 <div class="match-row">
 <div class="match-date">${d.date || '-'}</div>
 <div class="team-name">
@@ -1135,24 +1155,24 @@ ${isAdmin ? `<button class="edit-btn" style="position:absolute;top:10px;right:10
 <button class="delete-btn" style="position:absolute;top:10px;right:70px;" onclick="openEditForm('${section}', '${doc.id}', ${JSON.stringify(d).replace(/"/g, '&quot;')})">Usuń</button>` : ''}
 </div>
 `;
-      });
-      container.innerHTML = html;
-    } catch (e) {
-      container.innerHTML = "<p>Błąd ładowania meczów.</p>";
-    }
-  } else if (tableSections.includes(section)) {
-    const container = document.getElementById(section + '-list');
-    if (!container) return;
-    try {
-      const snap = await db.collection(section).orderBy("position", "asc").get();
-      if (snap.empty) {
-        container.querySelector('tbody').innerHTML = `<tr><td colspan="4">Brak drużyn.</td></tr>`;
-        return;
-      }
-      let html = '';
-      snap.forEach(doc => {
-        const d = doc.data();
-        html += `
+});
+container.innerHTML = html;
+} catch (e) {
+container.innerHTML = "<p>Błąd ładowania meczów.</p>";
+}
+} else if (tableSections.includes(section)) {
+const container = document.getElementById(section + '-list');
+if (!container) return;
+try {
+const snap = await db.collection(section).orderBy("position", "asc").get();
+if (snap.empty) {
+container.querySelector('tbody').innerHTML = `<tr><td colspan="4">Brak drużyn.</td></tr>`;
+return;
+}
+let html = '';
+snap.forEach(doc => {
+const d = doc.data();
+html += `
 <tr>
 <td>${d.position || '-'}</td>
 <td class="team-cell">
@@ -1167,21 +1187,19 @@ ${isAdmin ? `<td>
 </td>` : ''}
 </tr>
 `;
-      });
-      container.querySelector('tbody').innerHTML = html;
-    } catch (e) {
-      container.querySelector('tbody').innerHTML = `<tr><td colspan="4">Błąd ładowania tabeli.</td></tr>`;
-    }
-  }
-}
-
-document.querySelectorAll('.top-nav a').forEach(link => {
-  link.addEventListener('click', (e) => {
-    e.preventDefault();
-    showSection(link.getAttribute('data-section'));
-  });
 });
-
+container.querySelector('tbody').innerHTML = html;
+} catch (e) {
+container.querySelector('tbody').innerHTML = `<tr><td colspan="4">Błąd ładowania tabeli.</td></tr>`;
+}
+}
+}
+document.querySelectorAll('.top-nav a').forEach(link => {
+link.addEventListener('click', (e) => {
+e.preventDefault();
+showSection(link.getAttribute('data-section'));
+});
+});
 showSection('home');
 </script>
 </body>
