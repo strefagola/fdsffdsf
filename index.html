@@ -834,65 +834,97 @@ function logoutAdmin() {
   auth.signOut();
 }
 
+// ✅ Poprawiona wersja: openAddForm NIGDY nie kasuje currentDocId – tylko ustawia null przy dodawaniu
 function openAddForm(section) {
   if (!isAdmin) return;
-  currentDocId = null;
+  currentDocId = null; // ✅ tylko przy DODAWANIU
   currentSection = section;
+  _configureModal(section, null, false);
+}
+
+// ✅ Poprawiona wersja: openEditForm NIE WYWOŁUJE openAddForm
+function openEditForm(section, docId, data) {
+  if (!isAdmin) return;
+  currentDocId = docId; // ✅ ustalamy ID dokumentu
+  currentSection = section;
+  _configureModal(section, data, false);
+}
+
+// ✅ NOWA funkcja: konfiguruje modal bez kasowania currentDocId
+function _configureModal(section, data, isDeleteMode) {
   document.getElementById('modalSection').value = section;
   resetModal();
-  if (articleSections.includes(section)) {
+
+  const isArticle = articleSections.includes(section);
+  const isMatch = matchSections.includes(section);
+  const isTable = tableSections.includes(section);
+
+  document.getElementById('articleFields').style.display = 'none';
+  document.getElementById('matchFields').style.display = 'none';
+  document.getElementById('tableFields').style.display = 'none';
+
+  if (isArticle) {
     document.getElementById('articleFields').style.display = 'block';
-    document.getElementById('matchFields').style.display = 'none';
-    document.getElementById('tableFields').style.display = 'none';
+    if (data) {
+      document.getElementById('modalTitleInput').value = data.title || '';
+      document.getElementById('modalContent').value = data.content || '';
+      document.getElementById('modalImage').value = data.imageUrl || '';
+      document.getElementById('modalVideo').value = data.videoUrl || '';
+    } else {
+      document.getElementById('modalTitleInput').value = '';
+      document.getElementById('modalContent').value = '';
+      document.getElementById('modalImage').value = '';
+      document.getElementById('modalVideo').value = '';
+    }
     document.getElementById('modalSaveBtn').textContent = 'Zapisz artykuł';
-  } else if (matchSections.includes(section)) {
-    document.getElementById('articleFields').style.display = 'none';
+  }
+  else if (isMatch) {
     document.getElementById('matchFields').style.display = 'block';
-    document.getElementById('tableFields').style.display = 'none';
+    if (data) {
+      document.getElementById('modalTitleInputMatch').value = data.title || '';
+      document.getElementById('modalHomeTeam').value = data.homeTeam || '';
+      document.getElementById('modalAwayTeam').value = data.awayTeam || '';
+      document.getElementById('modalDate').value = data.date || '';
+      document.getElementById('modalScore').value = data.score || '';
+      document.getElementById('modalLogoHome').value = data.logoHome || '';
+      document.getElementById('modalLogoAway').value = data.logoAway || '';
+    } else {
+      document.getElementById('modalTitleInputMatch').value = '';
+      document.getElementById('modalHomeTeam').value = '';
+      document.getElementById('modalAwayTeam').value = '';
+      document.getElementById('modalDate').value = '';
+      document.getElementById('modalScore').value = '';
+      document.getElementById('modalLogoHome').value = '';
+      document.getElementById('modalLogoAway').value = '';
+    }
     document.getElementById('modalSaveBtn').textContent = 'Zapisz mecz';
-  } else if (tableSections.includes(section)) {
-    document.getElementById('articleFields').style.display = 'none';
-    document.getElementById('matchFields').style.display = 'none';
+  }
+  else if (isTable) {
     document.getElementById('tableFields').style.display = 'block';
+    if (data) {
+      document.getElementById('modalPosition').value = data.position || '';
+      document.getElementById('modalTeamName').value = data.teamName || '';
+      document.getElementById('modalTeamLogo').value = data.teamLogo || '';
+      document.getElementById('modalMatches').value = data.matches || '';
+      document.getElementById('modalPoints').value = data.points || '';
+    } else {
+      document.getElementById('modalPosition').value = '';
+      document.getElementById('modalTeamName').value = '';
+      document.getElementById('modalTeamLogo').value = '';
+      document.getElementById('modalMatches').value = '';
+      document.getElementById('modalPoints').value = '';
+    }
     document.getElementById('modalSaveBtn').textContent = 'Zapisz drużynę';
   }
-  document.getElementById('modalDelBtn').style.display = 'none';
+
+  // Przycisk usuwania – pokazujemy go tylko przy edycji (lub oddzielnej akcji usuwania)
+  document.getElementById('modalDelBtn').style.display = isDeleteMode || (currentDocId !== null) ? 'inline-block' : 'none';
+
   document.getElementById('modal').classList.remove('hidden');
 }
 
-function openEditForm(section, docId, data) {
-  if (!isAdmin) return;
-  currentDocId = docId;
-  currentSection = section;
-  document.getElementById('modalSection').value = section;
-  resetModal();
-  if (articleSections.includes(section)) {
-    document.getElementById('modalTitleInput').value = data.title || '';
-    document.getElementById('modalContent').value = data.content || '';
-    document.getElementById('modalImage').value = data.imageUrl || '';
-    document.getElementById('modalVideo').value = data.videoUrl || '';
-    openAddForm(section);
-    document.getElementById('modalDelBtn').style.display = 'inline-block';
-  } else if (matchSections.includes(section)) {
-    document.getElementById('modalTitleInputMatch').value = data.title || '';
-    document.getElementById('modalHomeTeam').value = data.homeTeam || '';
-    document.getElementById('modalAwayTeam').value = data.awayTeam || '';
-    document.getElementById('modalDate').value = data.date || '';
-    document.getElementById('modalScore').value = data.score || '';
-    document.getElementById('modalLogoHome').value = data.logoHome || '';
-    document.getElementById('modalLogoAway').value = data.logoAway || '';
-    openAddForm(section);
-    document.getElementById('modalDelBtn').style.display = 'inline-block';
-  } else if (tableSections.includes(section)) {
-    document.getElementById('modalPosition').value = data.position || '';
-    document.getElementById('modalTeamName').value = data.teamName || '';
-    document.getElementById('modalTeamLogo').value = data.teamLogo || '';
-    document.getElementById('modalMatches').value = data.matches || '';
-    document.getElementById('modalPoints').value = data.points || '';
-    openAddForm(section);
-    document.getElementById('modalDelBtn').style.display = 'inline-block';
-  }
-}
+// ✅ Przycisk "Usuń" – nowa funkcja do otwierania trybu usuwania (opcjonalnie)
+// Ale w tej wersji: po prostu ustawiamy modalDelBtn widoczny przy edycji
 
 function resetModal() {
   document.getElementById('modalErr').textContent = '';
@@ -933,7 +965,7 @@ async function saveArticle() {
     closeModal();
     loadSection(currentSection);
   } catch (e) {
-    err.textContent = "Błąd zapisu: " + e.message;
+    err.textContent = "Błąd zapisu: " + (e.message || e);
   }
 }
 
@@ -969,7 +1001,7 @@ async function saveMatch() {
       showLiga(activePageId, currentSection);
     }
   } catch (e) {
-    err.textContent = "Błąd zapisu: " + e.message;
+    err.textContent = "Błąd zapisu: " + (e.message || e);
   }
 }
 
@@ -1001,7 +1033,7 @@ async function saveTableEntry() {
     closeModal();
     loadSection(currentSection);
   } catch (e) {
-    err.textContent = "Błąd zapisu: " + e.message;
+    err.textContent = "Błąd zapisu: " + (e.message || e);
   }
 }
 
@@ -1016,15 +1048,15 @@ async function deleteContent() {
     closeModal();
     loadSection(currentSection);
     const activePageId = document.querySelector('.page.active')?.id;
+    if (['polskie','zagraniczne'].includes(activePageId) && matchSections.includes(currentSection)) {
+      showLiga(activePageId, currentSection);
+    }
     if (currentSection.endsWith('_table')) {
       const base = currentSection.replace('_table', '');
       loadSection(base);
     }
-    if (['polskie','zagraniczne'].includes(activePageId) && matchSections.includes(currentSection)) {
-      showLiga(activePageId, currentSection);
-    }
   } catch (e) {
-    document.getElementById('modalErr').textContent = "Błąd usuwania: " + e.message;
+    document.getElementById('modalErr').textContent = "Błąd usuwania: " + (e.message || e);
   }
 }
 
