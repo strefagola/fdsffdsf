@@ -606,7 +606,66 @@ height: 18px;
 <h3>Mecze Ekstraklasy</h3>
 <div id="ekstraklasa-list" class="match-list">Ładowanie...</div>
 </div>
-<!-- ... pozostałe ligi identycznie jak w oryginale ... -->
+<!-- 1 liga -->
+<div id="pierwsza_liga-content" class="liga-subpage">
+<h3>Tabela 1 ligi</h3>
+<table id="pierwsza_liga_table-list" class="table-list">
+<thead><tr><th>#</th><th>Drużyna</th><th>Mecze</th><th>Punkty</th></tr></thead>
+<tbody><tr><td colspan="4">Ładowanie...</td></tr></tbody>
+</table>
+<h3>Mecze 1 ligi</h3>
+<div id="pierwsza_liga-list" class="match-list">Ładowanie...</div>
+</div>
+<!-- 2 liga -->
+<div id="druga_liga-content" class="liga-subpage">
+<h3>Tabela 2 ligi</h3>
+<table id="druga_liga_table-list" class="table-list">
+<thead><tr><th>#</th><th>Drużyna</th><th>Mecze</th><th>Punkty</th></tr></thead>
+<tbody><tr><td colspan="4">Ładowanie...</td></tr></tbody>
+</table>
+<h3>Mecze 2 ligi</h3>
+<div id="druga_liga-list" class="match-list">Ładowanie...</div>
+</div>
+<!-- 3 liga gr I -->
+<div id="trzecia_liga_gr1-content" class="liga-subpage">
+<h3>Tabela 3 ligi gr I</h3>
+<table id="trzecia_liga_gr1_table-list" class="table-list">
+<thead><tr><th>#</th><th>Drużyna</th><th>Mecze</th><th>Punkty</th></tr></thead>
+<tbody><tr><td colspan="4">Ładowanie...</td></tr></tbody>
+</table>
+<h3>Mecze 3 ligi gr I</h3>
+<div id="trzecia_liga_gr1-list" class="match-list">Ładowanie...</div>
+</div>
+<!-- 3 liga gr II -->
+<div id="trzecia_liga_gr2-content" class="liga-subpage">
+<h3>Tabela 3 ligi gr II</h3>
+<table id="trzecia_liga_gr2_table-list" class="table-list">
+<thead><tr><th>#</th><th>Drużyna</th><th>Mecze</th><th>Punkty</th></tr></thead>
+<tbody><tr><td colspan="4">Ładowanie...</td></tr></tbody>
+</table>
+<h3>Mecze 3 ligi gr II</h3>
+<div id="trzecia_liga_gr2-list" class="match-list">Ładowanie...</div>
+</div>
+<!-- 3 liga gr III -->
+<div id="trzecia_liga_gr3-content" class="liga-subpage">
+<h3>Tabela 3 ligi gr III</h3>
+<table id="trzecia_liga_gr3_table-list" class="table-list">
+<thead><tr><th>#</th><th>Drużyna</th><th>Mecze</th><th>Punkty</th></tr></thead>
+<tbody><tr><td colspan="4">Ładowanie...</td></tr></tbody>
+</table>
+<h3>Mecze 3 ligi gr III</h3>
+<div id="trzecia_liga_gr3-list" class="match-list">Ładowanie...</div>
+</div>
+<!-- 3 liga gr IV -->
+<div id="trzecia_liga_gr4-content" class="liga-subpage">
+<h3>Tabela 3 ligi gr IV</h3>
+<table id="trzecia_liga_gr4_table-list" class="table-list">
+<thead><tr><th>#</th><th>Drużyna</th><th>Mecze</th><th>Punkty</th></tr></thead>
+<tbody><tr><td colspan="4">Ładowanie...</td></tr></tbody>
+</table>
+<h3>Mecze 3 ligi gr IV</h3>
+<div id="trzecia_liga_gr4-list" class="match-list">Ładowanie...</div>
+</div>
 </section>
 <!-- ZAGRANICZNE LIGI -->
 <section id="zagraniczne" class="page">
@@ -803,10 +862,10 @@ function openAddForm(section) {
 
 function openEditForm(section, docId, data) {
   if (!isAdmin) return;
-  currentDocId = docId; // ✅ KLUCZOWA POPRAWKA — USTAWIAMY PRZED WYPEŁNIENIEM
+  currentDocId = docId;
   currentSection = section;
-  resetModal();
   document.getElementById('modalSection').value = section;
+  resetModal();
   if (articleSections.includes(section)) {
     document.getElementById('modalTitleInput').value = data.title || '';
     document.getElementById('modalContent').value = data.content || '';
@@ -823,7 +882,7 @@ function openEditForm(section, docId, data) {
     document.getElementById('modalLogoHome').value = data.logoHome || '';
     document.getElementById('modalLogoAway').value = data.logoAway || '';
     openAddForm(section);
-    document.getElementById('modalDelBtn').style.display = 'inline-block'; // ✅ Pokazuj "Usuń" przy meczach
+    document.getElementById('modalDelBtn').style.display = 'inline-block';
   } else if (tableSections.includes(section)) {
     document.getElementById('modalPosition').value = data.position || '';
     document.getElementById('modalTeamName').value = data.teamName || '';
@@ -874,7 +933,7 @@ async function saveArticle() {
     closeModal();
     loadSection(currentSection);
   } catch (e) {
-    err.textContent = "Błąd zapisu artykułu.";
+    err.textContent = "Błąd zapisu: " + e.message;
   }
 }
 
@@ -899,18 +958,18 @@ async function saveMatch() {
   };
   try {
     if (currentDocId) {
-      await db.collection(currentSection).doc(currentDocId).update(data); // ✅ aktualizacja, nie dodanie
+      await db.collection(currentSection).doc(currentDocId).update(data);
     } else {
       await db.collection(currentSection).add(data);
     }
     closeModal();
     loadSection(currentSection);
-    const activePageId = document.querySelector('.page.active').id;
+    const activePageId = document.querySelector('.page.active')?.id;
     if (['polskie','zagraniczne'].includes(activePageId)) {
       showLiga(activePageId, currentSection);
     }
   } catch (e) {
-    err.textContent = "Błąd zapisu meczu.";
+    err.textContent = "Błąd zapisu: " + e.message;
   }
 }
 
@@ -942,25 +1001,30 @@ async function saveTableEntry() {
     closeModal();
     loadSection(currentSection);
   } catch (e) {
-    err.textContent = "Błąd zapisu drużyny.";
+    err.textContent = "Błąd zapisu: " + e.message;
   }
 }
 
 async function deleteContent() {
+  if (!currentDocId || !currentSection) {
+    document.getElementById('modalErr').textContent = "Nie wybrano elementu.";
+    return;
+  }
   if (!confirm("Na pewno chcesz usunąć?")) return;
   try {
     await db.collection(currentSection).doc(currentDocId).delete();
     closeModal();
     loadSection(currentSection);
-    const activePageId = document.querySelector('.page.active').id;
+    const activePageId = document.querySelector('.page.active')?.id;
+    if (currentSection.endsWith('_table')) {
+      const base = currentSection.replace('_table', '');
+      loadSection(base);
+    }
     if (['polskie','zagraniczne'].includes(activePageId) && matchSections.includes(currentSection)) {
       showLiga(activePageId, currentSection);
-    } else if (currentSection.endsWith('_table')) {
-      const baseSection = currentSection.replace('_table', '');
-      loadSection(baseSection);
     }
   } catch (e) {
-    document.getElementById('modalErr').textContent = "Błąd usuwania.";
+    document.getElementById('modalErr').textContent = "Błąd usuwania: " + e.message;
   }
 }
 
@@ -988,7 +1052,7 @@ async function loadSection(section) {
         const editBtn = isAdmin ?
           `<button class="edit-btn" onclick="openEditForm('${section}', '${doc.id}', ${JSON.stringify(d).replace(/"/g, '&quot;')})">Edytuj</button>` : '';
         const delBtn = isAdmin ?
-          `<button class="delete-btn" onclick="openEditForm('${section}', '${doc.id}', ${JSON.stringify(d).replace(/"/g, '&quot;')}); setTimeout(() => { document.getElementById('modalDelBtn').style.display='inline-block'; }, 10);">Usuń</button>` : '';
+          `<button class="delete-btn" onclick="openEditForm('${section}', '${doc.id}', ${JSON.stringify(d).replace(/"/g, '&quot;')})">Usuń</button>` : '';
         let media = '';
         if (d.imageUrl) media += `<img src="${d.imageUrl}" alt="Zdjęcie">`;
         if (d.videoUrl) media += embedVideo(d.videoUrl);
@@ -1036,7 +1100,7 @@ ${d.logoHome ? `<img class="team-logo" src="${d.logoHome}" onerror="this.style.d
 ${d.logoAway ? `<img class="team-logo" src="${d.logoAway}" onerror="this.style.display='none'">` : ''}
 </div>
 ${isAdmin ? `<button class="edit-btn" style="position:absolute;top:10px;right:10px;" onclick="openEditForm('${section}', '${doc.id}', ${JSON.stringify(d).replace(/"/g, '&quot;')})">Edytuj</button>
-<button class="delete-btn" style="position:absolute;top:10px;right:70px;" onclick="openEditForm('${section}', '${doc.id}', ${JSON.stringify(d).replace(/"/g, '&quot;')}); setTimeout(() => { document.getElementById('modalDelBtn').style.display='inline-block'; }, 10);">Usuń</button>` : ''}
+<button class="delete-btn" style="position:absolute;top:10px;right:70px;" onclick="openEditForm('${section}', '${doc.id}', ${JSON.stringify(d).replace(/"/g, '&quot;')})">Usuń</button>` : ''}
 </div>
 `;
       });
@@ -1065,8 +1129,10 @@ ${d.teamLogo ? `<img class="team-logo-small" src="${d.teamLogo}" onerror="this.s
 </td>
 <td>${d.matches || '-'}</td>
 <td>${d.points || '-'}</td>
-${isAdmin ? `<td><button class="edit-btn" onclick="openEditForm('${section}', '${doc.id}', ${JSON.stringify(d).replace(/"/g, '&quot;')})">Edytuj</button>
-<button class="delete-btn" onclick="openEditForm('${section}', '${doc.id}', ${JSON.stringify(d).replace(/"/g, '&quot;')}); setTimeout(() => { document.getElementById('modalDelBtn').style.display='inline-block'; }, 10);">Usuń</button></td>` : ''}
+${isAdmin ? `<td>
+  <button class="edit-btn" onclick="openEditForm('${section}', '${doc.id}', ${JSON.stringify(d).replace(/"/g, '&quot;')})">Edytuj</button>
+  <button class="delete-btn" onclick="openEditForm('${section}', '${doc.id}', ${JSON.stringify(d).replace(/"/g, '&quot;')})">Usuń</button>
+</td>` : ''}
 </tr>
 `;
       });
