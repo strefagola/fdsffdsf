@@ -739,6 +739,147 @@ footer {
 </footer>
 <script src="firebase-config.js"></script>
 <script>
+// ✅ MAPA DRUŻYN → HERBY
+const teamLogoMap = {
+  "Wisła Płock": "https://pliki.meczyki.pl/live-score/soccer/participant/1651/25w.webp",
+  "Górnik Zabrze": "https://pliki.meczyki.pl/live-score/soccer/participant/1655/25w.webp",
+  "Jagiellonia Białystok": "https://pliki.meczyki.pl/live-score/soccer/participant/1670/25w.webp",
+  "Raków Częstochowa": "https://ssl.gstatic.com/onebox/media/sports/logos/a18HirV6C9lpSPTTPMXMgg_48x48.png",
+  "Zagłębie Lubin": "https://ssl.gstatic.com/onebox/media/sports/logos/pa_6HLH5Uws7grfp6G4LhA_48x48.png",
+  "Cracovia": "https://ssl.gstatic.com/onebox/media/sports/logos/6-v3o-SzN373qD9NRYJBlg_48x48.png",
+  "Radomiak Radom": "https://ssl.gstatic.com/onebox/media/sports/logos/AI6Eq4wdLltCnddNckuJ5Q_48x48.png",
+  "Lech Poznań": "https://ssl.gstatic.com/onebox/media/sports/logos/llb7BEhclH9k0ioe8rTU_Q_48x48.png",
+  "Korona Kielce": "https://ssl.gstatic.com/onebox/media/sports/logos/BDdCENWYiX0-i_9DT9hauQ_48x48.png",
+  "Pogoń Szczecin": "https://ssl.gstatic.com/onebox/media/sports/logos/WUDgte53yMralab_toMeRA_48x48.png",
+  "Motor Lublin": "https://ssl.gstatic.com/onebox/media/sports/logos/nAwgzBjlAZOToe5i9bdz0A_48x48.png",
+  "Arka Gdynia": "https://ssl.gstatic.com/onebox/media/sports/logos/Tv9vuFCLDcFMH8nqEA8RAQ_48x48.png",
+  "Lechia Gdańsk": "https://ssl.gstatic.com/onebox/media/sports/logos/LxSWFAHbCtEPUdJ8z_lG-g_48x48.png",
+  "Piast Gliwice": "https://ssl.gstatic.com/onebox/media/sports/logos/ZARHj_kWktwGFA39drl-XA_48x48.png",
+  "Widzew Łódź": "https://ssl.gstatic.com/onebox/media/sports/logos/rDwEAZ7syOg0mh3TKn-O5w_48x48.png",
+  "GKS Katowice": "https://ssl.gstatic.com/onebox/media/sports/logos/gQPXBkbKP9dyeO0fZQk8Rw_48x48.png",
+  "Legia Warszawa": "https://ssl.gstatic.com/onebox/media/sports/logos/tK6soR0WoxrQ7h7RsrWBLA_48x48.png",
+  "Bruk-Bet Termalica Nieciecza": "https://ssl.gstatic.com/onebox/media/sports/logos/o7XlkdQ8SdLztOfNbx_qOg_48x48.png",
+  "Wisła Kraków": "https://ssl.gstatic.com/onebox/media/sports/logos/3F6yvApKHQn0q0rZ0a2neA_48x48.png",
+  "Polonia Bytom": "https://tmssl.akamaized.net/images/wappen/head/7976.png?lm=1644567890",
+  "Pogoń Grodzisk Mazowiecki": "https://tmssl.akamaized.net/images/wappen/head/30998.png",
+  "Chrobry Głogów": "https://tmssl.akamaized.net/images/wappen/head/8377.png",
+  "Stal Rzeszów": "https://tmssl.akamaized.net/images/wappen/head/9510.png",
+  "Wieczysta Kraków": "https://tmssl.akamaized.net/images/wappen/head/30974.png",
+  "Śląsk Wrocław": "https://ssl.gstatic.com/onebox/media/sports/logos/3MmX1HdOQpyMjOyUYZrV5A_48x48.png",
+  "Ruch Chorzów": "https://ssl.gstatic.com/onebox/media/sports/logos/i1SqD6VNfcEk9HKF2T-d2w_48x48.png",
+  "Polonia Warszawa": "https://tmssl.akamaized.net/images/wappen/head/2745.png",
+  "Miedź Legnica": "https://ssl.gstatic.com/onebox/media/sports/logos/fq1WD9d3xLj74lIdent4DA_48x48.png",
+  "ŁKS Łódź": "https://ssl.gstatic.com/onebox/media/sports/logos/gI6Z_B5Q8Jg2O8o-cw4CXA_48x48.png",
+  "Pogoń Siedlce": "https://tmssl.akamaized.net/images/wappen/head/4896.png",
+  "Odra Opole": "https://tmssl.akamaized.net/images/wappen/head/5699.png",
+  "Puszcza Niepołomice": "https://ssl.gstatic.com/onebox/media/sports/logos/0YoWjF5XBl-2s1S6GWkH2A_48x48.png",
+  "Znicz Pruszków": "https://tmssl.akamaized.net/images/wappen/head/9109.png",
+  "GKS Tychy": "https://ssl.gstatic.com/onebox/media/sports/logos/-Go6VcuWu0XVD1P9u0hpCw_48x48.png",
+  "Stal Mielec": "https://ssl.gstatic.com/onebox/media/sports/logos/GF_H0JiHkv4o2d7_BKx9mw_48x48.png",
+  "Górnik Łęczna": "https://ssl.gstatic.com/onebox/media/sports/logos/0r_STnYWNI7W9ovslr9lbg_48x48.png",
+  "Unia Skierniewice": "https://tmssl.akamaized.net/images/wappen/head/30753.png",
+  "Warta Poznań": "https://ssl.gstatic.com/onebox/media/sports/logos/7hBYIuozHBS7YTUqURuTPg_48x48.png",
+  "Podhale Nowy Targ": "https://tmssl.akamaized.net/images/wappen/head/50162.png",
+  "Olimpia Grudziądz": "https://tmssl.akamaized.net/images/wappen/head/26564.png",
+  "Świt Szczecin": "https://tmssl.akamaized.net/images/wappen/head/50309.png",
+  "Stal Stalowa Wola": "https://tmssl.akamaized.net/images/wappen/head/8641.png",
+  "Resovia Rzeszów": "https://ssl.gstatic.com/onebox/media/sports/logos/7azjZdhixac1J0lTYKLTUw_48x48.png",
+  "Podbeskidzie Bielsko-Biała": "https://ssl.gstatic.com/onebox/media/sports/logos/3Qv0VtCC44eIs9E2ZyUZbQ_48x48.png",
+  "Śląsk Wrocław II": "https://ssl.gstatic.com/onebox/media/sports/logos/3MmX1HdOQpyMjOyUYZrV5A_48x48.png",
+  "Sokół Kleczew": "https://tmssl.akamaized.net/images/wappen/head/10367.png",
+  "Chojniczanka Chojnice": "https://ssl.gstatic.com/onebox/media/sports/logos/_R1vMea3FWPzAtG3jDw_48x48.png",
+  "Sandecja Nowy Sącz": "https://ssl.gstatic.com/onebox/media/sports/logos/6vDKj5KjO7SCR1Y6Q4Nc-A_48x48.png",
+  "Zagłębie Sosnowiec": "https://ssl.gstatic.com/onebox/media/sports/logos/sosnowiec2425h_tm.png",
+  "Hutnik Kraków": "https://tmssl.akamaized.net/images/wappen/head/530.png",
+  "Rekord Bielsko-Biała": "https://tmssl.akamaized.net/images/wappen/head/31568.png",
+  "KKS 1925 Kalisz": "https://ssl.gstatic.com/onebox/media/sports/logos/-J5kYq1lpvSunxuL1zrK6A_48x48.png",
+  "ŁKS Łódź II": "https://tmssl.akamaized.net/images/wappen/head/16402.png",
+  "GKS Jastrzębie": "https://tmssl.akamaized.net/images/wappen/head/9104.png",
+  "Legia II Warszawa": "https://ssl.gstatic.com/onebox/media/sports/logos/9J1CLuM0AKoM0eeQxGamma_48x48.png",
+  "Warta Sieradz": "https://ssl.gstatic.com/onebox/media/sports/logos/SyRnJ_2N7ugjEwuPmHdp_g_48x48.png",
+  "ŁKS Łomża": "https://ssl.gstatic.com/onebox/media/sports/logos/_0KqFVi3vh_HmBq9Y3kP7w_48x48.png",
+  "Ząbkovia Ząbki": "https://ssl.gstatic.com/onebox/media/sports/logos/R4kPZ0Zzxj3OztUe9GqsKQ_48x48.png",
+  "Wigry Suwałki": "https://ssl.gstatic.com/onebox/media/sports/logos/0_qm3f8tVqS8Oa0tYCK6Cw_48x48.png",
+  "Wisła II Płock": "https://ssl.gstatic.com/onebox/media/sports/logos/8IsqZ9y2XHXp0sPXQ89WgQ_48x48.png",
+  "Świt Nowy Dwór Mazowiecki": "https://ssl.gstatic.com/onebox/media/sports/logos/O8j3W8gFS6e9R_3PnMS0yQ_48x48.png",
+  "Broń Radom": "https://ssl.gstatic.com/onebox/media/sports/logos/f7D7RKdqY6o9yV4BHO7bOg_48x48.png",
+  "KS CK Troszyn": "https://ssl.gstatic.com/onebox/media/sports/logos/M2qJx4qX5u1S5fVLpS5SEw_48x48.png",
+  "Lechia Tomaszów Mazowiecki": "https://ssl.gstatic.com/onebox/media/sports/logos/SSu5b0o3NlX1s9xC9WwPnA_48x48.png",
+  "Olimpia Elbląg": "https://ssl.gstatic.com/onebox/media/sports/logos/S_j9Xl3FgLm9S8QfHfBBGw_48x48.png",
+  "Widzew II Łódź": "https://ssl.gstatic.com/onebox/media/sports/logos/rDwEAZ7syOg0mh3TKn-O5w_48x48.png",
+  "Jagiellonia II Białystok": "https://ssl.gstatic.com/onebox/media/sports/logos/y_eM68BZHYr3j3R6PxR1hg_48x48.png",
+  "GKS Bełchatów": "https://ssl.gstatic.com/onebox/media/sports/logos/B5Yo8s8Vhz2qc0aQHbsSrw_48x48.png",
+  "GKS Wikielec": "https://ssl.gstatic.com/onebox/media/sports/logos/2J9zLN_Gw5Qqf1R3F5cncw_48x48.png",
+  "Mławianka Mława": "https://ssl.gstatic.com/onebox/media/sports/logos/7UGM6Q75lWDbCzjhJlTlHQ_48x48.png",
+  "KS Wasilków": "https://ssl.gstatic.com/onebox/media/sports/logos/55kLdUCG_SV33BQoPka-dA_48x48.png",
+  "Znicz Biała Piska": "https://ssl.gstatic.com/onebox/media/sports/logos/1B9_iR8C1xM_yp7UMJv7Dw_48x48.png",
+  "Polonia Środa Wlkp.": "https://tmssl.akamaized.net/images/wappen/head/9447.png",
+  "Zawisza Bydgoszcz": "https://tmssl.akamaized.net/images/wappen/head/543.png",
+  "Wikęd Luzino": "https://tmssl.akamaized.net/images/wappen/head/30997.png",
+  "Elana Toruń": "https://tmssl.akamaized.net/images/wappen/head/6103.png",
+  "Lech Poznań II": "https://ssl.gstatic.com/onebox/media/sports/logos/llb7BEhclH9k0ioe8rTU_Q_48x48.png",
+  "Cartusia Kartuzy": "https://tmssl.akamaized.net/images/wappen/head/27361.png",
+  "Lipno Steszew": "https://tmssl.akamaized.net/images/wappen/head/30998.png",
+  "Flota Świnoujście": "https://tmssl.akamaized.net/images/wappen/head/8763.png",
+  "Błękitni Stargard": "https://tmssl.akamaized.net/images/wappen/head/31001.png",
+  "Wda Świecie": "https://tmssl.akamaized.net/images/wappen/head/8768.png",
+  "Noteć Czarnków": "https://tmssl.akamaized.net/images/wappen/head/8766.png",
+  "Kluczevia Stargard": "https://tmssl.akamaized.net/images/wappen/head/31002.png",
+  "Pogoń Szczecin II": "https://ssl.gstatic.com/onebox/media/sports/logos/WUDgte53yMralab_toMeRA_48x48.png",
+  "Pogoń Nowe Skalmierzyce": "https://tmssl.akamaized.net/images/wappen/head/26924.png",
+  "Unia Swarzędz": "https://tmssl.akamaized.net/images/wappen/head/30999.png",
+  "Victoria Września": "https://tmssl.akamaized.net/images/wappen/head/31000.png",
+  "Tluchowo": "https://tmssl.akamaized.net/images/wappen/head/31003.png",
+  "Wybrzeże Rewalskie": "https://tmssl.akamaized.net/images/wappen/head/31004.png",
+  "Lechia Zielona Góra": "https://tmssl.akamaized.net/images/wappen/head/31010.png",
+  "BKS Sparta Katowice": "https://tmssl.akamaized.net/images/wappen/head/31011.png",
+  "Górnik Polkowice": "https://tmssl.akamaized.net/images/wappen/head/31012.png",
+  "Zagłębie Lubin II": "https://ssl.gstatic.com/onebox/media/sports/logos/pa_6HLH5Uws7grfp6G4LhA_48x48.png",
+  "KS Goczałkowice Zdrój": "https://tmssl.akamaized.net/images/wappen/head/31013.png",
+  "Carina Gubin": "https://tmssl.akamaized.net/images/wappen/head/31014.png",
+  "Skra Częstochowa": "https://ssl.gstatic.com/onebox/media/sports/logos/WUDgte53yMralab_toMeRA_48x48.png",
+  "MKS Kluczbork": "https://tmssl.akamaized.net/images/wappen/head/31015.png",
+  "Warta Gorzów": "https://tmssl.akamaized.net/images/wappen/head/31016.png",
+  "Karkonosze Jelenia Góra": "https://tmssl.akamaized.net/images/wappen/head/31017.png",
+  "Górnik Zabrze II": "https://ssl.gstatic.com/onebox/media/sports/logos/1655/25w.webp",
+  "Polonia Nysa": "https://tmssl.akamaized.net/images/wappen/head/31018.png",
+  "Ślęza Wrocław": "https://tmssl.akamaized.net/images/wappen/head/31019.png",
+  "Słowianin Wolibórz": "https://tmssl.akamaized.net/images/wappen/head/31020.png",
+  "Miedź Legnica II": "https://ssl.gstatic.com/onebox/media/sports/logos/ZARHj_kWktwGFA39drl-XA_48x48.png",
+  "Pniówek-74 Pawłowice": "https://tmssl.akamaized.net/images/wappen/head/31021.png",
+  "Starowice Dolne": "https://tmssl.akamaized.net/images/wappen/head/31022.png",
+  "Stal Jasień": "https://tmssl.akamaized.net/images/wappen/head/31023.png",
+  "Avia Świdnik": "https://tmssl.akamaized.net/images/wappen/head/31030.png",
+  "KSZO Ostrowiec": "https://tmssl.akamaized.net/images/wappen/head/31031.png",
+  "Chełmianka Chełm": "https://tmssl.akamaized.net/images/wappen/head/31032.png",
+  "Wiślanie Skawina": "https://tmssl.akamaized.net/images/wappen/head/31033.png",
+  "Star Starachowice": "https://tmssl.akamaized.net/images/wappen/head/31034.png",
+  "Siarka Tarnobrzeg": "https://ssl.gstatic.com/onebox/media/sports/logos/ZARHj_kWktwGFA39drl-XA_48x48.png",
+  "Podlasie Biała Podlaska": "https://tmssl.akamaized.net/images/wappen/head/31035.png  ",
+  "Pogoń-Sokół Lubaczów": "https://tmssl.akamaized.net/images/wappen/head/31036.png  ",
+  "Korona Kielce II": "https://ssl.gstatic.com/onebox/media/sports/logos/BDdCENWYiX0-i_9DT9hauQ_48x48.png  ",
+  "Wisłoka Dębica": "https://tmssl.akamaized.net/images/wappen/head/31037.png  ",
+  "Czarni Połaniec": "https://tmssl.akamaized.net/images/wappen/head/31038.png  ",
+  "Wisła Kraków II": "https://ssl.gstatic.com/onebox/media/sports/logos/25w.png  ",
+  "Cracovia II": "https://ssl.gstatic.com/onebox/media/sports/logos/6-v3o-SzN373qD9NRYJBlg_48x48.png  ",
+  "Stal Kraśnik": "https://tmssl.akamaized.net/images/wappen/head/31039.png  ",
+  "Naprzód Jędrzejów": "https://tmssl.akamaized.net/images/wappen/head/31040.png  ",
+  "Świdniczanka Świdnik": "https://tmssl.akamaized.net/images/wappen/head/31041.png  ",
+  "Kolbuszowa Dolna": "https://tmssl.akamaized.net/images/wappen/head/31042.png  ",
+  "Sparta Kazimierza Wielka": "https://tmssl.akamaized.net/images/wappen/head/31043.png  "
+};
+
+// ✅ AUTOMATYCZNE UZUPEŁNIANIE HERBU
+function updateTeamLogo() {
+  const teamName = document.getElementById('modalTeamName').value.trim();
+  const logoInput = document.getElementById('modalTeamLogo');
+  if (teamLogoMap[teamName]) {
+    logoInput.value = teamLogoMap[teamName].trim(); // ✅ usuwamy zbędne spacje
+  } else {
+    logoInput.value = '';
+  }
+}
+
 let isAdmin = false;
 let currentDocId = null;
 let currentSection = null;
@@ -987,20 +1128,19 @@ if (!position || !teamName || !matches || points === '') {
 err.textContent = "Wypełnij wszystkie pola tabeli.";
 return;
 }
+const section = document.getElementById('modalSection').value;
 const data = {
 position: parseInt(position),
 teamName,
 teamLogo: teamLogo || null,
 matches,
-points: parseInt(points),
-createdAt: firebase.firestore.FieldValue.serverTimestamp()
+points: parseInt(points)
 };
 try {
-const section = document.getElementById('modalSection').value;
 if (currentDocId) {
 await db.collection(section).doc(currentDocId).update(data);
 } else {
-await db.collection(section).add(data);
+await db.collection(section).add({ ...data, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
 }
 closeModal();
 loadSection(section);
@@ -1126,9 +1266,7 @@ const d = doc.data();
 let rowClass = '';
 const pos = parseInt(d.position);
 
-// ✅ ZASADY ZGODNIE Z REGULAMINEM
 if (section === 'ekstraklasa_table') {
-// Tylko spadek (16-18)
 if (pos >= 16) rowClass = 'relegation';
 } else if (section === 'pierwsza_liga_table' || section === 'druga_liga_table') {
 if (pos <= 2) rowClass = 'promotion';
@@ -1161,7 +1299,6 @@ ${actions}
 });
 container.querySelector('tbody').innerHTML = html;
 
-// ✅ LEGENDA
 let legendHTML = '';
 if (section === 'ekstraklasa_table') {
 legendHTML = '<div class="legend"><span class="relegation"></span> Spadek do 1. ligi (16–18)</div>';
@@ -1191,7 +1328,6 @@ legendHTML = `
 `;
 }
 
-// Usuwam starą legendę
 const existingLegend = container.nextElementSibling;
 if (existingLegend && existingLegend.classList.contains('legend')) {
 existingLegend.remove();
@@ -1211,6 +1347,14 @@ link.addEventListener('click', (e) => {
 e.preventDefault();
 showSection(link.getAttribute('data-section'));
 });
+});
+
+// ✅ PODPIĘCIE AUTOMATYCZNEGO HERBU
+document.addEventListener('DOMContentLoaded', () => {
+const teamNameInput = document.getElementById('modalTeamName');
+if (teamNameInput) {
+teamNameInput.addEventListener('input', updateTeamLogo);
+}
 });
 
 showSection('home');
