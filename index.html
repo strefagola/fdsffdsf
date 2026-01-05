@@ -409,13 +409,13 @@ font-size: 0.85rem;
 }
 /* 🎨 KOLORY TABELI */
 .table-list tr.promotion {
-background: #1a5e1a;
+background: #1a5e1a; /* Zielony – awans bezpośredni */
 }
 .table-list tr.playoff {
-background: #1a4a5e;
+background: #1a4a5e; /* Niebieski – play-off */
 }
 .table-list tr.relegation {
-background: #5e1a1a;
+background: #5e1a1a; /* Czerwony – spadek */
 }
 .legend {
 display: flex;
@@ -431,9 +431,15 @@ height: 16px;
 border-radius: 4px;
 display: inline-block;
 }
-.legend .promotion { background: #1a5e1a; }
-.legend .playoff { background: #1a4a5e; }
-.legend .relegation { background: #5e1a1a; }
+.legend .promotion {
+background: #1a5e1a;
+}
+.legend .playoff {
+background: #1a4a5e;
+}
+.legend .relegation {
+background: #5e1a1a;
+}
 @media (max-width: 768px) {
 .hero h1 { font-size: 1.8rem; }
 .page h2, .liga-subpage h3 { font-size: 1.5rem; }
@@ -445,11 +451,22 @@ display: inline-block;
 grid-template-columns: auto 1fr auto;
 gap: 8px;
 }
-.team-name { font-size: 0.85rem; }
-.score { font-size: 0.9rem; }
-.table-list { font-size: 0.85rem; }
-.team-cell { gap: 6px; }
-.team-logo-small { width: 18px; height: 18px; }
+.team-name {
+font-size: 0.85rem;
+}
+.score {
+font-size: 0.9rem;
+}
+.table-list {
+font-size: 0.85rem;
+}
+.team-cell {
+gap: 6px;
+}
+.team-logo-small {
+width: 18px;
+height: 18px;
+}
 }
 </style>
 </head>
@@ -480,41 +497,7 @@ gap: 8px;
 <header>
 <img src="https://www.ebilet.pl/now/app/uploads/2024/02/shutterstock_2253076431-1-1280x720.jpg" alt="Piłka nożna" />
 </header>
-
-<!-- MODAL: SZYBKIE DODAWANIE WIELOMECZOWE -->
-<div id="modalBatch" class="modal hidden">
-<div class="modal-content">
-<div class="modal-header">
-<h2>Szybkie dodanie meczów</h2>
-<button class="close-btn" onclick="closeModalBatch()">&times;</button>
-</div>
-<div class="modal-body">
-<select id="batchSection">
-<option value="ekstraklasa">Ekstraklasa (mecz)</option>
-<option value="pierwsza_liga">1. liga (mecz)</option>
-<option value="druga_liga">2. liga (mecz)</option>
-<option value="trzecia_liga_gr1">3. liga gr I (mecz)</option>
-<option value="trzecia_liga_gr2">3. liga gr II (mecz)</option>
-<option value="trzecia_liga_gr3">3. liga gr III (mecz)</option>
-<option value="trzecia_liga_gr4">3. liga gr IV (mecz)</option>
-<option value="superpuchar">Superpuchar (mecz)</option>
-<option value="puchar_polski">STS Puchar Polski (mecz)</option>
-<option value="champions_league">Liga Mistrzów (mecz)</option>
-<option value="europa_league">Liga Europy (mecz)</option>
-<option value="conference_league">Liga Konferencji (mecz)</option>
-</select>
-<input type="text" id="batchRound" placeholder="Nazwa kolejki (np. Kolejka 3)" />
-<textarea id="batchMatches" placeholder="Wklej mecze, każdy w osobnej linii, np.&#10;01.08.2025, 19:00 Polonia Środa Wlkp. 4-2 Błękitni Stargard&#10;02.08.2025, 15:00 Noteć Czarnków 1-1 Flota Świnoujście" style="height:160px;"></textarea>
-<div class="modal-actions">
-<button class="btn btn-primary" onclick="saveBatchMatches()">Dodaj mecze</button>
-<button class="btn btn-danger" onclick="closeModalBatch()">Anuluj</button>
-</div>
-<p id="batchErr" class="error"></p>
-</div>
-</div>
-</div>
-
-<!-- MODAL: STANDARDOWY -->
+<!-- MODAL -->
 <div id="modal" class="modal hidden">
 <div class="modal-content">
 <div class="modal-header">
@@ -545,23 +528,11 @@ gap: 8px;
 <option value="champions_league">Liga Mistrzów (mecz)</option>
 <option value="europa_league">Liga Europy (mecz)</option>
 <option value="conference_league">Liga Konferencji (mecz)</option>
-<!-- Polskie ligi – tabele -->
-<option value="ekstraklasa_table">Ekstraklasa (tabela)</option>
-<option value="pierwsza_liga_table">1. liga (tabela)</option>
-<option value="druga_liga_table">2. liga (tabela)</option>
-<option value="trzecia_liga_gr1_table">3. liga gr I (tabela)</option>
-<option value="trzecia_liga_gr2_table">3. liga gr II (tabela)</option>
-<option value="trzecia_liga_gr3_table">3. liga gr III (tabela)</option>
-<option value="trzecia_liga_gr4_table">3. liga gr IV (tabela)</option>
-<!-- Puchary – tabele -->
-<option value="superpuchar_table">Superpuchar (tabela)</option>
-<option value="puchar_polski_table">STS Puchar Polski (tabela)</option>
-<!-- Europa – tabele -->
-<option value="champions_league_table">Liga Mistrzów (tabela)</option>
-<option value="europa_league_table">Liga Europy (tabela)</option>
-<option value="conference_league_table">Liga Konferencji (tabela)</option>
 </select>
-<div id="articleFields">
+<!-- 🔥 NOWE POLE: SZYBKIE DODAWANIE MECZU -->
+<textarea id="modalQuickMatch" placeholder="Wklej mecz w formacie: 22.02.2026, 18:00 Lech Poznań 2-0 Legia Warszawa" style="display:none; height:80px;"></textarea>
+
+<div id="articleFields" style="display:none;">
 <input type="text" id="modalTitleInput" placeholder="Tytuł artykułu" />
 <textarea id="modalContent" placeholder="Treść..."></textarea>
 <input type="url" id="modalImage" placeholder="Link do zdjęcia" />
@@ -597,7 +568,6 @@ gap: 8px;
 </div>
 </div>
 </div>
-
 <!-- SEKCJE -->
 <section id="home" class="page active">
 <div class="hero">
@@ -736,7 +706,6 @@ gap: 8px;
 <h3>Mecze Ligi Konferencji</h3>
 <div id="conference_league-list" class="match-list">Ładowanie...</div>
 </section>
-
 <!-- 🔐 PANEL ADMINA -->
 <div class="admin-bar" id="adminPanel">
 <h3>Panel administratora</h3>
@@ -748,8 +717,8 @@ gap: 8px;
 <div id="adminTools" class="hidden">
 <button class="btn btn-primary" onclick="openAddForm('news')">+ Artykuł</button>
 <button class="btn btn-primary" onclick="openAddMatchOrTable('match')">+ Mecz</button>
+<button class="btn btn-primary" onclick="openAddMatchOrTable('quick')">+ Szybki mecz</button>
 <button class="btn btn-primary" onclick="openAddMatchOrTable('table')">+ Tabela</button>
-<button class="btn btn-primary" onclick="openBatchModal()">+ Szybki mecz (batch)</button>
 <button class="btn btn-danger" onclick="logoutAdmin()" style="margin-left:10px;">Wyloguj</button>
 </div>
 </div>
@@ -850,10 +819,89 @@ const teamLogoMap = {
 "Unia Swarzędz": "https://tmssl.akamaized.net/images/wappen/head/30999.png",
 "Victoria Września": "https://tmssl.akamaized.net/images/wappen/head/31000.png",
 "Tluchowo": "https://tmssl.akamaized.net/images/wappen/head/31003.png",
-"Wybrzeże Rewalskie": "https://tmssl.akamaized.net/images/wappen/head/31004.png"
+"Wybrzeże Rewalskie": "https://tmssl.akamaized.net/images/wappen/head/31004.png",
+"Lechia Zielona Góra": "https://tmssl.akamaized.net/images/wappen/head/31010.png",
+"BKS Sparta Katowice": "https://tmssl.akamaized.net/images/wappen/head/31011.png",
+"Górnik Polkowice": "https://tmssl.akamaized.net/images/wappen/head/31012.png",
+"Zagłębie Lubin II": "https://ssl.gstatic.com/onebox/media/sports/logos/pa_6HLH5Uws7grfp6G4LhA_48x48.png",
+"KS Goczałkowice Zdrój": "https://tmssl.akamaized.net/images/wappen/head/31013.png",
+"Carina Gubin": "https://tmssl.akamaized.net/images/wappen/head/31014.png",
+"Skra Częstochowa": "https://ssl.gstatic.com/onebox/media/sports/logos/WUDgte53yMralab_toMeRA_48x48.png",
+"MKS Kluczbork": "https://tmssl.akamaized.net/images/wappen/head/31015.png",
+"Warta Gorzów": "https://tmssl.akamaized.net/images/wappen/head/31016.png",
+"Karkonosze Jelenia Góra": "https://tmssl.akamaized.net/images/wappen/head/31017.png",
+"Górnik Zabrze II": "https://ssl.gstatic.com/onebox/media/sports/logos/1655/25w.webp",
+"Polonia Nysa": "https://tmssl.akamaized.net/images/wappen/head/31018.png",
+"Ślęza Wrocław": "https://tmssl.akamaized.net/images/wappen/head/31019.png",
+"Słowianin Wolibórz": "https://tmssl.akamaized.net/images/wappen/head/31020.png",
+"Miedź Legnica II": "https://ssl.gstatic.com/onebox/media/sports/logos/ZARHj_kWktwGFA39drl-XA_48x48.png",
+"Pniówek-74 Pawłowice": "https://tmssl.akamaized.net/images/wappen/head/31021.png",
+"Starowice Dolne": "https://tmssl.akamaized.net/images/wappen/head/31022.png",
+"Stal Jasień": "https://tmssl.akamaized.net/images/wappen/head/31023.png",
+"Avia Świdnik": "https://tmssl.akamaized.net/images/wappen/head/31030.png",
+"KSZO Ostrowiec": "https://tmssl.akamaized.net/images/wappen/head/31031.png",
+"Chełmianka Chełm": "https://tmssl.akamaized.net/images/wappen/head/31032.png",
+"Wiślanie Skawina": "https://tmssl.akamaized.net/images/wappen/head/31033.png",
+"Star Starachowice": "https://tmssl.akamaized.net/images/wappen/head/31034.png",
+"Siarka Tarnobrzeg": "https://ssl.gstatic.com/onebox/media/sports/logos/ZARHj_kWktwGFA39drl-XA_48x48.png",
+"Podlasie Biała Podlaska": "https://tmssl.akamaized.net/images/wappen/head/31035.png",
+"Pogoń-Sokół Lubaczów": "https://tmssl.akamaized.net/images/wappen/head/31036.png",
+"Korona Kielce II": "https://ssl.gstatic.com/onebox/media/sports/logos/BDdCENWYiX0-i_9DT9hauQ_48x48.png  ",
+"Wisłoka Dębica": "https://tmssl.akamaized.net/images/wappen/head/31037.png  ",
+"Czarni Połaniec": "https://tmssl.akamaized.net/images/wappen/head/31038.png  ",
+"Wisła Kraków II": "https://ssl.gstatic.com/onebox/media/sports/logos/25w.png  ",
+"Cracovia II": "https://ssl.gstatic.com/onebox/media/sports/logos/6-v3o-SzN373qD9NRYJBlg_48x48.png  ",
+"Stal Kraśnik": "https://tmssl.akamaized.net/images/wappen/head/31039.png  ",
+"Naprzód Jędrzejów": "https://tmssl.akamaized.net/images/wappen/head/31040.png  ",
+"Świdniczanka Świdnik": "https://tmssl.akamaized.net/images/wappen/head/31041.png  ",
+"Kolbuszowa Dolna": "https://tmssl.akamaized.net/images/wappen/head/31042.png  ",
+"Sparta Kazimierza Wielka": "https://tmssl.akamaized.net/images/wappen/head/31043.png  "
 };
 
+// ✅ FUNKCJA PARSUJĄCA SZYBKIE DODAWANIE
+function parseQuickMatch(text) {
+  // Przykład: "22.02.2026, 18:00 Lech Poznań 2-0 Legia Warszawa"
+  const regex = /^(\d{2}\.\d{2}\.\d{4}),\s*(\d{2}:\d{2})\s+(.+?)\s+(\d+)-(\d+)\s+(.+)$/;
+  const match = text.trim().match(regex);
+  if (!match) return null;
+
+  const [, date, time, homeTeam, homeScore, awayScore, awayTeam] = match;
+  const fullDate = `${date}, ${time}`;
+  const score = `${homeScore}:${awayScore}`;
+  return { homeTeam, awayTeam, date: fullDate, score };
+}
+
+// ✅ FUNKCJE AUTOMATYCZNEGO UZUPEŁNIANIA HERBÓW
+function updateHomeTeamLogo() {
+const teamName = document.getElementById('modalHomeTeam').value.trim();
+const logoInput = document.getElementById('modalLogoHome');
+if (teamLogoMap[teamName]) {
+logoInput.value = teamLogoMap[teamName].trim();
+} else {
+logoInput.value = '';
+}
+}
+function updateAwayTeamLogo() {
+const teamName = document.getElementById('modalAwayTeam').value.trim();
+const logoInput = document.getElementById('modalLogoAway');
+if (teamLogoMap[teamName]) {
+logoInput.value = teamLogoMap[teamName].trim();
+} else {
+logoInput.value = '';
+}
+}
+function updateTableTeamLogo() {
+const teamName = document.getElementById('modalTeamName').value.trim();
+const logoInput = document.getElementById('modalTeamLogo');
+if (teamLogoMap[teamName]) {
+logoInput.value = teamLogoMap[teamName].trim();
+} else {
+logoInput.value = '';
+}
+}
 let isAdmin = false;
+let currentDocId = null;
+let currentSection = null;
 const articleSections = ['news','results','analysis','media','history','schedule'];
 const matchSections = [
 'ekstraklasa','pierwsza_liga','druga_liga',
@@ -903,14 +951,13 @@ auth.signInWithEmailAndPassword("admin@sgstrefagola.pl", pass)
 function logoutAdmin() {
 auth.signOut();
 }
-
-// --- MODAL STANDARDOWY ---
 function openAddForm(section) {
 if (!isAdmin) return;
 currentDocId = null;
 currentSection = section;
-document.getElementById('modalSection').value = section;
 resetModal();
+document.getElementById('modalSection').value = section;
+document.getElementById('modalQuickMatch').style.display = 'none';
 if (articleSections.includes(section)) {
 document.getElementById('articleFields').style.display = 'block';
 document.getElementById('matchFields').style.display = 'none';
@@ -933,17 +980,32 @@ document.getElementById('modalTitle').textContent = 'Dodaj drużynę';
 document.getElementById('modalDelBtn').style.display = 'none';
 document.getElementById('modal').classList.remove('hidden');
 }
+
 function openAddMatchOrTable(type) {
 if (!isAdmin) return;
 currentDocId = null;
 currentSection = null;
 resetModal();
 const select = document.getElementById('modalSection');
+if (type === 'quick') {
+// SZYBKIE DODAWANIE
+document.getElementById('modalQuickMatch').style.display = 'block';
+document.getElementById('articleFields').style.display = 'none';
+document.getElementById('matchFields').style.display = 'none';
+document.getElementById('tableFields').style.display = 'none';
+document.getElementById('modalDelBtn').style.display = 'none';
+document.getElementById('modalSaveBtn').textContent = 'Dodaj mecz';
+document.getElementById('modalTitle').textContent = 'Szybkie dodanie meczu';
+document.getElementById('modal').classList.remove('hidden');
+return;
+}
+
 const allowedSections = type === 'match' ? matchSections : tableSections;
 Array.from(select.options).forEach(opt => {
 opt.style.display = allowedSections.includes(opt.value) ? 'block' : 'none';
 });
 select.value = allowedSections[0];
+document.getElementById('modalQuickMatch').style.display = 'none';
 document.getElementById('articleFields').style.display = 'none';
 document.getElementById('matchFields').style.display = type === 'match' ? 'block' : 'none';
 document.getElementById('tableFields').style.display = type === 'table' ? 'block' : 'none';
@@ -952,17 +1014,84 @@ document.getElementById('modalSaveBtn').textContent = type === 'match' ? 'Dodaj 
 document.getElementById('modalTitle').textContent = type === 'match' ? 'Dodaj mecz' : 'Dodaj drużynę do tabeli';
 document.getElementById('modal').classList.remove('hidden');
 }
+
 function openEditForm(section, docId, data) {
-// ten sam kod jak wcześniej – pominięty dla zwięzłości
+if (!isAdmin) return;
+currentDocId = docId;
+currentSection = section;
+resetModal();
+document.getElementById('modalSection').value = section;
+document.getElementById('modalQuickMatch').style.display = 'none';
+if (articleSections.includes(section)) {
+document.getElementById('modalTitleInput').value = data.title || '';
+document.getElementById('modalContent').value = data.content || '';
+document.getElementById('modalImage').value = data.imageUrl || '';
+document.getElementById('modalVideo').value = data.videoUrl || '';
+document.getElementById('articleFields').style.display = 'block';
+document.getElementById('matchFields').style.display = 'none';
+document.getElementById('tableFields').style.display = 'none';
+document.getElementById('modalSaveBtn').textContent = 'Zapisz artykuł';
+} else if (matchSections.includes(section)) {
+document.getElementById('modalTitleInputMatch').value = data.title || '';
+document.getElementById('modalHomeTeam').value = data.homeTeam || '';
+document.getElementById('modalAwayTeam').value = data.awayTeam || '';
+document.getElementById('modalDate').value = data.date || '';
+document.getElementById('modalScore').value = data.score || '';
+document.getElementById('modalLogoHome').value = data.logoHome || '';
+document.getElementById('modalLogoAway').value = data.logoAway || '';
+document.getElementById('articleFields').style.display = 'none';
+document.getElementById('matchFields').style.display = 'block';
+document.getElementById('tableFields').style.display = 'none';
+document.getElementById('modalSaveBtn').textContent = 'Zapisz mecz';
+} else if (tableSections.includes(section)) {
+document.getElementById('modalPosition').value = data.position || '';
+document.getElementById('modalTeamName').value = data.teamName || '';
+document.getElementById('modalTeamLogo').value = data.teamLogo || '';
+document.getElementById('modalMatches').value = data.matches || '';
+document.getElementById('modalPoints').value = data.points || '';
+document.getElementById('articleFields').style.display = 'none';
+document.getElementById('matchFields').style.display = 'none';
+document.getElementById('tableFields').style.display = 'block';
+document.getElementById('modalSaveBtn').textContent = 'Zapisz drużynę';
+}
+document.getElementById('modalDelBtn').style.display = 'inline-block';
+document.getElementById('modal').classList.remove('hidden');
 }
 function resetModal() {
 document.getElementById('modalErr').textContent = '';
+document.getElementById('modalQuickMatch').value = '';
 }
 function closeModal() {
 document.getElementById('modal').classList.add('hidden');
 }
+
 function handleSave() {
 const section = document.getElementById('modalSection').value;
+const quickInput = document.getElementById('modalQuickMatch');
+if (quickInput.style.display !== 'none' && quickInput.value.trim()) {
+  const parsed = parseQuickMatch(quickInput.value);
+  if (!parsed) {
+    document.getElementById('modalErr').textContent = "Niepoprawny format meczu.";
+    return;
+  }
+  // Wybieramy sekcję z selecta
+  if (!matchSections.includes(section)) {
+    document.getElementById('modalErr').textContent = "Wybierz ligę meczu.";
+    return;
+  }
+  const data = {
+    title: "Kolejka",
+    homeTeam: parsed.homeTeam,
+    awayTeam: parsed.awayTeam,
+    date: parsed.date,
+    score: parsed.score,
+    logoHome: teamLogoMap[parsed.homeTeam] || null,
+    logoAway: teamLogoMap[parsed.awayTeam] || null
+  };
+  saveMatchData(section, data);
+  return;
+}
+
 if (articleSections.includes(section)) {
 saveArticle();
 } else if (matchSections.includes(section)) {
@@ -972,77 +1101,295 @@ saveTableEntry();
 }
 }
 
-// --- PARSE I BATCH ---
-function parseMatchLine(line) {
-const regex = /^(\d{2}\.\d{2}\.\d{4}),\s*(\d{2}:\d{2})\s+(.+?)\s+(\d+)-(\d+)\s+(.+)$/;
-const match = line.trim().match(regex);
-if (!match) return null;
-const [, date, time, homeTeam, homeScore, awayScore, awayTeam] = match;
-return {
-date: `${date}, ${time}`,
-homeTeam: homeTeam.trim(),
-awayTeam: awayTeam.trim(),
-score: `${homeScore}:${awayScore}`
-};
-}
-async function saveBatchMatches() {
-const section = document.getElementById('batchSection').value;
-const round = document.getElementById('batchRound').value.trim() || "Kolejka";
-const text = document.getElementById('batchMatches').value;
-const lines = text.split('\n').filter(l => l.trim());
-let successCount = 0;
-
-for (const line of lines) {
-const parsed = parseMatchLine(line);
-if (!parsed) continue;
-const data = {
-title: round,
-homeTeam: parsed.homeTeam,
-awayTeam: parsed.awayTeam,
-date: parsed.date,
-score: parsed.score,
-logoHome: teamLogoMap[parsed.homeTeam] || null,
-logoAway: teamLogoMap[parsed.awayTeam] || null
-};
+async function saveMatchData(section, data) {
 try {
 await db.collection(section).add({ ...data, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
-successCount++;
-} catch (e) {
-console.error("Błąd zapisu meczu:", line, e);
-}
-}
-closeModalBatch();
+closeModal();
 loadSection(section);
-alert(`Dodano ${successCount} meczów do ${section}.`);
+const activePageId = document.querySelector('.page.active')?.id;
+if (['polskie','puchary'].includes(activePageId)) {
+showLiga(activePageId, section);
+}
+} catch (e) {
+document.getElementById('modalErr').textContent = "Błąd zapisu meczu.";
+}
 }
 
-// --- MODAL BATCH ---
-function openBatchModal() {
-if (!isAdmin) return;
-document.getElementById('batchErr').textContent = '';
-document.getElementById('batchMatches').value = '';
-document.getElementById('batchRound').value = '';
-document.getElementById('modalBatch').classList.remove('hidden');
+async function saveArticle() {
+const title = document.getElementById('modalTitleInput').value.trim();
+const content = document.getElementById('modalContent').value;
+const imageUrl = document.getElementById('modalImage').value.trim();
+const videoUrl = document.getElementById('modalVideo').value.trim();
+const err = document.getElementById('modalErr');
+if (!title || !content) {
+err.textContent = "Tytuł i treść są wymagane.";
+return;
 }
-function closeModalBatch() {
-document.getElementById('modalBatch').classList.add('hidden');
+const section = document.getElementById('modalSection').value;
+const data = { title, content, imageUrl: imageUrl || null, videoUrl: videoUrl || null };
+try {
+if (currentDocId) {
+await db.collection(currentSection).doc(currentDocId).update(data);
+} else {
+await db.collection(section).add({ ...data, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
 }
-
-// --- ZAŁADOWANIE SEKCJI ---
+closeModal();
+loadSection(section);
+} catch (e) {
+err.textContent = "Błąd zapisu.";
+}
+}
+async function saveMatch() {
+const title = document.getElementById('modalTitleInputMatch').value.trim();
+const homeTeam = document.getElementById('modalHomeTeam').value.trim();
+const awayTeam = document.getElementById('modalAwayTeam').value.trim();
+const date = document.getElementById('modalDate').value.trim();
+const score = document.getElementById('modalScore').value.trim();
+const logoHome = document.getElementById('modalLogoHome').value.trim();
+const logoAway = document.getElementById('modalLogoAway').value.trim();
+const err = document.getElementById('modalErr');
+if (!title || !homeTeam || !awayTeam || !date || !score) {
+err.textContent = "Wypełnij wszystkie pola meczu.";
+return;
+}
+const section = document.getElementById('modalSection').value;
+const data = {
+title, homeTeam, awayTeam, date, score,
+logoHome: logoHome || null,
+logoAway: logoAway || null
+};
+saveMatchData(section, data);
+}
+async function saveTableEntry() {
+const position = document.getElementById('modalPosition').value.trim();
+const teamName = document.getElementById('modalTeamName').value.trim();
+const teamLogo = document.getElementById('modalTeamLogo').value.trim();
+const matches = document.getElementById('modalMatches').value.trim();
+const points = document.getElementById('modalPoints').value.trim();
+const err = document.getElementById('modalErr');
+if (!position || !teamName || !matches || points === '') {
+err.textContent = "Wypełnij wszystkie pola tabeli.";
+return;
+}
+const section = document.getElementById('modalSection').value;
+const data = {
+position: parseInt(position),
+teamName,
+teamLogo: teamLogo || null,
+matches,
+points: parseInt(points)
+};
+try {
+if (currentDocId) {
+await db.collection(section).doc(currentDocId).update(data);
+} else {
+await db.collection(section).add({ ...data, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+}
+closeModal();
+loadSection(section);
+} catch (e) {
+err.textContent = "Błąd zapisu drużyny.";
+}
+}
+async function deleteContent() {
+if (!confirm("Na pewno chcesz usunąć?")) return;
+try {
+const section = document.getElementById('modalSection').value;
+await db.collection(section).doc(currentDocId).delete();
+closeModal();
+loadSection(section);
+const activePageId = document.querySelector('.page.active')?.id;
+if (section.endsWith('_table')) {
+const base = section.replace('_table', '');
+loadSection(base);
+}
+if (['polskie','puchary'].includes(activePageId) && matchSections.includes(section)) {
+showLiga(activePageId, section);
+}
+} catch (e) {
+document.getElementById('modalErr').textContent = "Błąd usuwania.";
+}
+}
+function embedVideo(url) {
+if (!url) return '';
+const yt = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/);
+if (yt) return `<iframe src="https://www.youtube.com/embed/${yt[1]}" frameborder="0" allowfullscreen></iframe>`;
+if (url.endsWith('.mp4') || url.endsWith('.webm')) return `<video controls style="width:100%"><source src="${url}" type="video/mp4"></video>`;
+return `<a href="${url}" target="_blank" style="display:inline-block;padding:6px 12px;background:#ff3b3b;color:white;border-radius:4px;text-decoration:none;">Otwórz film</a>`;
+}
 async function loadSection(section) {
-// jak wcześniej – można zachować oryginalny kod z twojego pliku
+if (articleSections.includes(section)) {
+const container = document.getElementById(section + '-list');
+if (!container) return;
+try {
+const snap = await db.collection(section).orderBy("createdAt", "desc").get();
+if (snap.empty) {
+container.innerHTML = "<p>Brak treści.</p>";
+return;
 }
-
-// --- RESZTA FUNKCJI (saveArticle, saveMatch itp.) – zachowaj oryginalne z pliku
-// (ze względu na limit, pominięto – ale nie usuwaj ich z kodu!)
-
+let html = '';
+snap.forEach(doc => {
+const d = doc.data();
+const editBtn = isAdmin ?
+`<button class="edit-btn" onclick="openEditForm('${section}', '${doc.id}', ${JSON.stringify(d).replace(/"/g, '&quot;')})">Edytuj</button>` : '';
+const delBtn = isAdmin ?
+`<button class="delete-btn" onclick="openEditForm('${section}', '${doc.id}', ${JSON.stringify(d).replace(/"/g, '&quot;')})">Usuń</button>` : '';
+let media = '';
+if (d.imageUrl) media += `<img src="${d.imageUrl}" alt="Zdjęcie">`;
+if (d.videoUrl) media += embedVideo(d.videoUrl);
+html += `
+<div class="content-item">
+${editBtn}${delBtn}
+<h3>${d.title}</h3>
+<div class="article-content">${d.content}</div>
+${media}
+</div>
+`;
+});
+container.innerHTML = html;
+} catch (e) {
+container.innerHTML = "<p>Błąd ładowania treści.</p>";
+}
+} else if (matchSections.includes(section)) {
+const container = document.getElementById(section + '-list');
+if (!container) return;
+try {
+const snap = await db.collection(section).orderBy("createdAt", "desc").get();
+if (snap.empty) {
+container.innerHTML = "<p>Brak meczów.</p>";
+return;
+}
+let html = '';
+let currentRound = '';
+snap.forEach(doc => {
+const d = doc.data();
+const round = d.title || 'Bez kolejki';
+if (round !== currentRound) {
+html += `<div class="match-header">${round}</div>`;
+currentRound = round;
+}
+const actions = isAdmin ?
+`<button class="edit-btn" style="position:absolute;top:10px;right:10px;" onclick="openEditForm('${section}', '${doc.id}', ${JSON.stringify(d).replace(/"/g, '&quot;')})">Edytuj</button>
+<button class="delete-btn" style="position:absolute;top:10px;right:70px;" onclick="openEditForm('${section}', '${doc.id}', ${JSON.stringify(d).replace(/"/g, '&quot;')})">Usuń</button>` : '';
+html += `
+<div class="match-row">
+<div class="match-date">${d.date || '-'}</div>
+<div class="team-name">
+${d.logoHome ? `<img class="team-logo" src="${d.logoHome.trim()}" onerror="this.style.display='none'">` : ''}
+<span>${d.homeTeam || '---'}</span>
+</div>
+<div class="score">${d.score || '-'}</div>
+<div class="team-name">
+<span>${d.awayTeam || '---'}</span>
+${d.logoAway ? `<img class="team-logo" src="${d.logoAway.trim()}" onerror="this.style.display='none'">` : ''}
+</div>
+${actions}
+</div>
+`;
+});
+container.innerHTML = html;
+} catch (e) {
+container.innerHTML = "<p>Błąd ładowania meczów.</p>";
+}
+} else if (tableSections.includes(section)) {
+const container = document.getElementById(section + '-list');
+if (!container) return;
+try {
+const snap = await db.collection(section).orderBy("position", "asc").get();
+if (snap.empty) {
+container.querySelector('tbody').innerHTML = `<tr><td colspan="4">Brak drużyn.</td></tr>`;
+return;
+}
+let html = '';
+snap.forEach(doc => {
+const d = doc.data();
+let rowClass = '';
+const pos = parseInt(d.position);
+if (section === 'ekstraklasa_table') {
+if (pos >= 16) rowClass = 'relegation';
+} else if (section === 'pierwsza_liga_table' || section === 'druga_liga_table') {
+if (pos <= 2) rowClass = 'promotion';
+else if (pos >= 3 && pos <= 6) rowClass = 'playoff';
+else if (pos >= 16) rowClass = 'relegation';
+} else if (section.startsWith('trzecia_liga')) {
+if (pos === 1) rowClass = 'promotion';
+else if (pos === 2) rowClass = 'playoff';
+else if (pos >= 15) rowClass = 'relegation';
+}
+const actions = isAdmin ?
+`<td>
+<button class="edit-btn" onclick="openEditForm('${section}', '${doc.id}', ${JSON.stringify(d).replace(/"/g, '&quot;')})">Edytuj</button>
+<button class="delete-btn" onclick="openEditForm('${section}', '${doc.id}', ${JSON.stringify(d).replace(/"/g, '&quot;')})">Usuń</button>
+</td>` : '';
+html += `
+<tr class="${rowClass}">
+<td>${d.position || '-'}</td>
+<td class="team-cell">
+${d.teamLogo ? `<img class="team-logo-small" src="${d.teamLogo.trim()}" onerror="this.style.display='none'">` : ''}
+<span>${d.teamName || '---'}</span>
+</td>
+<td>${d.matches || '-'}</td>
+<td>${d.points || '-'}</td>
+${actions}
+</tr>
+`;
+});
+container.querySelector('tbody').innerHTML = html;
+let legendHTML = '';
+if (section === 'ekstraklasa_table') {
+legendHTML = '<div class="legend"><span class="relegation"></span> Spadek do 1. ligi (16–18)</div>';
+} else if (section === 'pierwsza_liga_table') {
+legendHTML = `
+<div class="legend">
+<span class="promotion"></span> Awans do ekstraklasy (1–2)
+<span class="playoff"></span> Play-off o awans: Półfinał (3–6)
+<span class="relegation"></span> Spadek do 2. ligi (16–18)
+</div>
+`;
+} else if (section === 'druga_liga_table') {
+legendHTML = `
+<div class="legend">
+<span class="promotion"></span> Awans do 1. ligi (1–2)
+<span class="playoff"></span> Play-off o awans: Półfinał (3–6)
+<span class="relegation"></span> Spadek do 3. ligi (16–18)
+</div>
+`;
+} else if (section.startsWith('trzecia_liga')) {
+legendHTML = `
+<div class="legend">
+<span class="promotion"></span> Awans do 2. ligi (1)
+<span class="playoff"></span> Betclic 2. Liga – Play-off o awans (2)
+<span class="relegation"></span> Spadek do 4. ligi (15–18)
+</div>
+`;
+}
+const existingLegend = container.nextElementSibling;
+if (existingLegend && existingLegend.classList.contains('legend')) {
+existingLegend.remove();
+}
+if (legendHTML) {
+container.insertAdjacentHTML('afterend', legendHTML);
+}
+} catch (e) {
+container.querySelector('tbody').innerHTML = `<tr><td colspan="4">Błąd ładowania tabeli.</td></tr>`;
+}
+}
+}
 document.querySelectorAll('.top-nav a').forEach(link => {
 link.addEventListener('click', (e) => {
 e.preventDefault();
 showSection(link.getAttribute('data-section'));
 });
 });
-
+// ✅ PODPIĘCIE ZDARZEŃ DO POLA W FORMULARZU MECZU I TABELI
+document.addEventListener('DOMContentLoaded', () => {
+const homeTeamInput = document.getElementById('modalHomeTeam');
+const awayTeamInput = document.getElementById('modalAwayTeam');
+const teamNameInput = document.getElementById('modalTeamName');
+if (homeTeamInput) homeTeamInput.addEventListener('input', updateHomeTeamLogo);
+if (awayTeamInput) awayTeamInput.addEventListener('input', updateAwayTeamLogo);
+if (teamNameInput) teamNameInput.addEventListener('input', updateTableTeamLogo);
+});
 showSection('home');
 </script>
 </body>
