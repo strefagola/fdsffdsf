@@ -416,15 +416,9 @@ padding: 18px 0;
 margin-top: 25px;
 font-size: 0.85rem;
 }
-.table-list tr.promotion {
-background: #1a5e1a;
-}
-.table-list tr.playoff {
-background: #1a4a5e;
-}
-.table-list tr.relegation {
-background: #5e1a1a;
-}
+.table-list tr.promotion { background: #1a5e1a; }
+.table-list tr.playoff { background: #1a4a5e; }
+.table-list tr.relegation { background: #5e1a1a; }
 .legend {
 display: flex;
 flex-wrap: wrap;
@@ -459,6 +453,7 @@ align-items: center;
 }
 .team-name {
 justify-content: flex-end;
+font-size: 0.8rem;
 }
 .team-name + .score + .team-name {
 justify-content: flex-start;
@@ -477,8 +472,7 @@ width: 20px;
 height: 20px;
 }
 .team-name span {
-font-size: 0.85rem;
-max-width: 100px;
+max-width: 90px;
 }
 .table-list {
 font-size: 0.85rem;
@@ -621,6 +615,8 @@ height: 18px;
 <section id="media" class="page"><h2>Multimedia</h2><div id="media-list" class="content-grid">Ładowanie...</div></section>
 <section id="history" class="page"><h2>Transfery</h2><div id="history-list" class="content-grid">Ładowanie...</div></section>
 <section id="schedule" class="page"><h2>Terminarz</h2><div id="schedule-list" class="content-grid">Ładowanie...</div></section>
+
+<!-- POLSKIE LIGI -->
 <section id="polskie" class="page">
 <h2>Polskie ligi</h2>
 <div class="ligi-nav">
@@ -641,7 +637,6 @@ height: 18px;
 <h3>Mecze Ekstraklasy</h3>
 <div id="ekstraklasa-list" class="match-list">Ładowanie...</div>
 </div>
-<!-- ... (pozostałe ligi – bez zmian, zachowane jak w oryginale) -->
 <div id="pierwsza_liga-content" class="liga-subpage">
 <h3>Tabela 1. ligi</h3>
 <table id="pierwsza_liga_table-list" class="table-list">
@@ -697,6 +692,8 @@ height: 18px;
 <div id="trzecia_liga_gr4-list" class="match-list">Ładowanie...</div>
 </div>
 </section>
+
+<!-- PUCHARY -->
 <section id="puchary" class="page">
 <h2>Puchary</h2>
 <div class="ligi-nav">
@@ -712,6 +709,8 @@ height: 18px;
 <div id="puchar_polski-list" class="match-list">Ładowanie...</div>
 </div>
 </section>
+
+<!-- EUROPA -->
 <section id="champions_league" class="page">
 <h3>Tabela Ligi Mistrzów</h3>
 <table id="champions_league_table-list" class="table-list">
@@ -761,7 +760,6 @@ height: 18px;
 </footer>
 <script src="firebase-config.js"></script>
 <script>
-// === FIREBASE I ZMIENNE ===
 const db = firebase.firestore();
 const auth = firebase.auth();
 
@@ -786,7 +784,58 @@ const teamLogoMap = {
 "Bruk-Bet Termalica Nieciecza": "https://ssl.gstatic.com/onebox/media/sports/logos/o7XlkdQ8SdLztOfNbx_qOg_48x48.png",
 "Wisła Kraków": "https://ssl.gstatic.com/onebox/media/sports/logos/3F6yvApKHQn0q0rZ0a2neA_48x48.png",
 "Polonia Bytom": "https://tmssl.akamaized.net/images/wappen/head/7976.png?lm=1644567890",
-// ... (cała reszta mapy — bez zmian, zachowana jak w Twoim pliku)
+"Pogoń Grodzisk Mazowiecki": "https://tmssl.akamaized.net/images/wappen/head/30998.png",
+"Chrobry Głogów": "https://tmssl.akamaized.net/images/wappen/head/8377.png",
+"Stal Rzeszów": "https://tmssl.akamaized.net/images/wappen/head/9510.png",
+"Wieczysta Kraków": "https://tmssl.akamaized.net/images/wappen/head/30974.png",
+"Śląsk Wrocław": "https://ssl.gstatic.com/onebox/media/sports/logos/3MmX1HdOQpyMjOyUYZrV5A_48x48.png",
+"Ruch Chorzów": "https://ssl.gstatic.com/onebox/media/sports/logos/i1SqD6VNfcEk9HKF2T-d2w_48x48.png",
+"Polonia Warszawa": "https://tmssl.akamaized.net/images/wappen/head/2745.png",
+"Miedź Legnica": "https://ssl.gstatic.com/onebox/media/sports/logos/fq1WD9d3xLj74lIdent4DA_48x48.png",
+"ŁKS Łódź": "https://ssl.gstatic.com/onebox/media/sports/logos/gI6Z_B5Q8Jg2O8o-cw4CXA_48x48.png",
+"Pogoń Siedlce": "https://tmssl.akamaized.net/images/wappen/head/4896.png",
+"Odra Opole": "https://tmssl.akamaized.net/images/wappen/head/5699.png",
+"Puszcza Niepołomice": "https://ssl.gstatic.com/onebox/media/sports/logos/0YoWjF5XBl-2s1S6GWkH2A_48x48.png",
+"Znicz Pruszków": "https://tmssl.akamaized.net/images/wappen/head/9109.png",
+"GKS Tychy": "https://ssl.gstatic.com/onebox/media/sports/logos/-Go6VcuWu0XVD1P9u0hpCw_48x48.png",
+"Stal Mielec": "https://ssl.gstatic.com/onebox/media/sports/logos/GF_H0JiHkv4o2d7_BKx9mw_48x48.png",
+"Górnik Łęczna": "https://ssl.gstatic.com/onebox/media/sports/logos/0r_STnYWNI7W9ovslr9lbg_48x48.png",
+"Unia Skierniewice": "https://tmssl.akamaized.net/images/wappen/head/30753.png",
+"Warta Poznań": "https://ssl.gstatic.com/onebox/media/sports/logos/7hBYIuozHBS7YTUqURuTPg_48x48.png",
+"Podhale Nowy Targ": "https://tmssl.akamaized.net/images/wappen/head/50162.png",
+"Olimpia Grudziądz": "https://tmssl.akamaized.net/images/wappen/head/26564.png",
+"Świt Szczecin": "https://tmssl.akamaized.net/images/wappen/head/50309.png",
+"Stal Stalowa Wola": "https://tmssl.akamaized.net/images/wappen/head/8641.png",
+"Resovia Rzeszów": "https://ssl.gstatic.com/onebox/media/sports/logos/7azjZdhixac1J0lTYKLTUw_48x48.png",
+"Podbeskidzie Bielsko-Biała": "https://static.flashscore.com/res/image/data/QH3r5KVH-r18qDdb5.png",
+"Śląsk Wrocław II": "https://static.flashscore.com/res/image/data/nBJb4VmC-EsEJ4Qb5.png",
+"Sokół Kleczew": "https://tmssl.akamaized.net/images/wappen/head/10367.png",
+"Chojniczanka Chojnice": "https://ssl.gstatic.com/onebox/media/sports/logos/_R1vMea3FWPzAtG3jDw_48x48.png",
+"Sandecja Nowy Sącz": "https://ssl.gstatic.com/onebox/media/sports/logos/6vDKj5KjO7SCR1Y6Q4Nc-A_48x48.png",
+"Zagłębie Sosnowiec": "https://ssl.gstatic.com/onebox/media/sports/logos/sosnowiec2425h_tm.png",
+"Hutnik Kraków": "https://tmssl.akamaized.net/images/wappen/head/530.png",
+"Rekord Bielsko-Biała": "https://tmssl.akamaized.net/images/wappen/head/31568.png",
+"KKS 1925 Kalisz": "https://ssl.gstatic.com/onebox/media/sports/logos/-J5kYq1lpvSunxuL1zrK6A_48x48.png",
+"ŁKS Łódź II": "https://tmssl.akamaized.net/images/wappen/head/16402.png",
+"GKS Jastrzębie": "https://tmssl.akamaized.net/images/wappen/head/9104.png",
+"Legia II Warszawa": "https://ssl.gstatic.com/onebox/media/sports/logos/9J1CLuM0AKoM0eeQxGamma_48x48.png",
+"Warta Sieradz": "https://ssl.gstatic.com/onebox/media/sports/logos/SyRnJ_2N7ugjEwuPmHdp_g_48x48.png",
+"ŁKS Łomża": "https://ssl.gstatic.com/onebox/media/sports/logos/_0KqFVi3vh_HmBq9Y3kP7w_48x48.png",
+"Ząbkovia Ząbki": "https://ssl.gstatic.com/onebox/media/sports/logos/R4kPZ0Zzxj3OztUe9GqsKQ_48x48.png",
+"Wigry Suwałki": "https://ssl.gstatic.com/onebox/media/sports/logos/0_qm3f8tVqS8Oa0tYCK6Cw_48x48.png",
+"Wisła II Płock": "https://ssl.gstatic.com/onebox/media/sports/logos/8IsqZ9y2XHXp0sPXQ89WgQ_48x48.png",
+"Świt Nowy Dwór Mazowiecki": "https://ssl.gstatic.com/onebox/media/sports/logos/O8j3W8gFS6e9R_3PnMS0yQ_48x48.png",
+"Broń Radom": "https://ssl.gstatic.com/onebox/media/sports/logos/f7D7RKdqY6o9yV4BHO7bOg_48x48.png",
+"KS CK Troszyn": "https://ssl.gstatic.com/onebox/media/sports/logos/M2qJx4qX5u1S5fVLpS5SEw_48x48.png",
+"Lechia Tomaszów Mazowiecki": "https://ssl.gstatic.com/onebox/media/sports/logos/SSu5b0o3NlX1s9xC9WwPnA_48x48.png",
+"Olimpia Elbląg": "https://ssl.gstatic.com/onebox/media/sports/logos/S_j9Xl3FgLm9S8QfHfBBGw_48x48.png",
+"Widzew II Łódź": "https://ssl.gstatic.com/onebox/media/sports/logos/rDwEAZ7syOg0mh3TKn-O5w_48x48.png",
+"Jagiellonia II Białystok": "https://ssl.gstatic.com/onebox/media/sports/logos/y_eM68BZHYr3j3R6PxR1hg_48x48.png",
+"GKS Bełchatów": "https://ssl.gstatic.com/onebox/media/sports/logos/B5Yo8s8Vhz2qc0aQHbsSrw_48x48.png",
+"GKS Wikielec": "https://ssl.gstatic.com/onebox/media/sports/logos/2J9zLN_Gw5Qqf1R3F5cncw_48x48.png",
+"Mławianka Mława": "https://ssl.gstatic.com/onebox/media/sports/logos/7UGM6Q75lWDbCzjhJlTlHQ_48x48.png",
+"KS Wasilków": "https://ssl.gstatic.com/onebox/media/sports/logos/55kLdUCG_SV33BQoPka-dA_48x48.png",
+"Znicz Biała Piska": "https://ssl.gstatic.com/onebox/media/sports/logos/1B9_iR8C1xM_yp7UMJv7Dw_48x48.png",
 "Polonia Środa Wlkp.": "https://tmssl.akamaized.net/images/wappen/head/9447.png",
 "Zawisza Bydgoszcz": "https://tmssl.akamaized.net/images/wappen/head/543.png",
 "Wikęd Luzino": "https://tmssl.akamaized.net/images/wappen/head/30997.png",
@@ -819,7 +868,7 @@ const matchSections = [
 ];
 const tableSections = matchSections.map(s => s + '_table');
 
-// === FUNKCJE LOGO ===
+// === LOGO ===
 function updateHomeTeamLogo() {
 const teamName = document.getElementById('modalHomeTeam').value.trim();
 const logoInput = document.getElementById('modalLogoHome');
@@ -848,7 +897,7 @@ logoInput.value = '';
 }
 }
 
-// === LOGIKA STRONY ===
+// === STRONA ===
 function showSection(id) {
 document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
 document.querySelectorAll('.top-nav a').forEach(a => a.classList.remove('active'));
@@ -998,14 +1047,118 @@ saveTableEntry();
 }
 }
 
-// === ZAPISY === (bez zmian – działają poprawnie)
+// === ZAPISY ===
+async function saveArticle() {
+const title = document.getElementById('modalTitleInput').value.trim();
+const content = document.getElementById('modalContent').value;
+const imageUrl = document.getElementById('modalImage').value.trim();
+const videoUrl = document.getElementById('modalVideo').value.trim();
+const err = document.getElementById('modalErr');
+if (!title || !content) {
+err.textContent = "Tytuł i treść są wymagane.";
+return;
+}
+const section = document.getElementById('modalSection').value;
+const data = { title, content, imageUrl: imageUrl || null, videoUrl: videoUrl || null };
+try {
+if (currentDocId) {
+await db.collection(currentSection).doc(currentDocId).update(data);
+} else {
+await db.collection(section).add({ ...data, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+}
+closeModal();
+loadSection(section);
+} catch (e) {
+err.textContent = "Błąd zapisu.";
+}
+}
+async function saveMatch() {
+const title = document.getElementById('modalTitleInputMatch').value.trim();
+const homeTeam = document.getElementById('modalHomeTeam').value.trim();
+const awayTeam = document.getElementById('modalAwayTeam').value.trim();
+const date = document.getElementById('modalDate').value.trim();
+const score = document.getElementById('modalScore').value.trim();
+const logoHome = document.getElementById('modalLogoHome').value.trim();
+const logoAway = document.getElementById('modalLogoAway').value.trim();
+const err = document.getElementById('modalErr');
+if (!title || !homeTeam || !awayTeam || !date || !score) {
+err.textContent = "Wypełnij wszystkie pola meczu.";
+return;
+}
+const section = document.getElementById('modalSection').value;
+const data = {
+title, homeTeam, awayTeam, date, score,
+logoHome: logoHome || null,
+logoAway: logoAway || null
+};
+try {
+if (currentDocId) {
+await db.collection(section).doc(currentDocId).update(data);
+} else {
+await db.collection(section).add({ ...data, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+}
+closeModal();
+loadSection(section);
+const activePageId = document.querySelector('.page.active')?.id;
+if (['polskie','puchary'].includes(activePageId)) {
+showLiga(activePageId, section);
+}
+} catch (e) {
+err.textContent = "Błąd zapisu meczu.";
+}
+}
+async function saveTableEntry() {
+const position = document.getElementById('modalPosition').value.trim();
+const teamName = document.getElementById('modalTeamName').value.trim();
+const teamLogo = document.getElementById('modalTeamLogo').value.trim();
+const matches = document.getElementById('modalMatches').value.trim();
+const points = document.getElementById('modalPoints').value.trim();
+const err = document.getElementById('modalErr');
+if (!position || !teamName || !matches || points === '') {
+err.textContent = "Wypełnij wszystkie pola.";
+return;
+}
+const section = document.getElementById('modalSection').value;
+const data = {
+position: parseInt(position),
+teamName,
+teamLogo: teamLogo || null,
+matches,
+points: parseInt(points)
+};
+try {
+if (currentDocId) {
+await db.collection(section).doc(currentDocId).update(data);
+} else {
+await db.collection(section).add({ ...data, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+}
+closeModal();
+loadSection(section);
+} catch (e) {
+err.textContent = "Błąd zapisu drużyny.";
+}
+}
+async function deleteContent() {
+if (!confirm("Na pewno chcesz usunąć?")) return;
+try {
+const section = document.getElementById('modalSection').value;
+await db.collection(section).doc(currentDocId).delete();
+closeModal();
+loadSection(section);
+const activePageId = document.querySelector('.page.active')?.id;
+if (section.endsWith('_table')) {
+const base = section.replace('_table', '');
+loadSection(base);
+}
+if (['polskie','puchary'].includes(activePageId) && matchSections.includes(section)) {
+showLiga(activePageId, section);
+}
+} catch (e) {
+document.getElementById('modalErr').textContent = "Błąd usuwania.";
+}
+}
 
-async function saveArticle() { /* ... */ }
-async function saveMatch() { /* ... */ }
-async function saveTableEntry() { /* ... */ }
-async function deleteContent() { /* ... */ }
-
-// === KLUCZOWA ZMIANA: SORTOWANIE MECZY wg KOEJKI I DATY ===
+// === KLUCZOWA FUNKCJA: sortowanie meczów wg kolejki ===
 function extractRoundNumber(title) {
 if (!title) return 999;
 const match = title.match(/kolejka\s*(\d+)/i);
@@ -1015,16 +1168,14 @@ function compareMatches(a, b) {
 const roundA = extractRoundNumber(a.title);
 const roundB = extractRoundNumber(b.title);
 if (roundA !== roundB) return roundA - roundB;
-// Jeśli ta sama kolejka – sortuj po dacie
 const dateA = a.date || '';
 const dateB = b.date || '';
 return dateA.localeCompare(dateB);
 }
 
-// === WCZYTANIE SEKCJI – Z SORTOWANIEM ===
+// === ŁADOWANIE SEKCJI ===
 async function loadSection(section) {
 if (articleSections.includes(section)) {
-// artykuły — bez zmian
 const container = document.getElementById(section + '-list');
 if (!container) return;
 try {
@@ -1060,7 +1211,7 @@ container.innerHTML = "<p>Błąd ładowania treści.</p>";
 const container = document.getElementById(section + '-list');
 if (!container) return;
 try {
-const snap = await db.collection(section).get(); // 🔸 bez orderBy — sortujemy ręcznie
+const snap = await db.collection(section).get(); // ⚠️ bez orderBy — sortujemy ręcznie
 if (snap.empty) {
 container.innerHTML = "<p>Brak meczów.</p>";
 return;
@@ -1069,8 +1220,7 @@ let matches = [];
 snap.forEach(doc => {
 matches.push({ id: doc.id, ...doc.data() });
 });
-// 🔸 SORTUJ wg kolejki i daty
-matches.sort(compareMatches);
+matches.sort(compareMatches); // 🔥 sortowanie wg kolejki
 
 let html = '';
 let currentRound = '';
@@ -1104,7 +1254,6 @@ container.innerHTML = html;
 container.innerHTML = "<p>Błąd ładowania meczów.</p>";
 }
 } else if (tableSections.includes(section)) {
-// tabele — bez zmian
 const container = document.getElementById(section + '-list');
 if (!container) return;
 try {
@@ -1152,29 +1301,23 @@ let legendHTML = '';
 if (section === 'ekstraklasa_table') {
 legendHTML = '<div class="legend"><span class="relegation"></span> Spadek do 1. ligi (16–18)</div>';
 } else if (section === 'pierwsza_liga_table') {
-legendHTML = `
-<div class="legend">
+legendHTML = `<div class="legend">
 <span class="promotion"></span> Awans do ekstraklasy (1–2)
 <span class="playoff"></span> Play-off o awans: Półfinał (3–6)
 <span class="relegation"></span> Spadek do 2. ligi (16–18)
-</div>
-`;
+</div>`;
 } else if (section === 'druga_liga_table') {
-legendHTML = `
-<div class="legend">
+legendHTML = `<div class="legend">
 <span class="promotion"></span> Awans do 1. ligi (1–2)
 <span class="playoff"></span> Play-off o awans: Półfinał (3–6)
 <span class="relegation"></span> Spadek do 3. ligi (16–18)
-</div>
-`;
+</div>`;
 } else if (section.startsWith('trzecia_liga')) {
-legendHTML = `
-<div class="legend">
+legendHTML = `<div class="legend">
 <span class="promotion"></span> Awans do 2. ligi (1)
 <span class="playoff"></span> Betclic 2. Liga – Play-off o awans (2)
 <span class="relegation"></span> Spadek do 4. ligi (15–18)
-</div>
-`;
+</div>`;
 }
 const existingLegend = container.nextElementSibling;
 if (existingLegend && existingLegend.classList.contains('legend')) {
