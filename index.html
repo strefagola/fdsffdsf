@@ -974,16 +974,16 @@ saveTableEntry();
 
 // --- PARSE I BATCH ---
 function parseMatchLine(line) {
-const regex = /^(\d{2}\.\d{2}\.\d{4}),\s*(\d{2}:\d{2})\s+(.+?)\s+(\d+)-(\d+)\s+(.+)$/;
-const match = line.trim().match(regex);
-if (!match) return null;
-const [, date, time, homeTeam, homeScore, awayScore, awayTeam] = match;
-return {
-date: `${date}, ${time}`,
-homeTeam: homeTeam.trim(),
-awayTeam: awayTeam.trim(),
-score: `${homeScore}:${awayScore}`
-};
+  const regex = /^(.+?)\s+(\d+)-(\d+)\s+(.+)$/;
+  const match = line.trim().match(regex);
+  if (!match) return null;
+  const [, homeTeam, homeScore, awayScore, awayTeam] = match;
+  return {
+    date: "", // brak daty — zostaw puste
+    homeTeam: homeTeam.trim(),
+    awayTeam: awayTeam.trim(),
+    score: `${homeScore}:${awayScore}`
+  };
 }
 async function saveBatchMatches() {
 const section = document.getElementById('batchSection').value;
