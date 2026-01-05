@@ -4,12 +4,12 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>StrefaGola (SG)</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com ">
+<link rel="preconnect" href="https://fonts.gstatic.com " crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto :wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js "></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js "></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js "></script>
 <style>
 :root {
 --bg: #0d101a;
@@ -171,137 +171,137 @@ font-size: 0.95rem;
 }
 .content-item img {
 max-width: 100%;
-height: auto;
-border-radius: 6px;
-margin: 10px 0;
-display: block;
+	height: auto;
+	border-radius: 6px;
+	margin: 10px 0;
+	display: block;
 }
 .content-item iframe, .content-item video {
 width: 100%;
-height: 220px;
-border-radius: 6px;
-margin: 10px 0;
+	height: 220px;
+	border-radius: 6px;
+	margin: 10px 0;
 }
 .edit-btn, .delete-btn {
-background: var(--accent);
-color: white;
-border: none;
-padding: 5px 10px;
-border-radius: 4px;
-font-weight: 600;
-cursor: pointer;
-font-size: 0.85rem;
-margin-left: 8px;
+	background: var(--accent);
+	color: white;
+	border: none;
+	padding: 5px 10px;
+	border-radius: 4px;
+	font-weight: 600;
+	cursor: pointer;
+	font-size: 0.85rem;
+	margin-left: 8px;
 }
 .delete-btn {
-background: #dc2626;
+	background: #dc2626;
 }
 .ligi-nav {
-display: flex;
-flex-wrap: wrap;
-gap: 8px;
-margin: 15px 0 20px;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	margin: 15px 0 20px;
 }
 .liga-btn {
-padding: 7px 14px;
-background: #1f2636;
-border: 1px solid var(--border);
-border-radius: 4px;
-color: var(--text);
-font-weight: 600;
-font-size: 0.9rem;
-cursor: pointer;
-white-space: nowrap;
+	padding: 7px 14px;
+	background: #1f2636;
+	border: 1px solid var(--border);
+	border-radius: 4px;
+	color: var(--text);
+	font-weight: 600;
+	font-size: 0.9rem;
+	cursor: pointer;
+	white-space: nowrap;
 }
 .liga-btn:hover {
-background: #2a3245;
+	background: #2a3245;
 }
 .liga-subpage {
-display: none;
+	display: none;
 }
 .liga-subpage.active-liga {
-display: block;
+	display: block;
 }
 .table-list {
-width: 100%;
-border-collapse: collapse;
-margin-bottom: 20px;
-background: var(--card);
-border-radius: 6px;
-overflow: hidden;
+	width: 100%;
+	border-collapse: collapse;
+	margin-bottom: 20px;
+	background: var(--card);
+	border-radius: 6px;
+	overflow: hidden;
 }
 .table-list th,
 .table-list td {
-padding: 10px 12px;
-text-align: center;
-border-bottom: 1px solid var(--border);
+	padding: 10px 12px;
+	text-align: center;
+	border-bottom: 1px solid var(--border);
 }
 .table-list th {
-background: #0b0e15;
-font-weight: 600;
+	background: #0b0e15;
+	font-weight: 600;
 }
 .table-list tr:last-child td {
-border-bottom: none;
+	border-bottom: none;
 }
 .team-cell {
-display: flex;
-align-items: center;
-gap: 8px;
-justify-content: center;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	justify-content: center;
 }
 .team-logo-small {
-width: 20px;
-height: 20px;
-border-radius: 50%;
-object-fit: cover;
+	width: 20px;
+	height: 20px;
+	border-radius: 50%;
+	object-fit: cover;
 }
 .match-list {
-display: grid;
-gap: 6px;
+	display: grid;
+	gap: 6px;
 }
 .match-header {
-background: #0b0e15;
-padding: 8px 12px;
-border-top-left-radius: 6px;
-border-top-right-radius: 6px;
-font-weight: 600;
-font-size: 0.9rem;
-display: flex;
-justify-content: space-between;
-align-items: center;
+	background: #0b0e15;
+	padding: 8px 12px;
+	border-top-left-radius: 6px;
+	border-top-right-radius: 6px;
+	font-weight: 600;
+	font-size: 0.9rem;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
 }
 .match-row {
-display: grid;
-grid-template-columns: 1fr 1fr 1fr 1fr;
-gap: 8px;
-padding: 10px 12px;
-border: 1px solid var(--border);
-align-items: center;
-position: relative;
+	display: grid;
+	grid-template-columns: 1fr 1fr 1fr 1fr;
+	gap: 8px;
+	padding: 10px 12px;
+	border: 1px solid var(--border);
+	align-items: center;
+	position: relative;
 }
 .match-date {
-font-size: 0.85rem;
-color: var(--text-light);
+	font-size: 0.85rem;
+	color: var(--text-light);
 }
 .team-name {
-display: flex;
-align-items: center;
-gap: 8px;
-font-size: 0.9rem;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	font-size: 0.9rem;
 }
 .team-logo {
-width: 24px;
-height: 24px;
-border-radius: 50%;
-object-fit: cover;
+	width: 24px;
+	height: 24px;
+	border-radius: 50%;
+	object-fit: cover;
 }
 .score {
-font-weight: 700;
-font-size: 1rem;
-text-align: center;
+	font-weight: 700;
+	font-size: 1rem;
+	text-align: center;
 }
 .admin-bar {
-background: #090c12;
+	background: #090c12;
 	padding: 18px 15px;
 	margin-top: 30px;
 	border-top: 1px solid var(--border);
@@ -409,13 +409,13 @@ footer {
 }
 /* 🎨 KOLORY TABELI */
 .table-list tr.promotion {
-	background: #1a5e1a; /* Zielony – awans bezpośredni */
+	background: #1a5e1a;
 }
 .table-list tr.playoff {
-	background: #1a4a5e; /* Niebieski – play-off */
+	background: #1a4a5e;
 }
 .table-list tr.relegation {
-	background: #5e1a1a; /* Czerwony – spadek */
+	background: #5e1a1a;
 }
 .legend {
 	display: flex;
@@ -495,8 +495,9 @@ footer {
 </nav>
 <main id="main">
 <header>
-<img src="https://www.ebilet.pl/now/app/uploads/2024/02/shutterstock_2253076431-1-1280x720.jpg" alt="Piłka nożna" />
+<img src="https://www.ebilet.pl/now/app/uploads/2024/02/shutterstock_2253076431-1-1280x720.jpg " alt="Piłka nożna" />
 </header>
+
 <!-- MODAL -->
 <div id="modal" class="modal hidden">
 <div class="modal-content">
@@ -506,14 +507,13 @@ footer {
 </div>
 <div class="modal-body">
 <select id="modalSection">
-<!-- Artykuły -->
 <option value="news">Aktualności</option>
 <option value="results">Wyniki</option>
 <option value="analysis">Analizy</option>
 <option value="media">Multimedia</option>
 <option value="history">Transfery</option>
 <option value="schedule">Terminarz</option>
-<!-- Polskie ligi – mecze -->
+
 <option value="ekstraklasa">Ekstraklasa (mecz)</option>
 <option value="pierwsza_liga">1. liga (mecz)</option>
 <option value="druga_liga">2. liga (mecz)</option>
@@ -521,14 +521,14 @@ footer {
 <option value="trzecia_liga_gr2">3. liga gr II (mecz)</option>
 <option value="trzecia_liga_gr3">3. liga gr III (mecz)</option>
 <option value="trzecia_liga_gr4">3. liga gr IV (mecz)</option>
-<!-- Puchary – mecze -->
+
 <option value="superpuchar">Superpuchar (mecz)</option>
 <option value="puchar_polski">STS Puchar Polski (mecz)</option>
-<!-- Europa – mecze -->
+
 <option value="champions_league">Liga Mistrzów (mecz)</option>
 <option value="europa_league">Liga Europy (mecz)</option>
 <option value="conference_league">Liga Konferencji (mecz)</option>
-<!-- Polskie ligi – tabele -->
+
 <option value="ekstraklasa_table">Ekstraklasa (tabela)</option>
 <option value="pierwsza_liga_table">1. liga (tabela)</option>
 <option value="druga_liga_table">2. liga (tabela)</option>
@@ -536,20 +536,22 @@ footer {
 <option value="trzecia_liga_gr2_table">3. liga gr II (tabela)</option>
 <option value="trzecia_liga_gr3_table">3. liga gr III (tabela)</option>
 <option value="trzecia_liga_gr4_table">3. liga gr IV (tabela)</option>
-<!-- Puchary – tabele -->
+
 <option value="superpuchar_table">Superpuchar (tabela)</option>
 <option value="puchar_polski_table">STS Puchar Polski (tabela)</option>
-<!-- Europa – tabele -->
+
 <option value="champions_league_table">Liga Mistrzów (tabela)</option>
 <option value="europa_league_table">Liga Europy (tabela)</option>
 <option value="conference_league_table">Liga Konferencji (tabela)</option>
 </select>
+
 <div id="articleFields">
 <input type="text" id="modalTitleInput" placeholder="Tytuł artykułu" />
 <textarea id="modalContent" placeholder="Treść..."></textarea>
 <input type="url" id="modalImage" placeholder="Link do zdjęcia" />
 <input type="url" id="modalVideo" placeholder="Link do filmu" />
 </div>
+
 <div id="matchFields" style="display:none;">
 <input type="text" id="modalTitleInputMatch" placeholder="KOLEJKA 20" />
 <div style="margin:10px 0;padding:10px;background:#1a1f2c;border-radius:6px;">
@@ -565,6 +567,7 @@ footer {
 <input type="text" id="modalDate" placeholder="Data i godzina" />
 <input type="text" id="modalScore" placeholder="Wynik (np. 2:1)" />
 </div>
+
 <div id="tableFields" style="display:none;">
 <input type="number" id="modalPosition" placeholder="Pozycja (1-20)" min="1" max="100" />
 <input type="text" id="modalTeamName" placeholder="Nazwa drużyny" />
@@ -572,6 +575,7 @@ footer {
 <input type="text" id="modalMatches" placeholder="Mecze (np. WWPPW)" />
 <input type="number" id="modalPoints" placeholder="Liczba punktów" min="0" />
 </div>
+
 <div class="modal-actions">
 <button class="btn btn-primary" id="modalSaveBtn" onclick="handleSave()">Zapisz</button>
 <button class="btn btn-danger" id="modalDelBtn" onclick="deleteContent()" style="display:none;">Usuń</button>
@@ -580,6 +584,7 @@ footer {
 </div>
 </div>
 </div>
+
 <!-- SEKCJE -->
 <section id="home" class="page active">
 <div class="hero">
@@ -592,12 +597,14 @@ footer {
 <div class="feature-card"><h3>Puchary</h3><p>Superpuchar i Puchar Polski.</p></div>
 </div>
 </section>
+
 <section id="news" class="page"><h2>Aktualności</h2><div id="news-list" class="content-grid">Ładowanie...</div></section>
 <section id="results" class="page"><h2>Wyniki</h2><div id="results-list" class="content-grid">Ładowanie...</div></section>
 <section id="analysis" class="page"><h2>Analizy</h2><div id="analysis-list" class="content-grid">Ładowanie...</div></section>
 <section id="media" class="page"><h2>Multimedia</h2><div id="media-list" class="content-grid">Ładowanie...</div></section>
 <section id="history" class="page"><h2>Transfery</h2><div id="history-list" class="content-grid">Ładowanie...</div></section>
 <section id="schedule" class="page"><h2>Terminarz</h2><div id="schedule-list" class="content-grid">Ładowanie...</div></section>
+
 <!-- POLSKIE LIGI -->
 <section id="polskie" class="page">
 <h2>Polskie ligi</h2>
@@ -610,70 +617,44 @@ footer {
 <button class="liga-btn" onclick="showLiga('polskie', 'trzecia_liga_gr3')">3. liga gr III</button>
 <button class="liga-btn" onclick="showLiga('polskie', 'trzecia_liga_gr4')">3. liga gr IV</button>
 </div>
+
 <div id="ekstraklasa-content" class="liga-subpage active-liga">
 <h3>Tabela Ekstraklasy</h3>
-<table id="ekstraklasa_table-list" class="table-list">
-<thead><tr><th>#</th><th>Drużyna</th><th>Mecze</th><th>Punkty</th></tr></thead>
-<tbody><tr><td colspan="4">Ładowanie...</td></tr></tbody>
-</table>
-<h3>Mecze Ekstraklasy</h3>
-<div id="ekstraklasa-list" class="match-list">Ładowanie...</div>
+<table id="ekstraklasa_table-list" class="table-list"><thead><tr><th>#</th><th>Drużyna</th><th>Mecze</th><th>Punkty</th></tr></thead><tbody><tr><td colspan="4">Ładowanie...</td></tr></tbody></table>
+<h3>Mecze Ekstraklasy</h3><div id="ekstraklasa-list" class="match-list">Ładowanie...</div>
 </div>
 <div id="pierwsza_liga-content" class="liga-subpage">
 <h3>Tabela 1. ligi</h3>
-<table id="pierwsza_liga_table-list" class="table-list">
-<thead><tr><th>#</th><th>Drużyna</th><th>Mecze</th><th>Punkty</th></tr></thead>
-<tbody><tr><td colspan="4">Ładowanie...</td></tr></tbody>
-</table>
-<h3>Mecze 1. ligi</h3>
-<div id="pierwsza_liga-list" class="match-list">Ładowanie...</div>
+<table id="pierwsza_liga_table-list" class="table-list"><thead><tr><th>#</th><th>Drużyna</th><th>Mecze</th><th>Punkty</th></tr></thead><tbody><tr><td colspan="4">Ładowanie...</td></tr></tbody></table>
+<h3>Mecze 1. ligi</h3><div id="pierwsza_liga-list" class="match-list">Ładowanie...</div>
 </div>
 <div id="druga_liga-content" class="liga-subpage">
 <h3>Tabela 2. ligi</h3>
-<table id="druga_liga_table-list" class="table-list">
-<thead><tr><th>#</th><th>Drużyna</th><th>Mecze</th><th>Punkty</th></tr></thead>
-<tbody><tr><td colspan="4">Ładowanie...</td></tr></tbody>
-</table>
-<h3>Mecze 2. ligi</h3>
-<div id="druga_liga-list" class="match-list">Ładowanie...</div>
+<table id="druga_liga_table-list" class="table-list"><thead><tr><th>#</th><th>Drużyna</th><th>Mecze</th><th>Punkty</th></tr></thead><tbody><tr><td colspan="4">Ładowanie...</td></tr></tbody></table>
+<h3>Mecze 2. ligi</h3><div id="druga_liga-list" class="match-list">Ładowanie...</div>
 </div>
 <div id="trzecia_liga_gr1-content" class="liga-subpage">
 <h3>Tabela 3. ligi gr I</h3>
-<table id="trzecia_liga_gr1_table-list" class="table-list">
-<thead><tr><th>#</th><th>Drużyna</th><th>Mecze</th><th>Punkty</th></tr></thead>
-<tbody><tr><td colspan="4">Ładowanie...</td></tr></tbody>
-</table>
-<h3>Mecze 3. ligi gr I</h3>
-<div id="trzecia_liga_gr1-list" class="match-list">Ładowanie...</div>
+<table id="trzecia_liga_gr1_table-list" class="table-list"><thead><tr><th>#</th><th>Drużyna</th><th>Mecze</th><th>Punkty</th></tr></thead><tbody><tr><td colspan="4">Ładowanie...</td></tr></tbody></table>
+<h3>Mecze 3. ligi gr I</h3><div id="trzecia_liga_gr1-list" class="match-list">Ładowanie...</div>
 </div>
 <div id="trzecia_liga_gr2-content" class="liga-subpage">
 <h3>Tabela 3. ligi gr II</h3>
-<table id="trzecia_liga_gr2_table-list" class="table-list">
-<thead><tr><th>#</th><th>Drużyna</th><th>Mecze</th><th>Punkty</th></tr></thead>
-<tbody><tr><td colspan="4">Ładowanie...</td></tr></tbody>
-</table>
-<h3>Mecze 3. ligi gr II</h3>
-<div id="trzecia_liga_gr2-list" class="match-list">Ładowanie...</div>
+<table id="trzecia_liga_gr2_table-list" class="table-list"><thead><tr><th>#</th><th>Drużyna</th><th>Mecze</th><th>Punkty</th></tr></thead><tbody><tr><td colspan="4">Ładowanie...</td></tr></tbody></table>
+<h3>Mecze 3. ligi gr II</h3><div id="trzecia_liga_gr2-list" class="match-list">Ładowanie...</div>
 </div>
 <div id="trzecia_liga_gr3-content" class="liga-subpage">
 <h3>Tabela 3. ligi gr III</h3>
-<table id="trzecia_liga_gr3_table-list" class="table-list">
-<thead><tr><th>#</th><th>Drużyna</th><th>Mecze</th><th>Punkty</th></tr></thead>
-<tbody><tr><td colspan="4">Ładowanie...</td></tr></tbody>
-</table>
-<h3>Mecze 3. ligi gr III</h3>
-<div id="trzecia_liga_gr3-list" class="match-list">Ładowanie...</div>
+<table id="trzecia_liga_gr3_table-list" class="table-list"><thead><tr><th>#</th><th>Drużyna</th><th>Mecze</th><th>Punkty</th></tr></thead><tbody><tr><td colspan="4">Ładowanie...</td></tr></tbody></table>
+<h3>Mecze 3. ligi gr III</h3><div id="trzecia_liga_gr3-list" class="match-list">Ładowanie...</div>
 </div>
 <div id="trzecia_liga_gr4-content" class="liga-subpage">
 <h3>Tabela 3. ligi gr IV</h3>
-<table id="trzecia_liga_gr4_table-list" class="table-list">
-<thead><tr><th>#</th><th>Drużyna</th><th>Mecze</th><th>Punkty</th></tr></thead>
-<tbody><tr><td colspan="4">Ładowanie...</td></tr></tbody>
-</table>
-<h3>Mecze 3. ligi gr IV</h3>
-<div id="trzecia_liga_gr4-list" class="match-list">Ładowanie...</div>
+<table id="trzecia_liga_gr4_table-list" class="table-list"><thead><tr><th>#</th><th>Drużyna</th><th>Mecze</th><th>Punkty</th></tr></thead><tbody><tr><td colspan="4">Ładowanie...</td></tr></tbody></table>
+<h3>Mecze 3. ligi gr IV</h3><div id="trzecia_liga_gr4-list" class="match-list">Ładowanie...</div>
 </div>
 </section>
+
 <!-- PUCHARY -->
 <section id="puchary" class="page">
 <h2>Puchary</h2>
@@ -682,42 +663,30 @@ footer {
 <button class="liga-btn" onclick="showLiga('puchary', 'puchar_polski')">STS Puchar Polski</button>
 </div>
 <div id="superpuchar-content" class="liga-subpage active-liga">
-<h3>Mecze Superpucharu</h3>
-<div id="superpuchar-list" class="match-list">Ładowanie...</div>
+<h3>Mecze Superpucharu</h3><div id="superpuchar-list" class="match-list">Ładowanie...</div>
 </div>
 <div id="puchar_polski-content" class="liga-subpage">
-<h3>Mecze Pucharu Polski</h3>
-<div id="puchar_polski-list" class="match-list">Ładowanie...</div>
+<h3>Mecze Pucharu Polski</h3><div id="puchar_polski-list" class="match-list">Ładowanie...</div>
 </div>
 </section>
+
 <!-- EUROPA -->
 <section id="champions_league" class="page">
 <h3>Tabela Ligi Mistrzów</h3>
-<table id="champions_league_table-list" class="table-list">
-<thead><tr><th>#</th><th>Drużyna</th><th>Mecze</th><th>Punkty</th></tr></thead>
-<tbody><tr><td colspan="4">Ładowanie...</td></tr></tbody>
-</table>
-<h3>Mecze Ligi Mistrzów</h3>
-<div id="champions_league-list" class="match-list">Ładowanie...</div>
+<table id="champions_league_table-list" class="table-list"><thead><tr><th>#</th><th>Drużyna</th><th>Mecze</th><th>Punkty</th></tr></thead><tbody><tr><td colspan="4">Ładowanie...</td></tr></tbody></table>
+<h3>Mecze Ligi Mistrzów</h3><div id="champions_league-list" class="match-list">Ładowanie...</div>
 </section>
 <section id="europa_league" class="page">
 <h3>Tabela Ligi Europy</h3>
-<table id="europa_league_table-list" class="table-list">
-<thead><tr><th>#</th><th>Drużyna</th><th>Mecze</th><th>Punkty</th></tr></thead>
-<tbody><tr><td colspan="4">Ładowanie...</td></tr></tbody>
-</table>
-<h3>Mecze Ligi Europy</h3>
-<div id="europa_league-list" class="match-list">Ładowanie...</div>
+<table id="europa_league_table-list" class="table-list"><thead><tr><th>#</th><th>Drużyna</th><th>Mecze</th><th>Punkty</th></tr></thead><tbody><tr><td colspan="4">Ładowanie...</td></tr></tbody></table>
+<h3>Mecze Ligi Europy</h3><div id="europa_league-list" class="match-list">Ładowanie...</div>
 </section>
 <section id="conference_league" class="page">
 <h3>Tabela Ligi Konferencji</h3>
-<table id="conference_league_table-list" class="table-list">
-<thead><tr><th>#</th><th>Drużyna</th><th>Mecze</th><th>Punkty</th></tr></thead>
-<tbody><tr><td colspan="4">Ładowanie...</td></tr></tbody>
-</table>
-<h3>Mecze Ligi Konferencji</h3>
-<div id="conference_league-list" class="match-list">Ładowanie...</div>
+<table id="conference_league_table-list" class="table-list"><thead><tr><th>#</th><th>Drużyna</th><th>Mecze</th><th>Punkty</th></tr></thead><tbody><tr><td colspan="4">Ładowanie...</td></tr></tbody></table>
+<h3>Mecze Ligi Konferencji</h3><div id="conference_league-list" class="match-list">Ładowanie...</div>
 </section>
+
 <!-- 🔐 PANEL ADMINA -->
 <div class="admin-bar" id="adminPanel">
 <h3>Panel administratora</h3>
@@ -739,155 +708,144 @@ footer {
 </footer>
 <script src="firebase-config.js"></script>
 <script>
-// ✅ MAPA DRUŻYN → HERBY
+// ✅ NOWA MAPA HERBÓW – TYLKO LINKI Z WIKIMEDIA
 const teamLogoMap = {
-"Wisła Płock": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Wisla_Plock_herb.svg/48px-Wisla_Plock_herb.svg.png",
-"Górnik Zabrze": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/16/Gornik_Zabrze_herb.svg/48px-Gornik_Zabrze_herb.svg.png",
-"Jagiellonia Białystok": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Jagiellonia_Bialystok_herb.svg/48px-Jagiellonia_Bialystok_herb.svg.png",
-"Raków Częstochowa": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/36/Rakow_Czestochowa_herb.svg/48px-Rakow_Czestochowa_herb.svg.png",
-"Zagłębie Lubin": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2d/Zaglebie_Lubin_herb.svg/48px-Zaglebie_Lubin_herb.svg.png",
-"Cracovia": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3b/Cracovia_herb.svg/48px-Cracovia_herb.svg.png",
-"Radomiak Radom": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/89/Radomiak_Radom_herb.svg/48px-Radomiak_Radom_herb.svg.png",
-"Lech Poznań": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7f/Lech_Poznan_herb.svg/48px-Lech_Poznan_herb.svg.png",
-"Korona Kielce": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/74/Korona_Kielce_herb.svg/48px-Korona_Kielce_herb.svg.png",
-"Pogoń Szczecin": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0f/Pogon_Szczecin_herb.svg/48px-Pogon_Szczecin_herb.svg.png",
-"Motor Lublin": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/Motor_Lublin_herb.svg/48px-Motor_Lublin_herb.svg.png",
-"Arka Gdynia": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4a/Arka_Gdynia_herb.svg/48px-Arka_Gdynia_herb.svg.png",
-"Lechia Gdańsk": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6d/Lechia_Gdansk_herb.svg/48px-Lechia_Gdansk_herb.svg.png",
-"Piast Gliwice": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/Piast_Gliwice_herb.svg/48px-Piast_Gliwice_herb.svg.png",
-"Widzew Łódź": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Widzew_Lodz_herb.svg/48px-Widzew_Lodz_herb.svg.png",
-"GKS Katowice": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/GKS_Katowice_herb.svg/48px-GKS_Katowice_herb.svg.png",
-"Legia Warszawa": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/Legia_Warszawa_herb.svg/48px-Legia_Warszawa_herb.svg.png",
-"Bruk-Bet Termalica Nieciecza": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/Bruk-Bet_Termalica_Nieciecza_herb.svg/48px-Bruk-Bet_Termalica_Nieciecza_herb.svg.png",
-"Wisła Kraków": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9f/Wisla_Krakow_herb.svg/48px-Wisla_Krakow_herb.svg.png",
-"Polonia Bytom": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/47/Polonia_Bytom_herb.svg/48px-Polonia_Bytom_herb.svg.png",
-"Śląsk Wrocław": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Slask_Wroclaw_herb.svg/48px-Slask_Wroclaw_herb.svg.png",
-"Ruch Chorzów": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Ruch_Chorzow_herb.svg/48px-Ruch_Chorzow_herb.svg.png"
-"Polonia Warszawa": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/Polonia_Warszawa_herb.svg/48px-Polonia_Warszawa_herb.svg.png",
-"Miedź Legnica": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7e/Miedz_Legnica_herb.svg/48px-Miedz_Legnica_herb.svg.png",
-"ŁKS Łódź": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/LKS_Lodz_herb.svg/48px-LKS_Lodz_herb.svg.png",
-"Odra Opole": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2b/Odra_Opole_herb.svg/48px-Odra_Opole_herb.svg.png",
-"Znicz Pruszków": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/Znicz_Pruszkow_herb.svg/48px-Znicz_Pruszkow_herb.svg.png",
-"GKS Tychy": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/GKS_Tychy_herb.svg/48px-GKS_Tychy_herb.svg.png",
-"Górnik Łęczna": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/Gornik_Leczna_herb.svg/48px-Gornik_Leczna_herb.svg.png",
-"Stal Mielec": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/77/Stal_Mielec_herb.svg/48px-Stal_Mielec_herb.svg.png",
-"Puszcza Niepołomice": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6c/Puszcza_Niepolomice_herb.svg/48px-Puszcza_Niepolomice_herb.svg.png",
-"Warta Poznań": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2b/Warta_Poznan_herb.svg/48px-Warta_Poznan_herb.svg.png",
-"Resovia Rzeszów": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/49/Resovia_Rzeszow_herb.svg/48px-Resovia_Rzeszow_herb.svg.png",
-"Podbeskidzie Bielsko-Biała": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/Podbeskidzie_Bielsko-Biala_herb.svg/48px-Podbeskidzie_Bielsko-Biala_herb.svg.png",
-"Stal Stalowa Wola": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1f/Stal_Stalowa_Wola_herb.svg/48px-Stal_Stalowa_Wola_herb.svg.png",
-"Chojniczanka Chojnice": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0b/Chojniczanka_Chojnice_herb.svg/48px-Chojniczanka_Chojnice_herb.svg.png",
-"Sandecja Nowy Sącz": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/78/Sandecja_Nowy_Sacz_herb.svg/48px-Sandecja_Nowy_Sacz_herb.svg.png",
-"Hutnik Kraków": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4a/Hutnik_Krakow_herb.svg/48px-Hutnik_Krakow_herb.svg.png",
-"Rekord Bielsko-Biała": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6a/Rekord_Bielsko-Biala_herb.svg/48px-Rekord_Bielsko-Biala_herb.svg.png",
-"KKS 1925 Kalisz": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1b/KKS_1925_Kalisz_herb.svg/48px-KKS_1925_Kalisz_herb.svg.png"
-"ŁKS Łódź II": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/LKS_Lodz_herb.svg/48px-LKS_Lodz_herb.svg.png",
-"GKS Jastrzębie": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2e/GKS_Jastrzebie_herb.svg/48px-GKS_Jastrzebie_herb.svg.png",
-"Legia II Warszawa": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/Legia_Warszawa_herb.svg/48px-Legia_Warszawa_herb.svg.png",
-"Warta Sieradz": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1c/Warta_Sieradz_herb.svg/48px-Warta_Sieradz_herb.svg.png",
-"ŁKS Łomża": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/57/LKS_Lomza_herb.svg/48px-LKS_Lomza_herb.svg.png",
-"Ząbkovia Ząbki": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0e/Zabkovia_Zabki_herb.svg/48px-Zabkovia_Zabki_herb.svg.png",
-"Wigry Suwałki": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b/Wigry_Suwalki_herb.svg/48px-Wigry_Suwalki_herb.svg.png",
-"Wisła II Płock": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Wisla_Plock_herb.svg/48px-Wisla_Plock_herb.svg.png",
-"Świt Nowy Dwór Mazowiecki": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/Swit_Nowy_Dwor_Mazowiecki_herb.svg/48px-Swit_Nowy_Dwor_Mazowiecki_herb.svg.png",
-"Broń Radom": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7e/Bron_Radom_herb.svg/48px-Bron_Radom_herb.svg.png",
-"KS CK Troszyn": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/CK_Troszyn_herb.svg/48px-CK_Troszyn_herb.svg.png",
-"Lechia Tomaszów Mazowiecki": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0c/Lechia_Tomaszow_Mazowiecki_herb.svg/48px-Lechia_Tomaszow_Mazowiecki_herb.svg.png",
-"Olimpia Elbląg": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6a/Olimpia_Elblag_herb.svg/48px-Olimpia_Elblag_herb.svg.png",
-"Widzew II Łódź": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Widzew_Lodz_herb.svg/48px-Widzew_Lodz_herb.svg.png",
-"Jagiellonia II Białystok": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Jagiellonia_Bialystok_herb.svg/48px-Jagiellonia_Bialystok_herb.svg.png",
-"GKS Bełchatów": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6d/GKS_Belchatow_herb.svg/48px-GKS_Belchatow_herb.svg.png",
-"GKS Wikielec": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/GKS_Wikielec_herb.svg/48px-GKS_Wikielec_herb.svg.png",
-"Mławianka Mława": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/19/Mlawianka_Mlawa_herb.svg/48px-Mlawianka_Mlawa_herb.svg.png",
-"KS Wasilków": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5d/KS_Wasilkow_herb.svg/48px-KS_Wasilkow_herb.svg.png",
-"Znicz Biała Piska": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Znicz_Biala_Piska_herb.svg/48px-Znicz_Biala_Piska_herb.svg.png"
-"Polonia Środa Wielkopolska": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/47/Polonia_Sroda_Wielkopolska_herb.svg/48px-Polonia_Sroda_Wielkopolska_herb.svg.png",
-"Zawisza Bydgoszcz": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Zawisza_Bydgoszcz_herb.svg/48px-Zawisza_Bydgoszcz_herb.svg.png",
-"Wikęd Luzino": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7c/Wiked_Luzino_herb.svg/48px-Wiked_Luzino_herb.svg.png",
-"Elana Toruń": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/63/Elana_Torun_herb.svg/48px-Elana_Torun_herb.svg.png",
-"Lech Poznań II": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7f/Lech_Poznan_herb.svg/48px-Lech_Poznan_herb.svg.png",
-"Cartusia Kartuzy": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2d/Cartusia_Kartuzy_herb.svg/48px-Cartusia_Kartuzy_herb.svg.png",
-"Lipno Stęszew": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0f/Lipno_Steszew_herb.svg/48px-Lipno_Steszew_herb.svg.png",
-"Flota Świnoujście": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/Flota_Swinoujscie_herb.svg/48px-Flota_Swinoujscie_herb.svg.png",
-"Błękitni Stargard": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Blekitni_Stargard_herb.svg/48px-Blekitni_Stargard_herb.svg.png",
-"Wda Świecie": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/Wda_Swiecie_herb.svg/48px-Wda_Swiecie_herb.svg.png",
-"Noteć Czarnków": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/63/Notec_Czarnkow_herb.svg/48px-Notec_Czarnkow_herb.svg.png",
-"Kluczevia Stargard": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4a/Kluczevia_Stargard_herb.svg/48px-Kluczevia_Stargard_herb.svg.png",
-"Pogoń Szczecin II": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0f/Pogon_Szczecin_herb.svg/48px-Pogon_Szczecin_herb.svg.png",
-"Pogoń Nowe Skalmierzyce": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/78/Pogon_Nowe_Skalmierzyce_herb.svg/48px-Pogon_Nowe_Skalmierzyce_herb.svg.png",
-"Unia Swarzędz": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/Unia_Swarzedz_herb.svg/48px-Unia_Swarzedz_herb.svg.png",
-"Victoria Września": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1c/Victoria_Wrzesnia_herb.svg/48px-Victoria_Wrzesnia_herb.svg.png",
-"Tłuchowo": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Tluchowo_herb.svg/48px-Tluchowo_herb.svg.png",
-"Wybrzeże Rewalskie Rewal": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Wybrzeze_Rewalskie_herb.svg/48px-Wybrzeze_Rewalskie_herb.svg.png"
-"Lechia Zielona Góra": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4d/Lechia_Zielona_Gora_herb.svg/48px-Lechia_Zielona_Gora_herb.svg.png",
-"BKS Sparta Katowice": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/Sparta_Katowice_herb.svg/48px-Sparta_Katowice_herb.svg.png",
-"Górnik Polkowice": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0c/Gornik_Polkowice_herb.svg/48px-Gornik_Polkowice_herb.svg.png",
-"Zagłębie Lubin II": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2d/Zaglebie_Lubin_herb.svg/48px-Zaglebie_Lubin_herb.svg.png",
-"KS Goczałkowice-Zdrój": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/Goczalkowice_Zdroj_herb.svg/48px-Goczalkowice_Zdroj_herb.svg.png",
-"Carina Gubin": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Carina_Gubin_herb.svg/48px-Carina_Gubin_herb.svg.png",
-"Skra Częstochowa": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b/Skra_Czestochowa_herb.svg/48px-Skra_Czestochowa_herb.svg.png",
-"MKS Kluczbork": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/MKS_Kluczbork_herb.svg/48px-MKS_Kluczbork_herb.svg.png",
-"Warta Gorzów Wielkopolski": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Warta_Gorzow_herb.svg/48px-Warta_Gorzow_herb.svg.png",
-"Karkonosze Jelenia Góra": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7c/Karkonosze_Jelenia_Gora_herb.svg/48px-Karkonosze_Jelenia_Gora_herb.svg.png",
-"Górnik Zabrze II": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/16/Gornik_Zabrze_herb.svg/48px-Gornik_Zabrze_herb.svg.png",
-"Polonia Nysa": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2b/Polonia_Nysa_herb.svg/48px-Polonia_Nysa_herb.svg.png",
-"Ślęza Wrocław": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/49/Sleza_Wroclaw_herb.svg/48px-Sleza_Wroclaw_herb.svg.png",
-"Słowianin Wolibórz": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3d/Slowianin_Woliborz_herb.svg/48px-Slowianin_Woliborz_herb.svg.png",
-"Miedź Legnica II": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7e/Miedz_Legnica_herb.svg/48px-Miedz_Legnica_herb.svg.png",
-"Pniówek-74 Pawłowice": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9d/Pniowek-74_Pawlowice_herb.svg/48px-Pniowek-74_Pawlowice_herb.svg.png",
-"Starowice Dolne": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/Starowice_Dolne_herb.svg/48px-Starowice_Dolne_herb.svg.png",
-"Stal Jasień": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6a/Stal_Jasien_herb.svg/48px-Stal_Jasien_herb.svg.png"
-"Avia Świdnik": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6d/Avia_Swidnik_herb.svg/48px-Avia_Swidnik_herb.svg.png",
-"KSZO Ostrowiec Świętokrzyski": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/KSZO_Ostrowiec_herb.svg/48px-KSZO_Ostrowiec_herb.svg.png",
-"Chełmianka Chełm": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0a/Chelmianka_Chelm_herb.svg/48px-Chelmianka_Chelm_herb.svg.png",
-"Wiślanie Skawina": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4f/Wislane_Skawina_herb.svg/48px-Wislane_Skawina_herb.svg.png",
-"Star Starachowice": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Star_Starachowice_herb.svg/48px-Star_Starachowice_herb.svg.png",
-"Siarka Tarnobrzeg": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/Siarka_Tarnobrzeg_herb.svg/48px-Siarka_Tarnobrzeg_herb.svg.png",
-"Podlasie Biała Podlaska": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/77/Podlasie_Biala_Podlaska_herb.svg/48px-Podlasie_Biala_Podlaska_herb.svg.png",
-"Pogoń-Sokół Lubaczów": "https://tmssl.akamaized.net/images/wappen/head/31036.png",
-"Korona Kielce II": "https://ssl.gstatic.com/onebox/media/sports/logos/BDdCENWYiX0-i_9DT9hauQ_48x48.png  ",
-"Wisłoka Dębica": "https://tmssl.akamaized.net/images/wappen/head/31037.png  ",
-"Czarni Połaniec": "https://tmssl.akamaized.net/images/wappen/head/31038.png  ",
-"Wisła Kraków II": "https://ssl.gstatic.com/onebox/media/sports/logos/25w.png  ",
-"Cracovia II": "https://ssl.gstatic.com/onebox/media/sports/logos/6-v3o-SzN373qD9NRYJBlg_48x48.png  ",
-"Stal Kraśnik": "https://tmssl.akamaized.net/images/wappen/head/31039.png  ",
-"Naprzód Jędrzejów": "https://tmssl.akamaized.net/images/wappen/head/31040.png  ",
-"Świdniczanka Świdnik": "https://tmssl.akamaized.net/images/wappen/head/31041.png  ",
-"Kolbuszowa Dolna": "https://tmssl.akamaized.net/images/wappen/head/31042.png  ",
-"Sparta Kazimierza Wielka": "https://tmssl.akamaized.net/images/wappen/head/31043.png  "
+"Wisła Płock": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Wisla_Plock_herb.svg/48px-Wisla_Plock_herb.svg.png ",
+"Górnik Zabrze": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/16/Gornik_Zabrze_herb.svg/48px-Gornik_Zabrze_herb.svg.png ",
+"Jagiellonia Białystok": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Jagiellonia_Bialystok_herb.svg/48px-Jagiellonia_Bialystok_herb.svg.png ",
+"Raków Częstochowa": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/36/Rakow_Czestochowa_herb.svg/48px-Rakow_Czestochowa_herb.svg.png ",
+"Zagłębie Lubin": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2d/Zaglebie_Lubin_herb.svg/48px-Zaglebie_Lubin_herb.svg.png ",
+"Cracovia": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3b/Cracovia_herb.svg/48px-Cracovia_herb.svg.png ",
+"Radomiak Radom": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/89/Radomiak_Radom_herb.svg/48px-Radomiak_Radom_herb.svg.png ",
+"Lech Poznań": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7f/Lech_Poznan_herb.svg/48px-Lech_Poznan_herb.svg.png ",
+"Korona Kielce": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/74/Korona_Kielce_herb.svg/48px-Korona_Kielce_herb.svg.png ",
+"Pogoń Szczecin": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0f/Pogon_Szczecin_herb.svg/48px-Pogon_Szczecin_herb.svg.png ",
+"Motor Lublin": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/Motor_Lublin_herb.svg/48px-Motor_Lublin_herb.svg.png ",
+"Arka Gdynia": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4a/Arka_Gdynia_herb.svg/48px-Arka_Gdynia_herb.svg.png ",
+"Lechia Gdańsk": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6d/Lechia_Gdansk_herb.svg/48px-Lechia_Gdansk_herb.svg.png ",
+"Piast Gliwice": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/Piast_Gliwice_herb.svg/48px-Piast_Gliwice_herb.svg.png ",
+"Widzew Łódź": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Widzew_Lodz_herb.svg/48px-Widzew_Lodz_herb.svg.png ",
+"GKS Katowice": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/GKS_Katowice_herb.svg/48px-GKS_Katowice_herb.svg.png ",
+"Legia Warszawa": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/Legia_Warszawa_herb.svg/48px-Legia_Warszawa_herb.svg.png ",
+"Bruk-Bet Termalica Nieciecza": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/Bruk-Bet_Termalica_Nieciecza_herb.svg/48px-Bruk-Bet_Termalica_Nieciecza_herb.svg.png ",
+"Wisła Kraków": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9f/Wisla_Krakow_herb.svg/48px-Wisla_Krakow_herb.svg.png ",
+"Polonia Bytom": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/47/Polonia_Bytom_herb.svg/48px-Polonia_Bytom_herb.svg.png ",
+"Śląsk Wrocław": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Slask_Wroclaw_herb.svg/48px-Slask_Wroclaw_herb.svg.png ",
+"Ruch Chorzów": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Ruch_Chorzow_herb.svg/48px-Ruch_Chorzow_herb.svg.png ",
+"Polonia Warszawa": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/Polonia_Warszawa_herb.svg/48px-Polonia_Warszawa_herb.svg.png ",
+"Miedź Legnica": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7e/Miedz_Legnica_herb.svg/48px-Miedz_Legnica_herb.svg.png ",
+"ŁKS Łódź": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/LKS_Lodz_herb.svg/48px-LKS_Lodz_herb.svg.png ",
+"Odra Opole": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2b/Odra_Opole_herb.svg/48px-Odra_Opole_herb.svg.png ",
+"Znicz Pruszków": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/Znicz_Pruszkow_herb.svg/48px-Znicz_Pruszkow_herb.svg.png ",
+"GKS Tychy": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/GKS_Tychy_herb.svg/48px-GKS_Tychy_herb.svg.png ",
+"Górnik Łęczna": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/Gornik_Leczna_herb.svg/48px-Gornik_Leczna_herb.svg.png ",
+"Stal Mielec": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/77/Stal_Mielec_herb.svg/48px-Stal_Mielec_herb.svg.png ",
+"Puszcza Niepołomice": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6c/Puszcza_Niepolomice_herb.svg/48px-Puszcza_Niepolomice_herb.svg.png ",
+"Warta Poznań": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2b/Warta_Poznan_herb.svg/48px-Warta_Poznan_herb.svg.png ",
+"Resovia Rzeszów": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/49/Resovia_Rzeszow_herb.svg/48px-Resovia_Rzeszow_herb.svg.png ",
+"Podbeskidzie Bielsko-Biała": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/Podbeskidzie_Bielsko-Biala_herb.svg/48px-Podbeskidzie_Bielsko-Biala_herb.svg.png ",
+"Stal Stalowa Wola": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1f/Stal_Stalowa_Wola_herb.svg/48px-Stal_Stalowa_Wola_herb.svg.png ",
+"Chojniczanka Chojnice": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0b/Chojniczanka_Chojnice_herb.svg/48px-Chojniczanka_Chojnice_herb.svg.png ",
+"Sandecja Nowy Sącz": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/78/Sandecja_Nowy_Sacz_herb.svg/48px-Sandecja_Nowy_Sacz_herb.svg.png ",
+"Hutnik Kraków": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4a/Hutnik_Krakow_herb.svg/48px-Hutnik_Krakow_herb.svg.png ",
+"Rekord Bielsko-Biała": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6a/Rekord_Bielsko-Biala_herb.svg/48px-Rekord_Bielsko-Biala_herb.svg.png ",
+"KKS 1925 Kalisz": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1b/KKS_1925_Kalisz_herb.svg/48px-KKS_1925_Kalisz_herb.svg.png ",
+"ŁKS Łódź II": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/LKS_Lodz_herb.svg/48px-LKS_Lodz_herb.svg.png ",
+"GKS Jastrzębie": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2e/GKS_Jastrzebie_herb.svg/48px-GKS_Jastrzebie_herb.svg.png ",
+"Legia II Warszawa": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/Legia_Warszawa_herb.svg/48px-Legia_Warszawa_herb.svg.png ",
+"Warta Sieradz": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1c/Warta_Sieradz_herb.svg/48px-Warta_Sieradz_herb.svg.png ",
+"ŁKS Łomża": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/57/LKS_Lomza_herb.svg/48px-LKS_Lomza_herb.svg.png ",
+"Ząbkovia Ząbki": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0e/Zabkovia_Zabki_herb.svg/48px-Zabkovia_Zabki_herb.svg.png ",
+"Wigry Suwałki": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b/Wigry_Suwalki_herb.svg/48px-Wigry_Suwalki_herb.svg.png ",
+"Wisła II Płock": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Wisla_Plock_herb.svg/48px-Wisla_Plock_herb.svg.png ",
+"Świt Nowy Dwór Mazowiecki": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/Swit_Nowy_Dwor_Mazowiecki_herb.svg/48px-Swit_Nowy_Dwor_Mazowiecki_herb.svg.png ",
+"Broń Radom": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7e/Bron_Radom_herb.svg/48px-Bron_Radom_herb.svg.png ",
+"KS CK Troszyn": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/CK_Troszyn_herb.svg/48px-CK_Troszyn_herb.svg.png ",
+"Lechia Tomaszów Mazowiecki": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0c/Lechia_Tomaszow_Mazowiecki_herb.svg/48px-Lechia_Tomaszow_Mazowiecki_herb.svg.png ",
+"Olimpia Elbląg": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6a/Olimpia_Elblag_herb.svg/48px-Olimpia_Elblag_herb.svg.png ",
+"Widzew II Łódź": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Widzew_Lodz_herb.svg/48px-Widzew_Lodz_herb.svg.png ",
+"Jagiellonia II Białystok": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Jagiellonia_Bialystok_herb.svg/48px-Jagiellonia_Bialystok_herb.svg.png ",
+"GKS Bełchatów": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6d/GKS_Belchatow_herb.svg/48px-GKS_Belchatow_herb.svg.png ",
+"GKS Wikielec": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/GKS_Wikielec_herb.svg/48px-GKS_Wikielec_herb.svg.png ",
+"Mławianka Mława": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/19/Mlawianka_Mlawa_herb.svg/48px-Mlawianka_Mlawa_herb.svg.png ",
+"KS Wasilków": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5d/KS_Wasilkow_herb.svg/48px-KS_Wasilkow_herb.svg.png ",
+"Znicz Biała Piska": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Znicz_Biala_Piska_herb.svg/48px-Znicz_Biala_Piska_herb.svg.png ",
+"Polonia Środa Wielkopolska": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/47/Polonia_Sroda_Wielkopolska_herb.svg/48px-Polonia_Sroda_Wielkopolska_herb.svg.png ",
+"Zawisza Bydgoszcz": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Zawisza_Bydgoszcz_herb.svg/48px-Zawisza_Bydgoszcz_herb.svg.png ",
+"Wikęd Luzino": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7c/Wiked_Luzino_herb.svg/48px-Wiked_Luzino_herb.svg.png ",
+"Elana Toruń": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/63/Elana_Torun_herb.svg/48px-Elana_Torun_herb.svg.png ",
+"Lech Poznań II": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7f/Lech_Poznan_herb.svg/48px-Lech_Poznan_herb.svg.png ",
+"Cartusia Kartuzy": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2d/Cartusia_Kartuzy_herb.svg/48px-Cartusia_Kartuzy_herb.svg.png ",
+"Lipno Stęszew": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0f/Lipno_Steszew_herb.svg/48px-Lipno_Steszew_herb.svg.png ",
+"Flota Świnoujście": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/Flota_Swinoujscie_herb.svg/48px-Flota_Swinoujscie_herb.svg.png ",
+"Błękitni Stargard": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Blekitni_Stargard_herb.svg/48px-Blekitni_Stargard_herb.svg.png ",
+"Wda Świecie": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/Wda_Swiecie_herb.svg/48px-Wda_Swiecie_herb.svg.png ",
+"Noteć Czarnków": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/63/Notec_Czarnkow_herb.svg/48px-Notec_Czarnkow_herb.svg.png ",
+"Kluczevia Stargard": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4a/Kluczevia_Stargard_herb.svg/48px-Kluczevia_Stargard_herb.svg.png ",
+"Pogoń Szczecin II": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0f/Pogon_Szczecin_herb.svg/48px-Pogon_Szczecin_herb.svg.png ",
+"Pogoń Nowe Skalmierzyce": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/78/Pogon_Nowe_Skalmierzyce_herb.svg/48px-Pogon_Nowe_Skalmierzyce_herb.svg.png ",
+"Unia Swarzędz": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/Unia_Swarzedz_herb.svg/48px-Unia_Swarzedz_herb.svg.png ",
+"Victoria Września": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1c/Victoria_Wrzesnia_herb.svg/48px-Victoria_Wrzesnia_herb.svg.png ",
+"Tłuchowo": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Tluchowo_herb.svg/48px-Tluchowo_herb.svg.png ",
+"Wybrzeże Rewalskie Rewal": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Wybrzeze_Rewalskie_herb.svg/48px-Wybrzeze_Rewalskie_herb.svg.png ",
+"Lechia Zielona Góra": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4d/Lechia_Zielona_Gora_herb.svg/48px-Lechia_Zielona_Gora_herb.svg.png ",
+"BKS Sparta Katowice": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/Sparta_Katowice_herb.svg/48px-Sparta_Katowice_herb.svg.png ",
+"Górnik Polkowice": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0c/Gornik_Polkowice_herb.svg/48px-Gornik_Polkowice_herb.svg.png ",
+"Zagłębie Lubin II": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2d/Zaglebie_Lubin_herb.svg/48px-Zaglebie_Lubin_herb.svg.png ",
+"KS Goczałkowice-Zdrój": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/Goczalkowice_Zdroj_herb.svg/48px-Goczalkowice_Zdroj_herb.svg.png ",
+"Carina Gubin": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Carina_Gubin_herb.svg/48px-Carina_Gubin_herb.svg.png ",
+"Skra Częstochowa": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b/Skra_Czestochowa_herb.svg/48px-Skra_Czestochowa_herb.svg.png ",
+"MKS Kluczbork": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/MKS_Kluczbork_herb.svg/48px-MKS_Kluczbork_herb.svg.png ",
+"Warta Gorzów Wielkopolski": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Warta_Gorzow_herb.svg/48px-Warta_Gorzow_herb.svg.png ",
+"Karkonosze Jelenia Góra": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7c/Karkonosze_Jelenia_Gora_herb.svg/48px-Karkonosze_Jelenia_Gora_herb.svg.png ",
+"Górnik Zabrze II": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/16/Gornik_Zabrze_herb.svg/48px-Gornik_Zabrze_herb.svg.png  ",
+"Polonia Nysa": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2b/Polonia_Nysa_herb.svg/48px-Polonia_Nysa_herb.svg.png  ",
+"Ślęza Wrocław": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/49/Sleza_Wroclaw_herb.svg/48px-Sleza_Wroclaw_herb.svg.png  ",
+"Słowianin Wolibórz": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3d/Slowianin_Woliborz_herb.svg/48px-Slowianin_Woliborz_herb.svg.png  ",
+"Miedź Legnica II": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7e/Miedz_Legnica_herb.svg/48px-Miedz_Legnica_herb.svg.png  ",
+"Pniówek-74 Pawłowice": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9d/Pniowek-74_Pawlowice_herb.svg/48px-Pniowek-74_Pawlowice_herb.svg.png  ",
+"Starowice Dolne": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/Starowice_Dolne_herb.svg/48px-Starowice_Dolne_herb.svg.png  ",
+"Stal Jasień": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6a/Stal_Jasien_herb.svg/48px-Stal_Jasien_herb.svg.png  ",
+"Avia Świdnik": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6d/Avia_Swidnik_herb.svg/48px-Avia_Swidnik_herb.svg.png  ",
+"KSZO Ostrowiec Świętokrzyski": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/KSZO_Ostrowiec_herb.svg/48px-KSZO_Ostrowiec_herb.svg.png  ",
+"Chełmianka Chełm": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0a/Chelmianka_Chelm_herb.svg/48px-Chelmianka_Chelm_herb.svg.png  ",
+"Wiślanie Skawina": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4f/Wislane_Skawina_herb.svg/48px-Wislane_Skawina_herb.svg.png  ",
+"Star Starachowice": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Star_Starachowice_herb.svg/48px-Star_Starachowice_herb.svg.png  ",
+"Siarka Tarnobrzeg": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/Siarka_Tarnobrzeg_herb.svg/48px-Siarka_Tarnobrzeg_herb.svg.png  ",
+"Podlasie Biała Podlaska": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/77/Podlasie_Biala_Podlaska_herb.svg/48px-Podlasie_Biala_Podlaska_herb.svg.png  ",
+"Pogoń-Sokół Lubaczów": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4d/Pogon-Sokol_Lubaczow_herb.svg/48px-Pogon-Sokol_Lubaczow_herb.svg.png  ",
+"Korona Kielce II": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/74/Korona_Kielce_herb.svg/48px-Korona_Kielce_herb.svg.png  ",
+"Wisłoka Dębica": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/23/Wisloka_Debica_herb.svg/48px-Wisloka_Debica_herb.svg.png  ",
+"Czarni Połaniec": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0f/Czarni_Polaniec_herb.svg/48px-Czarni_Polaniec_herb.svg.png  ",
+"Wisła Kraków II": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9f/Wisla_Krakow_herb.svg/48px-Wisla_Krakow_herb.svg.png  ",
+"Cracovia II": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3b/Cracovia_herb.svg/48px-Cracovia_herb.svg.png  ",
+"Stal Kraśnik": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0e/Stal_Krasnik_herb.svg/48px-Stal_Krasnik_herb.svg.png  ",
+"Naprzód Jędrzejów": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/77/Naprzod_Jedrzejow_herb.svg/48px-Naprzod_Jedrzejow_herb.svg.png  ",
+"Świdniczanka Świdnik": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Swidniczanka_Swidnik_herb.svg/48px-Swidniczanka_Swidnik_herb.svg.png  ",
+"Kolbuszowa Dolna": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2d/Kolbuszowa_Dolna_herb.svg/48px-Kolbuszowa_Dolna_herb.svg.png  ",
+"Sparta Kazimierza Wielka": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6f/Sparta_Kazimierza_Wielka_herb.svg/48px-Sparta_Kazimierza_Wielka_herb.svg.png  "
 };
 
 // ✅ FUNKCJE AUTOMATYCZNEGO UZUPEŁNIANIA HERBÓW
 function updateHomeTeamLogo() {
   const teamName = document.getElementById('modalHomeTeam').value.trim();
   const logoInput = document.getElementById('modalLogoHome');
-  if (teamLogoMap[teamName]) {
-    logoInput.value = teamLogoMap[teamName].trim();
-  } else {
-    logoInput.value = '';
-  }
+  logoInput.value = teamLogoMap[teamName] ? teamLogoMap[teamName].trim() : '';
 }
 
 function updateAwayTeamLogo() {
   const teamName = document.getElementById('modalAwayTeam').value.trim();
   const logoInput = document.getElementById('modalLogoAway');
-  if (teamLogoMap[teamName]) {
-    logoInput.value = teamLogoMap[teamName].trim();
-  } else {
-    logoInput.value = '';
-  }
+  logoInput.value = teamLogoMap[teamName] ? teamLogoMap[teamName].trim() : '';
 }
 
 function updateTableTeamLogo() {
   const teamName = document.getElementById('modalTeamName').value.trim();
   const logoInput = document.getElementById('modalTeamLogo');
-  if (teamLogoMap[teamName]) {
-    logoInput.value = teamLogoMap[teamName].trim();
-  } else {
-    logoInput.value = '';
-  }
+  logoInput.value = teamLogoMap[teamName] ? teamLogoMap[teamName].trim() : '';
 }
 
+// ✅ RESZTA KODU – BEZ ZMIAN
 let isAdmin = false;
 let currentDocId = null;
 let currentSection = null;
@@ -1095,8 +1053,9 @@ const homeTeam = document.getElementById('modalHomeTeam').value.trim();
 const awayTeam = document.getElementById('modalAwayTeam').value.trim();
 const date = document.getElementById('modalDate').value.trim();
 const score = document.getElementById('modalScore').value.trim();
-const logoHome = document.getElementById('modalLogoHome').value.trim();
-const logoAway = document.getElementById('modalLogoAway').value.trim();
+// ✅ AUTOMATYCZNE UZUPEŁNIENIE HERBÓW
+const logoHome = teamLogoMap[homeTeam] || null;
+const logoAway = teamLogoMap[awayTeam] || null;
 const err = document.getElementById('modalErr');
 if (!title || !homeTeam || !awayTeam || !date || !score) {
 err.textContent = "Wypełnij wszystkie pola meczu.";
@@ -1105,8 +1064,8 @@ return;
 const section = document.getElementById('modalSection').value;
 const data = {
 title, homeTeam, awayTeam, date, score,
-logoHome: logoHome || null,
-logoAway: logoAway || null
+logoHome,
+logoAway
 };
 try {
 if (currentDocId) {
@@ -1126,11 +1085,12 @@ err.textContent = "Błąd zapisu meczu.";
 }
 
 async function saveTableEntry() {
-const position = document.getElementById('modalPosition').value.trim();
 const teamName = document.getElementById('modalTeamName').value.trim();
-const teamLogo = document.getElementById('modalTeamLogo').value.trim();
+const position = document.getElementById('modalPosition').value.trim();
 const matches = document.getElementById('modalMatches').value.trim();
 const points = document.getElementById('modalPoints').value.trim();
+// ✅ AUTOMATYCZNE UZUPEŁNIENIE HERBU
+const teamLogo = teamLogoMap[teamName] || null;
 const err = document.getElementById('modalErr');
 if (!position || !teamName || !matches || points === '') {
 err.textContent = "Wypełnij wszystkie pola tabeli.";
@@ -1140,7 +1100,7 @@ const section = document.getElementById('modalSection').value;
 const data = {
 position: parseInt(position),
 teamName,
-teamLogo: teamLogo || null,
+teamLogo,
 matches,
 points: parseInt(points)
 };
@@ -1288,8 +1248,8 @@ else if (pos >= 15) rowClass = 'relegation';
 
 const actions = isAdmin ?
 `<td>
-  <button class="edit-btn" onclick="openEditForm('${section}', '${doc.id}', ${JSON.stringify(d).replace(/"/g, '&quot;')})">Edytuj</button>
-  <button class="delete-btn" onclick="openEditForm('${section}', '${doc.id}', ${JSON.stringify(d).replace(/"/g, '&quot;')})">Usuń</button>
+<button class="edit-btn" onclick="openEditForm('${section}', '${doc.id}', ${JSON.stringify(d).replace(/"/g, '&quot;')})">Edytuj</button>
+<button class="delete-btn" onclick="openEditForm('${section}', '${doc.id}', ${JSON.stringify(d).replace(/"/g, '&quot;')})">Usuń</button>
 </td>` : '';
 
 html += `
@@ -1357,14 +1317,15 @@ showSection(link.getAttribute('data-section'));
 });
 });
 
-// ✅ PODPIĘCIE ZDARZEŃ DO POLA W FORMULARZU MECZU I TABELI
+// ✅ PODPIĘCIE ZDARZEŃ
 document.addEventListener('DOMContentLoaded', () => {
-const homeTeamInput = document.getElementById('modalHomeTeam');
-const awayTeamInput = document.getElementById('modalAwayTeam');
-const teamNameInput = document.getElementById('modalTeamName');
-if (homeTeamInput) homeTeamInput.addEventListener('input', updateHomeTeamLogo);
-if (awayTeamInput) awayTeamInput.addEventListener('input', updateAwayTeamLogo);
-if (teamNameInput) teamNameInput.addEventListener('input', updateTableTeamLogo);
+const homeInput = document.getElementById('modalHomeTeam');
+const awayInput = document.getElementById('modalAwayTeam');
+const tableInput = document.getElementById('modalTeamName');
+
+if (homeInput) homeInput.addEventListener('input', updateHomeTeamLogo);
+if (awayInput) awayInput.addEventListener('input', updateAwayTeamLogo);
+if (tableInput) tableInput.addEventListener('input', updateTableTeamLogo);
 });
 
 showSection('home');
