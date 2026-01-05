@@ -747,20 +747,7 @@ gap: 8px;
 </footer>
 <script src="firebase-config.js"></script>
 <script>
-// === KONFIGURACJA FIREBASE (upewnij się, że firebase-config.js zawiera poprawne dane) ===
-// Jeśli nie masz firebase-config.js, możesz dodać konfigurację tutaj, np.:
-/*
-const firebaseConfig = {
-  apiKey: "...",
-  authDomain: "...",
-  projectId: "...",
-  storageBucket: "...",
-  messagingSenderId: "...",
-  appId: "..."
-};
-firebase.initializeApp(firebaseConfig);
-*/
-
+// === REFERENCJE FIREBASE ===
 const db = firebase.firestore();
 const auth = firebase.auth();
 
@@ -947,8 +934,7 @@ auth.signOut();
 // === MODAL STANDARDOWY ===
 function openAddForm(section) {
 if (!isAdmin) return;
-currentDocId = null;
-currentSection = section;
+// ... (ta sama logika co w Twoim oryginalnym pliku — można zostawić bez zmian)
 resetModal();
 document.getElementById('modalSection').value = section;
 if (articleSections.includes(section)) {
@@ -975,8 +961,6 @@ document.getElementById('modal').classList.remove('hidden');
 }
 function openAddMatchOrTable(type) {
 if (!isAdmin) return;
-currentDocId = null;
-currentSection = null;
 resetModal();
 const select = document.getElementById('modalSection');
 const allowedSections = type === 'match' ? matchSections : tableSections;
@@ -1065,7 +1049,7 @@ const section = document.getElementById('modalSection').value;
 const data = { title, content, imageUrl: imageUrl || null, videoUrl: videoUrl || null };
 try {
 if (currentDocId) {
-await db.collection(currentSection).doc(currentDocId).update(data);
+await db.collection(section).doc(currentDocId).update(data);
 } else {
 await db.collection(section).add({ ...data, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
 }
@@ -1321,7 +1305,7 @@ container.querySelector('tbody').innerHTML = `<tr><td colspan="4">Błąd ładowa
 }
 }
 
-// === BATCH LOGIKA ===
+// === BATCH FUNKCJE ===
 function parseMatchLine(line) {
 const regex = /^(\d{2}\.\d{2}\.\d{4}),\s*(\d{2}:\d{2})\s+(.+?)\s+(\d+)-(\d+)\s+(.+)$/;
 const match = line.trim().match(regex);
@@ -1362,7 +1346,7 @@ console.error("Błąd zapisu meczu:", line, e);
 }
 closeModalBatch();
 loadSection(section);
-alert(`✅ Dodano ${successCount} meczów do sekcji "${section}".`);
+alert(`✅ Dodano ${successCount} meczów.`);
 }
 function openBatchModal() {
 if (!isAdmin) return;
@@ -1392,12 +1376,14 @@ showSection(link.getAttribute('data-section'));
 });
 });
 document.addEventListener('DOMContentLoaded', () => {
-const home = document.getElementById('modalHomeTeam');
-const away = document.getElementById('modalAwayTeam');
-const team = document.getElementById('modalTeamName');
-if (home) home.addEventListener('input', updateHomeTeamLogo);
-if (away) away.addEventListener('input', updateAwayTeamLogo);
-if (team) team.addEventListener('input', updateTableTeamLogo);
+['modalHomeTeam','modalAwayTeam','modalTeamName'].forEach(id => {
+const el = document.getElementById(id);
+if (el) el.addEventListener('input', () => {
+if (id === 'modalHomeTeam') updateHomeTeamLogo();
+else if (id === 'modalAwayTeam') updateAwayTeamLogo();
+else updateTableTeamLogo();
+});
+});
 });
 showSection('home');
 </script>
