@@ -492,7 +492,7 @@ footer {
 </div>
 </div>
 
-<!-- TRYB MASOWY (INDEX 24) -->
+<!-- TRYB MASOWY -->
 <div id="matchBulkView" style="display:none;">
 <input type="text" id="bulkMatchRound" placeholder="Domyślna Kolejka (np. KOLEJKA 20)" />
 <label>Wklej mecze (jeden mecz w linii):</label>
@@ -549,7 +549,7 @@ Jagiellonia Białystok | Lech Poznań | - | 16.03, 20:00"></textarea>
 </div>
 </div>
 
-<!-- TRYB MASOWY (INDEX 24) -->
+<!-- TRYB MASOWY -->
 <div id="tableBulkView" style="display:none;">
 <label>Wklej tabelę (jedna drużyna w linii):</label>
 <small style="color:var(--text-light);display:block;margin-bottom:6px;">Wzór: Pozycja | Drużyna | Mecze | Punkty</small>
@@ -745,7 +745,7 @@ Jagiellonia Białystok | Lech Poznań | - | 16.03, 20:00"></textarea>
 <div class="admin-bar hidden" id="adminPanel">
 <h3>Panel administratora</h3>
 <div id="loginForm">
-<input type="password" id="adminPass" placeholder="Hasło administratora" />
+<input type="password" id="adminPass" placeholder="Hasło administratora" onkeydown="if(event.key==='Enter') loginAdmin()" />
 <button class="btn btn-primary" onclick="loginAdmin()">Zaloguj</button>
 <p id="loginErr" class="error"></p>
 </div>
@@ -839,7 +839,6 @@ function toggleAdminByClick() {
 let isAdmin = false;
 let currentEditId = null;
 let currentEditSection = null;
-let currentActiveLeague = 'ekstraklasa';
 
 const articleSections = ['news','results','analysis','media','history','schedule'];
 const matchSections = [
@@ -848,24 +847,22 @@ const matchSections = [
   'superpuchar','puchar_polski',
   'champions_league','europa_league','conference_league'
 ];
-const tableSections = matchSections.filter(s => s !== 'superpuchar' && s !== 'puchar_polski').map(s => s + '_table');
+const tableSections = matchSections.map(s => s + '_table');
 
 function showSection(id) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.top-nav a').forEach(a => a.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
+  const targetPage = document.getElementById(id);
+  if (targetPage) targetPage.classList.add('active');
   const navLink = document.querySelector(`.top-nav a[data-section="${id}"]`);
   if (navLink) navLink.classList.add('active');
   
   if (id !== 'home') {
-    if (id === 'polskie') {
-      showLiga('polskie', 'ekstraklasa');
-    } else if (id === 'puchary') {
-      showLiga('puchary', 'superpuchar');
-    } else {
-      currentActiveLeague = id;
+    if (id === 'polskie') showLiga('polskie', 'ekstraklasa');
+    else if (id === 'puchary') showLiga('puchary', 'superpuchar');
+    else {
       loadSection(id);
-      if (tableSections.includes(id + '_table')) {
+      if (matchSections.includes(id) && tableSections.includes(id + '_table')) {
         loadSection(id + '_table');
       }
     }
@@ -882,12 +879,8 @@ function showLiga(context, ligaId, btnEl) {
   container.querySelectorAll('.liga-subpage').forEach(el => el.classList.remove('active-liga'));
   const target = document.getElementById(ligaId + '-content');
   if (target) target.classList.add('active-liga');
-  
-  currentActiveLeague = ligaId;
   loadSection(ligaId);
-  if (tableSections.includes(ligaId + '_table')) {
-    loadSection(ligaId + '_table');
-  }
+  loadSection(ligaId + '_table');
 }
 
 auth.onAuthStateChanged(user => {
@@ -896,9 +889,9 @@ auth.onAuthStateChanged(user => {
   document.getElementById('adminTools').classList.toggle('hidden', !isAdmin);
   if (isAdmin) {
     document.getElementById('adminPanel').classList.remove('hidden');
+    const allSections = [...articleSections, ...matchSections, ...tableSections];
+    allSections.forEach(loadSection);
   }
-  const allSections = [...articleSections, ...matchSections, ...tableSections];
-  allSections.forEach(loadSection);
 });
 
 function loginAdmin() {
@@ -951,19 +944,21 @@ async function saveArticle() {
   const data = { title, content, imageUrl: imageUrl || null, videoUrl: videoUrl || null };
   try {
     if (currentEditId) {
-      await db.collection(sec).doc(currentEditId).update(data);
+      const targetSec = currentEditSection || sec;
+      await db.collection(targetSec).doc(currentEditId).update(data);
     } else {
       await db.collection(sec).add({ ...data, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
     }
     closeModal('articleModal');
-    loadSection(sec);
+    loadSection(currentEditSection || sec);
+    if (sec !== currentEditSection) loadSection(sec);
   } catch (e) { err.textContent = "Błąd zapisu artykułu."; }
 }
 
 async function deleteArticle() {
   if (!confirm("Usunąć ten artykuł?")) return;
   try {
-    const sec = document.getElementById('artSection').value;
+    const sec = currentEditSection || document.getElementById('artSection').value;
     await db.collection(sec).doc(currentEditId).delete();
     closeModal('articleModal');
     loadSection(sec);
@@ -971,7 +966,7 @@ async function deleteArticle() {
 }
 
 // ----------------------------------------------------
-// 2. MODAL MECZÓW (W PEŁNI PEŁNOSPRAWNY SYSTEM Z INDEX 24)
+// 2. MODAL MECZÓW (SYSTEM Z INDEX 24)
 // ----------------------------------------------------
 function switchMatchTab(mode) {
   const singleView = document.getElementById('matchSingleView');
@@ -992,19 +987,12 @@ function switchMatchTab(mode) {
   }
 }
 
-function openMatchModal(section = currentActiveLeague, docId = null, data = null) {
+function openMatchModal(section = 'ekstraklasa', docId = null, data = null) {
   if (!isAdmin && docId) return;
   currentEditId = docId;
   currentEditSection = section;
   document.getElementById('matchErr').textContent = '';
-  
-  const selectEl = document.getElementById('matchSection');
-  if (matchSections.includes(section)) {
-    selectEl.value = section;
-  } else {
-    selectEl.value = currentActiveLeague;
-  }
-  
+  document.getElementById('matchSection').value = section;
   switchMatchTab('single');
 
   if (data) {
@@ -1028,8 +1016,8 @@ function openMatchModal(section = currentActiveLeague, docId = null, data = null
     document.getElementById('matchAwayLogo').value = '';
     document.getElementById('matchDate').value = '';
     document.getElementById('matchScore').value = '';
-    document.getElementById('bulkMatchText').value = '';
     document.getElementById('bulkMatchRound').value = '';
+    document.getElementById('bulkMatchText').value = '';
     document.getElementById('matchDelBtn').style.display = 'none';
   }
   document.getElementById('matchModal').classList.remove('hidden');
@@ -1057,12 +1045,14 @@ async function saveMatch() {
   };
   try {
     if (currentEditId) {
-      await db.collection(sec).doc(currentEditId).update(data);
+      const targetSec = currentEditSection || sec;
+      await db.collection(targetSec).doc(currentEditId).update(data);
     } else {
       await db.collection(sec).add({ ...data, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
     }
     closeModal('matchModal');
-    loadSection(sec);
+    loadSection(currentEditSection || sec);
+    if (sec !== currentEditSection) loadSection(sec);
   } catch (e) { err.textContent = "Błąd zapisu meczu."; }
 }
 
@@ -1078,10 +1068,7 @@ async function saveBulkMatches() {
 
   try {
     for (let line of lines) {
-      let parts = line.split('|').map(p => p.trim());
-      if (parts.length < 2) {
-        parts = line.split('\t').map(p => p.trim());
-      }
+      const parts = line.split('|').map(p => p.trim());
       if (parts.length >= 2) {
         const homeTeam = parts[0];
         const awayTeam = parts[1];
@@ -1109,7 +1096,7 @@ async function saveBulkMatches() {
 async function deleteMatch() {
   if (!confirm("Usunąć ten mecz?")) return;
   try {
-    const sec = document.getElementById('matchSection').value;
+    const sec = currentEditSection || document.getElementById('matchSection').value;
     await db.collection(sec).doc(currentEditId).delete();
     closeModal('matchModal');
     loadSection(sec);
@@ -1117,7 +1104,7 @@ async function deleteMatch() {
 }
 
 // ----------------------------------------------------
-// 3. MODAL TABELI (W PEŁNI PEŁNOSPRAWNY SYSTEM Z INDEX 24)
+// 3. MODAL TABELI (SYSTEM Z INDEX 24)
 // ----------------------------------------------------
 function switchTableTab(mode) {
   const singleView = document.getElementById('tableSingleView');
@@ -1138,19 +1125,12 @@ function switchTableTab(mode) {
   }
 }
 
-function openTableModal(section = currentActiveLeague + '_table', docId = null, data = null) {
+function openTableModal(section = 'ekstraklasa_table', docId = null, data = null) {
   if (!isAdmin && docId) return;
   currentEditId = docId;
   currentEditSection = section;
   document.getElementById('tableErr').textContent = '';
-  
-  const selectEl = document.getElementById('tableSection');
-  if (tableSections.includes(section)) {
-    selectEl.value = section;
-  } else {
-    selectEl.value = tableSections.includes(currentActiveLeague + '_table') ? (currentActiveLeague + '_table') : 'ekstraklasa_table';
-  }
-  
+  document.getElementById('tableSection').value = section;
   switchTableTab('single');
 
   if (data) {
@@ -1198,12 +1178,14 @@ async function saveTableEntry() {
   };
   try {
     if (currentEditId) {
-      await db.collection(sec).doc(currentEditId).update(data);
+      const targetSec = currentEditSection || sec;
+      await db.collection(targetSec).doc(currentEditId).update(data);
     } else {
       await db.collection(sec).add({ ...data, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
     }
     closeModal('tableModal');
-    loadSection(sec);
+    loadSection(currentEditSection || sec);
+    if (sec !== currentEditSection) loadSection(sec);
   } catch (e) { err.textContent = "Błąd zapisu."; }
 }
 
@@ -1218,16 +1200,12 @@ async function saveBulkTable() {
 
   try {
     for (let line of lines) {
-      let parts = line.split('|').map(p => p.trim());
-      if (parts.length < 3) {
-        parts = line.split('\t').map(p => p.trim());
-      }
+      const parts = line.split('|').map(p => p.trim());
       if (parts.length >= 4) {
-        const posStr = parts[0].replace('.', '').trim();
-        const pos = parseInt(posStr) || 1;
+        const pos = parseInt(parts[0]);
         const teamName = parts[1];
         const matches = parts[2];
-        const pts = parseInt(parts[3]) || 0;
+        const pts = parseInt(parts[3]);
 
         await db.collection(sec).add({
           position: pos,
@@ -1247,7 +1225,7 @@ async function saveBulkTable() {
 async function deleteTableEntry() {
   if (!confirm("Usunąć tę drużynę?")) return;
   try {
-    const sec = document.getElementById('tableSection').value;
+    const sec = currentEditSection || document.getElementById('tableSection').value;
     await db.collection(sec).doc(currentEditId).delete();
     closeModal('tableModal');
     loadSection(sec);
@@ -1326,17 +1304,13 @@ async function loadSection(section) {
   } else if (tableSections.includes(section)) {
     const container = document.getElementById(section + '-list');
     if (!container) return;
-    const theadEl = container.querySelector('thead');
-    const tbodyEl = container.querySelector('tbody');
-    const colCount = isAdmin ? 5 : 4;
-
-    if (theadEl) {
-      theadEl.innerHTML = `<tr><th>#</th><th>Drużyna</th><th>Mecze</th><th>Punkty</th>${isAdmin ? '<th>Akcje</th>' : ''}</tr>`;
-    }
-
     try {
       const snap = await db.collection(section).orderBy("position", "asc").get();
-      if (snap.empty) { tbodyEl.innerHTML = `<tr><td colspan="${colCount}">Brak drużyn.</td></tr>`; return; }
+      const headRow = container.querySelector('thead tr');
+      if (headRow) {
+        headRow.innerHTML = `<th>#</th><th>Drużyna</th><th>Mecze</th><th>Punkty</th>${isAdmin ? '<th>Akcja</th>' : ''}`;
+      }
+      if (snap.empty) { container.querySelector('tbody').innerHTML = `<tr><td colspan="${isAdmin ? 5 : 4}">Brak drużyn.</td></tr>`; return; }
       let html = '';
       snap.forEach(doc => {
         const d = doc.data();
@@ -1370,7 +1344,7 @@ async function loadSection(section) {
           </tr>
         `;
       });
-      tbodyEl.innerHTML = html;
+      container.querySelector('tbody').innerHTML = html;
 
       let legendHTML = '';
       if (section === 'ekstraklasa_table') {
@@ -1387,7 +1361,7 @@ async function loadSection(section) {
       if (existingLegend && existingLegend.classList.contains('legend')) existingLegend.remove();
       if (legendHTML) container.insertAdjacentHTML('afterend', legendHTML);
 
-    } catch (e) { tbodyEl.innerHTML = `<tr><td colspan="${colCount}">Błąd ładowania tabeli.</td></tr>`; }
+    } catch (e) { container.querySelector('tbody').innerHTML = `<tr><td colspan="${isAdmin ? 5 : 4}">Błąd ładowania tabeli.</td></tr>`; }
   }
 }
 
