@@ -12,266 +12,372 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <style>
 :root {
---bg: #0d101a;
---card: #161b26;
---text: #e0e0e0;
---text-light: #a0a0a0;
---accent: #ff3b3b;
---border: #252b3a;
+  --bg: #0d101a;
+  --card: #161b26;
+  --text: #e0e0e0;
+  --text-light: #a0a0a0;
+  --accent: #ff3b3b;
+  --accent-hover: #ff5252;
+  --border: #252b3a;
+  --card-hover: #1f2636;
 }
 * {
-margin: 0;
-padding: 0;
-box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 body {
-font-family: 'Roboto', system-ui, sans-serif;
-background: var(--bg);
-color: var(--text);
-line-height: 1.6;
+  font-family: 'Roboto', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
 }
+
+/* NAWIGACJA */
 .top-nav {
-background: #0b0e15;
-border-bottom: 2px solid var(--accent);
-padding: 0;
-position: sticky;
-top: 0;
-z-index: 1000;
+  background: #0b0e15;
+  border-bottom: 2px solid var(--accent);
+  padding: 0;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.4);
 }
 .nav-container {
-max-width: 1600px;
-margin: 0 auto;
-display: flex;
-overflow-x: auto;
+  max-width: 1600px;
+  margin: 0 auto;
+  display: flex;
+  overflow-x: auto;
 }
 .nav-container::-webkit-scrollbar { display: none; }
 .top-nav ul { display: flex; list-style: none; padding: 0 10px; }
 .top-nav li { margin: 0; }
 .logo-box {
-display: flex;
-align-items: center;
-padding: 8px 16px;
-background: var(--accent);
-min-width: 140px;
+  display: flex;
+  align-items: center;
+  padding: 8px 18px;
+  background: var(--accent);
+  min-width: 140px;
+  cursor: pointer;
+  user-select: none;
 }
 .logo-box img { height: 28px; margin-right: 10px; }
 .logo-text { color: white; font-weight: 700; font-size: 1.1rem; white-space: nowrap; }
 .top-nav a {
-color: var(--text);
-text-decoration: none;
-padding: 12px 14px;
-font-weight: 600;
-font-size: 0.9rem;
-white-space: nowrap;
-border-bottom: 2px solid transparent;
-transition: all 0.2s;
+  color: var(--text);
+  text-decoration: none;
+  padding: 14px 16px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  white-space: nowrap;
+  border-bottom: 3px solid transparent;
+  transition: all 0.25s ease;
 }
 .top-nav a:hover, .top-nav a.active {
-color: white;
-border-bottom: 2px solid var(--accent);
+  color: white;
+  border-bottom: 3px solid var(--accent);
+  background: rgba(255,255,255,0.03);
 }
+
 #main {
-max-width: 1400px;
-margin: 20px auto;
-padding: 0 15px;
+  max-width: 1400px;
+  margin: 20px auto;
+  padding: 0 15px;
 }
 header img {
-width: 100%;
-height: 160px;
-object-fit: cover;
-border-radius: 6px;
-margin-bottom: 20px;
+  width: 100%;
+  height: 160px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
 }
 .page { display: none; }
 .page.active { display: block; }
 .page h2, .liga-subpage h3 {
-font-size: 1.7rem;
-margin: 20px 0 15px;
-color: white;
-font-weight: 700;
-padding-bottom: 8px;
-border-bottom: 2px solid var(--accent);
+  font-size: 1.7rem;
+  margin: 20px 0 15px;
+  color: white;
+  font-weight: 700;
+  padding-bottom: 8px;
+  border-bottom: 2px solid var(--accent);
 }
+
 .hero { text-align: center; margin-bottom: 25px; }
 .hero h1 { font-size: 2.1rem; margin-bottom: 10px; color: white; }
 .hero p { font-size: 1rem; color: var(--text-light); max-width: 600px; margin: 0 auto; }
+
 .features-grid {
-display: grid;
-grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-gap: 16px;
-margin: 20px 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+  margin: 20px 0;
 }
 .feature-card {
-background: var(--card);
-padding: 16px;
-border-radius: 6px;
-text-align: center;
-border: 1px solid var(--border);
+  background: var(--card);
+  padding: 18px;
+  border-radius: 8px;
+  text-align: center;
+  border: 1px solid var(--border);
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+.feature-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(255,59,59,0.4);
 }
 .feature-card h3 { margin-bottom: 6px; color: white; font-size: 1.1rem; }
+
 .content-grid { display: grid; gap: 20px; }
 .content-item {
-background: var(--card);
-padding: 18px;
-border-radius: 6px;
-border: 1px solid var(--border);
-position: relative;
+  background: var(--card);
+  padding: 20px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  position: relative;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
 }
 .content-item h3 { font-size: 1.4rem; margin-bottom: 10px; color: white; font-weight: 600; }
 .content-item .article-content { line-height: 1.6; color: var(--text-light); white-space: pre-wrap; margin-bottom: 12px; font-size: 0.95rem; }
 .content-item img { max-width: 100%; height: auto; border-radius: 6px; margin: 10px 0; display: block; }
-.content-item iframe, .content-item video { width: 100%; height: 220px; border-radius: 6px; margin: 10px 0; }
-.edit-btn, .delete-btn {
-background: var(--accent);
-color: white;
-border: none;
-padding: 5px 10px;
-border-radius: 4px;
-font-weight: 600;
-cursor: pointer;
-font-size: 0.85rem;
-margin-left: 8px;
+.content-item iframe, .content-item video { width: 100%; height: 220px; border-radius: 6px; margin: 10px 0; border: none; }
+
+/* PRZYCISKI - NOWY ELEGANCKI DESIGN */
+.btn {
+  padding: 9px 18px;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+  user-select: none;
 }
-.delete-btn { background: #dc2626; }
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.35);
+}
+.btn:active {
+  transform: translateY(0);
+}
+.btn-primary {
+  background: linear-gradient(135deg, #ff3b3b, #d32f2f);
+  color: #ffffff;
+}
+.btn-primary:hover {
+  background: linear-gradient(135deg, #ff5252, #e53935);
+}
+.btn-secondary {
+  background: #1f2636;
+  color: #e0e0e0;
+  border: 1px solid var(--border);
+}
+.btn-secondary:hover {
+  background: #2a3348;
+  color: #ffffff;
+  border-color: #3b4660;
+}
+.btn-danger {
+  background: linear-gradient(135deg, #dc2626, #b91c1c);
+  color: white;
+}
+.btn-danger:hover {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+}
+
+.edit-btn, .delete-btn {
+  background: #1f2636;
+  color: #e0e0e0;
+  border: 1px solid var(--border);
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 0.8rem;
+  margin-left: 8px;
+  transition: all 0.2s ease;
+}
+.edit-btn:hover { background: var(--accent); color: white; border-color: var(--accent); }
+.delete-btn { background: #7f1d1d; color: #fca5a5; border-color: #991b1b; }
+.delete-btn:hover { background: #dc2626; color: white; }
+
 .ligi-nav { display: flex; flex-wrap: wrap; gap: 8px; margin: 15px 0 20px; }
 .liga-btn {
-padding: 7px 14px;
-background: #1f2636;
-border: 1px solid var(--border);
-border-radius: 4px;
-color: var(--text);
-font-weight: 600;
-font-size: 0.9rem;
-cursor: pointer;
-white-space: nowrap;
+  padding: 8px 16px;
+  background: #181d2a;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  color: var(--text);
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
 }
-.liga-btn:hover { background: #2a3245; }
+.liga-btn:hover, .liga-btn.active {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+  box-shadow: 0 2px 8px rgba(255,59,59,0.3);
+}
+
 .liga-subpage { display: none; }
 .liga-subpage.active-liga { display: block; }
+
 .table-list {
-width: 100%;
-border-collapse: collapse;
-margin-bottom: 20px;
-background: var(--card);
-border-radius: 6px;
-overflow: hidden;
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+  background: var(--card);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
 }
-.table-list th, .table-list td { padding: 10px 12px; text-align: center; border-bottom: 1px solid var(--border); }
-.table-list th { background: #0b0e15; font-weight: 600; }
+.table-list th, .table-list td { padding: 10px 14px; text-align: center; border-bottom: 1px solid var(--border); }
+.table-list th { background: #0b0e15; font-weight: 600; color: #a0a0a0; }
 .table-list tr:last-child td { border-bottom: none; }
-.team-cell { display: flex; align-items: center; gap: 8px; justify-content: center; }
-.team-logo-small { width: 20px; height: 20px; border-radius: 50%; object-fit: cover; }
-.match-list { display: grid; gap: 6px; }
+.team-cell { display: flex; align-items: center; gap: 10px; justify-content: center; }
+.team-logo-small { width: 22px; height: 22px; border-radius: 50%; object-fit: cover; }
+
+.match-list { display: grid; gap: 8px; }
 .match-header {
-background: #0b0e15;
-padding: 8px 12px;
-border-top-left-radius: 6px;
-border-top-right-radius: 6px;
-font-weight: 600;
-font-size: 0.9rem;
-display: flex;
-justify-content: space-between;
-align-items: center;
+  background: #0b0e15;
+  padding: 10px 14px;
+  border-radius: 6px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 .match-row {
-display: grid;
-grid-template-columns: 1fr 1fr 1fr 1fr;
-gap: 8px;
-padding: 10px 12px;
-border: 1px solid var(--border);
-align-items: center;
-position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1.2fr 0.8fr 1.2fr;
+  gap: 8px;
+  padding: 12px 14px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  align-items: center;
+  position: relative;
+  transition: background 0.2s;
 }
+.match-row:hover { background: var(--card-hover); }
 .match-date { font-size: 0.85rem; color: var(--text-light); }
-.team-name { display: flex; align-items: center; gap: 8px; font-size: 0.9rem; }
+.team-name { display: flex; align-items: center; gap: 8px; font-size: 0.9rem; font-weight: 500; }
 .team-logo { width: 24px; height: 24px; border-radius: 50%; object-fit: cover; }
-.score { font-weight: 700; font-size: 1rem; text-align: center; }
-.admin-bar { background: #090c12; padding: 18px 15px; margin-top: 30px; border-top: 1px solid var(--border); }
-.admin-bar h3 { margin-bottom: 10px; color: var(--accent); font-size: 1.1rem; }
+.score { font-weight: 700; font-size: 1.05rem; text-align: center; color: white; background: #0b0e15; padding: 4px 8px; border-radius: 4px; border: 1px solid var(--border); }
+
+/* 🔐 UKRYTY PANEL ADMINA ( INDEX 24 STYLE ) */
+.admin-bar {
+  background: #090c12;
+  padding: 20px;
+  margin-top: 40px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+  transition: all 0.3s ease;
+}
+.admin-bar.hidden { display: none !important; }
+.admin-bar h3 { margin-bottom: 12px; color: var(--accent); font-size: 1.1rem; }
 #adminPass {
-width: 100%;
-max-width: 280px;
-padding: 9px;
-margin: 6px 0 10px;
-border: 1px solid var(--border);
-border-radius: 4px;
-background: #1a1f2c;
-color: white;
-font-size: 0.95rem;
+  width: 100%;
+  max-width: 300px;
+  padding: 10px;
+  margin: 6px 10px 10px 0;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: #1a1f2c;
+  color: white;
+  font-size: 0.95rem;
 }
-.btn {
-padding: 9px 14px;
-border: none;
-border-radius: 4px;
-font-weight: 600;
-cursor: pointer;
-font-size: 0.95rem;
-}
-.btn-primary { background: var(--accent); color: white; }
-.btn-secondary { background: #1f2636; color: white; border: 1px solid var(--border); }
-.btn-danger { background: #d32f2f; color: white; }
-.error { color: #ff6b6b; font-size: 0.8rem; margin-top: 5px; }
+
+/* MODALE */
 .modal {
-position: fixed;
-top: 0; left: 0;
-width: 100%; height: 100%;
-background: rgba(0,0,0,0.85);
-display: flex;
-justify-content: center;
-align-items: center;
-z-index: 2000;
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.85);
+  backdrop-filter: blur(4px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
 }
 .modal-content {
-background: var(--card);
-width: 92%;
-max-width: 650px;
-border-radius: 10px;
-overflow: hidden;
-border: 1px solid var(--border);
-max-height: 90vh;
-overflow-y: auto;
+  background: var(--card);
+  width: 92%;
+  max-width: 650px;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.6);
 }
 .modal-header {
-padding: 12px 16px;
-background: var(--accent);
-color: white;
-display: flex;
-justify-content: space-between;
-align-items: center;
+  padding: 14px 18px;
+  background: linear-gradient(135deg, #ff3b3b, #d32f2f);
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 .close-btn {
-background: none;
-border: none;
-color: white;
-font-size: 1.4rem;
-cursor: pointer;
-width: 30px; height: 30px;
-border-radius: 50%;
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.5rem;
+  cursor: pointer;
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
 }
-.modal-body { padding: 18px; }
-.modal-body label { display: block; margin-top: 8px; font-size: 0.85rem; color: var(--text-light); }
+.close-btn:hover { background: rgba(255,255,255,0.2); }
+.modal-body { padding: 20px; }
+.modal-body label { display: block; margin-top: 10px; font-size: 0.85rem; color: var(--text-light); font-weight: 500; }
 .modal-body input, .modal-body textarea, .modal-body select {
-width: 100%;
-padding: 9px;
-margin: 5px 0 10px;
-border: 1px solid var(--border);
-border-radius: 4px;
-background: #1a1f2c;
-color: white;
-font-size: 0.95rem;
+  width: 100%;
+  padding: 10px;
+  margin: 6px 0 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: #1a1f2c;
+  color: white;
+  font-size: 0.95rem;
+  outline: none;
 }
-textarea { min-height: 110px; resize: vertical; }
-.modal-actions { display: flex; gap: 10px; margin-top: 14px; }
-.tab-switcher { display: flex; gap: 8px; margin-bottom: 12px; }
+.modal-body input:focus, .modal-body textarea:focus, .modal-body select:focus {
+  border-color: var(--accent);
+}
+textarea { min-height: 120px; resize: vertical; font-family: inherit; }
+.modal-actions { display: flex; gap: 10px; margin-top: 16px; }
+.tab-switcher { display: flex; gap: 8px; margin-bottom: 15px; }
 .tab-switcher .btn { flex: 1; text-align: center; }
 .hidden { display: none !important; }
-footer { color: var(--text-light); text-align: center; padding: 18px 0; margin-top: 25px; font-size: 0.85rem; }
+.error { color: #ff6b6b; font-size: 0.85rem; margin-top: 8px; }
 
-.table-list tr.promotion { background: #1a5e1a; }
-.table-list tr.playoff { background: #1a4a5e; }
-.table-list tr.relegation { background: #5e1a1a; }
-.legend { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 8px; font-size: 0.85rem; color: var(--text-light); }
-.legend span { width: 16px; height: 16px; border-radius: 4px; display: inline-block; }
+footer {
+  color: var(--text-light);
+  text-align: center;
+  padding: 22px 0;
+  margin-top: 30px;
+  font-size: 0.85rem;
+  user-select: none;
+}
+
+.table-list tr.promotion { background: rgba(26, 94, 26, 0.4); }
+.table-list tr.playoff { background: rgba(26, 74, 94, 0.4); }
+.table-list tr.relegation { background: rgba(94, 26, 26, 0.4); }
+.legend { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 10px; font-size: 0.85rem; color: var(--text-light); }
+.legend span { width: 14px; height: 14px; border-radius: 3px; display: inline-block; vertical-align: middle; margin-right: 4px; }
 .legend .promotion { background: #1a5e1a; }
 .legend .playoff { background: #1a4a5e; }
 .legend .relegation { background: #5e1a1a; }
@@ -280,7 +386,7 @@ footer { color: var(--text-light); text-align: center; padding: 18px 0; margin-t
 <body>
 <nav class="top-nav">
 <div class="nav-container">
-<div class="logo-box">
+<div class="logo-box" id="logoBtn" onclick="toggleAdminByClick()">
 <img src="logo.png" alt="StrefaGola" onerror="this.style.display='none'" />
 <span class="logo-text">StrefaGola</span>
 </div>
@@ -336,7 +442,7 @@ footer { color: var(--text-light); text-align: center; padding: 18px 0; margin-t
 </div>
 </div>
 
-<!-- ⚽ MODAL MECZÓW (POJEDYNCZO + MASOWO) -->
+<!-- ⚽ MODAL MECZÓW ( WZÓR Z INDEX 24 ) -->
 <div id="matchModal" class="modal hidden">
 <div class="modal-content">
 <div class="modal-header">
@@ -365,17 +471,17 @@ footer { color: var(--text-light); text-align: center; padding: 18px 0; margin-t
 <option value="conference_league">Liga Konferencji</option>
 </select>
 
-<!-- TRYB POJEDYNCZY -->
+<!-- TRYB POJEDYNCZY ( WZÓR INDEX 24 ) -->
 <div id="matchSingleView">
 <input type="text" id="matchRound" placeholder="Kolejka (np. KOLEJKA 20)" />
-<div style="margin:10px 0;padding:10px;background:#1a1f2c;border-radius:6px;">
+<div style="margin:10px 0;padding:12px;background:#1a1f2c;border-radius:6px;border:1px solid var(--border);">
 <label>Gospodarz</label>
-<input type="text" id="matchHomeTeam" placeholder="Nazwa drużyny" oninput="autoLogo('matchHomeTeam', 'matchHomeLogo')" style="width:100%;margin:5px 0;" />
+<input type="text" id="matchHomeTeam" placeholder="Nazwa drużyny" oninput="autoLogo('matchHomeTeam', 'matchHomeLogo')" style="width:100%;margin:5px 0 8px;" />
 <input type="url" id="matchHomeLogo" placeholder="URL herbu" style="width:100%;" />
 </div>
-<div style="margin:10px 0;padding:10px;background:#1a1f2c;border-radius:6px;">
+<div style="margin:10px 0;padding:12px;background:#1a1f2c;border-radius:6px;border:1px solid var(--border);">
 <label>Gość</label>
-<input type="text" id="matchAwayTeam" placeholder="Nazwa drużyny" oninput="autoLogo('matchAwayTeam', 'matchAwayLogo')" style="width:100%;margin:5px 0;" />
+<input type="text" id="matchAwayTeam" placeholder="Nazwa drużyny" oninput="autoLogo('matchAwayTeam', 'matchAwayLogo')" style="width:100%;margin:5px 0 8px;" />
 <input type="url" id="matchAwayLogo" placeholder="URL herbu" style="width:100%;" />
 </div>
 <input type="text" id="matchDate" placeholder="Data i godzina (np. 15.03, 18:00)" />
@@ -386,11 +492,11 @@ footer { color: var(--text-light); text-align: center; padding: 18px 0; margin-t
 </div>
 </div>
 
-<!-- TRYB MASOWY -->
+<!-- TRYB MASOWY ( WZÓR INDEX 24 ) -->
 <div id="matchBulkView" style="display:none;">
 <input type="text" id="bulkMatchRound" placeholder="Domyślna Kolejka (np. KOLEJKA 20)" />
-<label>Wklej mecze (jeden mecz na linię):</label>
-<small style="color:var(--text-light);display:block;margin-bottom:4px;">Format: Gospodarz | Gość | Wynik | Data | Kolejka (opcjonalnie)</small>
+<label>Wklej mecze (jeden mecz w linii):</label>
+<small style="color:var(--text-light);display:block;margin-bottom:6px;">Wzór: Gospodarz | Gość | Wynik | Data | Kolejka (opcjonalnie)</small>
 <textarea id="bulkMatchText" placeholder="Wisła Płock | Górnik Zabrze | 2:1 | 15.03, 18:00
 Jagiellonia Białystok | Lech Poznań | - | 16.03, 20:00"></textarea>
 <div class="modal-actions">
@@ -403,7 +509,7 @@ Jagiellonia Białystok | Lech Poznań | - | 16.03, 20:00"></textarea>
 </div>
 </div>
 
-<!-- 📊 MODAL TABELI (POJEDYNCZO + MASOWO) -->
+<!-- 📊 MODAL TABELI -->
 <div id="tableModal" class="modal hidden">
 <div class="modal-content">
 <div class="modal-header">
@@ -435,7 +541,7 @@ Jagiellonia Białystok | Lech Poznań | - | 16.03, 20:00"></textarea>
 <input type="number" id="tablePos" placeholder="Pozycja w tabeli (np. 1)" min="1" />
 <input type="text" id="tableTeam" placeholder="Nazwa drużyny" oninput="autoLogo('tableTeam', 'tableLogo')" />
 <input type="url" id="tableLogo" placeholder="URL herbu drużyny" />
-<input type="text" id="tableMatches" placeholder="Liczba meczów / Forma (np. 20 lub WWPPW)" />
+<input type="text" id="tableMatches" placeholder="Liczba meczów (np. 20)" />
 <input type="number" id="tablePts" placeholder="Punkty (np. 45)" min="0" />
 <div class="modal-actions">
 <button class="btn btn-primary" onclick="saveTableEntry()">Zapisz drużynę</button>
@@ -445,8 +551,8 @@ Jagiellonia Białystok | Lech Poznań | - | 16.03, 20:00"></textarea>
 
 <!-- TRYB MASOWY -->
 <div id="tableBulkView" style="display:none;">
-<label>Wklej tabelę (jedna drużyna na linię):</label>
-<small style="color:var(--text-light);display:block;margin-bottom:4px;">Format: Pozycja | Drużyna | Mecze | Punkty</small>
+<label>Wklej tabelę (jedna drużyna w linii):</label>
+<small style="color:var(--text-light);display:block;margin-bottom:6px;">Wzór: Pozycja | Drużyna | Mecze | Punkty</small>
 <textarea id="bulkTableText" placeholder="1 | Wisła Płock | 20 | 42
 2 | Jagiellonia Białystok | 20 | 39
 3 | Lech Poznań | 20 | 38"></textarea>
@@ -473,7 +579,7 @@ Jagiellonia Białystok | Lech Poznań | - | 16.03, 20:00"></textarea>
 <div class="modal-body">
 <div style="display:flex; gap:10px; margin-bottom:15px;">
 <button class="btn btn-primary" id="btn-tab-up" onclick="switchClubTab('upcoming')">Nadchodzące</button>
-<button class="btn" style="background:#1a1f2c;color:white;border:1px solid var(--border);" id="btn-tab-res" onclick="switchClubTab('results')">Wyniki</button>
+<button class="btn btn-secondary" id="btn-tab-res" onclick="switchClubTab('results')">Wyniki</button>
 </div>
 <div id="club-upcoming-list" class="match-list"></div>
 <div id="club-results-list" class="match-list" style="display:none;"></div>
@@ -516,13 +622,13 @@ Jagiellonia Białystok | Lech Poznań | - | 16.03, 20:00"></textarea>
 <section id="polskie" class="page">
 <h2>Polskie ligi</h2>
 <div class="ligi-nav">
-<button class="liga-btn" onclick="showLiga('polskie', 'ekstraklasa')">Ekstraklasa</button>
-<button class="liga-btn" onclick="showLiga('polskie', 'pierwsza_liga')">1. liga</button>
-<button class="liga-btn" onclick="showLiga('polskie', 'druga_liga')">2. liga</button>
-<button class="liga-btn" onclick="showLiga('polskie', 'trzecia_liga_gr1')">3. liga gr I</button>
-<button class="liga-btn" onclick="showLiga('polskie', 'trzecia_liga_gr2')">3. liga gr II</button>
-<button class="liga-btn" onclick="showLiga('polskie', 'trzecia_liga_gr3')">3. liga gr III</button>
-<button class="liga-btn" onclick="showLiga('polskie', 'trzecia_liga_gr4')">3. liga gr IV</button>
+<button class="liga-btn active" onclick="showLiga('polskie', 'ekstraklasa', this)">Ekstraklasa</button>
+<button class="liga-btn" onclick="showLiga('polskie', 'pierwsza_liga', this)">1. liga</button>
+<button class="liga-btn" onclick="showLiga('polskie', 'druga_liga', this)">2. liga</button>
+<button class="liga-btn" onclick="showLiga('polskie', 'trzecia_liga_gr1', this)">3. liga gr I</button>
+<button class="liga-btn" onclick="showLiga('polskie', 'trzecia_liga_gr2', this)">3. liga gr II</button>
+<button class="liga-btn" onclick="showLiga('polskie', 'trzecia_liga_gr3', this)">3. liga gr III</button>
+<button class="liga-btn" onclick="showLiga('polskie', 'trzecia_liga_gr4', this)">3. liga gr IV</button>
 </div>
 <div id="ekstraklasa-content" class="liga-subpage active-liga">
 <h3>Tabela Ekstraklasy</h3>
@@ -593,8 +699,8 @@ Jagiellonia Białystok | Lech Poznań | - | 16.03, 20:00"></textarea>
 <section id="puchary" class="page">
 <h2>Puchary</h2>
 <div class="ligi-nav">
-<button class="liga-btn" onclick="showLiga('puchary', 'superpuchar')">Superpuchar</button>
-<button class="liga-btn" onclick="showLiga('puchary', 'puchar_polski')">STS Puchar Polski</button>
+<button class="liga-btn active" onclick="showLiga('puchary', 'superpuchar', this)">Superpuchar</button>
+<button class="liga-btn" onclick="showLiga('puchary', 'puchar_polski', this)">STS Puchar Polski</button>
 </div>
 <div id="superpuchar-content" class="liga-subpage active-liga">
 <h3>Mecze Superpucharu</h3>
@@ -635,28 +741,26 @@ Jagiellonia Białystok | Lech Poznań | - | 16.03, 20:00"></textarea>
 <div id="conference_league-list" class="match-list">Ładowanie...</div>
 </section>
 
-<!-- 🔐 PANEL ADMINA -->
-<div class="admin-bar" id="adminPanel">
+<!-- 🔐 UKRYTY PANEL ADMINA ( INDEX 24 ) -->
+<div class="admin-bar hidden" id="adminPanel">
 <h3>Panel administratora</h3>
 <div id="loginForm">
-<input type="password" id="adminPass" placeholder="Hasło" />
+<input type="password" id="adminPass" placeholder="Hasło administratora" />
 <button class="btn btn-primary" onclick="loginAdmin()">Zaloguj</button>
 <p id="loginErr" class="error"></p>
 </div>
 <div id="adminTools" class="hidden">
-<button class="btn btn-primary" onclick="openArticleModal()">+ Artykuł</button>
-<button class="btn btn-primary" onclick="openMatchModal()">+ Mecze (Pojedynczo/Masowo)</button>
-<button class="btn btn-primary" onclick="openTableModal()">+ Tabela (Pojedynczo/Masowo)</button>
+<button class="btn btn-primary" onclick="openArticleModal()">+ Dodaj artykuł</button>
+<button class="btn btn-primary" onclick="openMatchModal()">+ Dodaj mecze</button>
+<button class="btn btn-primary" onclick="openTableModal()">+ Zarządzaj tabelą</button>
 <button class="btn btn-danger" onclick="logoutAdmin()" style="margin-left:10px;">Wyloguj</button>
 </div>
 </div>
 </main>
 
 <footer>
-<p>© 2025 StrefaGola (SG) • strefa@gola.hub.pl</p>
+<p onclick="toggleAdminByClick()" style="cursor:pointer;" title="Kliknij 3 razy aby otworzyć panel admina">© 2025 StrefaGola (SG) • strefa@gola.hub.pl</p>
 </footer>
-
-<div class="secret-trigger" id="mobile-admin-trigger" style="position:fixed;bottom:0;right:0;width:70px;height:70px;z-index:999;cursor:default;" onclick="document.getElementById('adminPanel').scrollIntoView({behavior: 'smooth'})"></div>
 
 <script src="firebase-config.js"></script>
 <script>
@@ -715,58 +819,82 @@ function autoLogo(teamInputId, logoInputId) {
   }
 }
 
+// MECHANIZM UKRYTYCH KLIKNIĘĆ PANELU ADMINA ( INDEX 24 )
+let clickCount = 0;
+let clickTimer = null;
+function toggleAdminByClick() {
+  clickCount++;
+  if (clickCount === 3) {
+    const adminPanel = document.getElementById('adminPanel');
+    adminPanel.classList.toggle('hidden');
+    if (!adminPanel.classList.contains('hidden')) {
+      adminPanel.scrollIntoView({ behavior: 'smooth' });
+    }
+    clickCount = 0;
+  }
+  clearTimeout(clickTimer);
+  clickTimer = setTimeout(() => { clickCount = 0; }, 1200);
+}
+
 let isAdmin = false;
 let currentEditId = null;
 let currentEditSection = null;
 
 const articleSections = ['news','results','analysis','media','history','schedule'];
 const matchSections = [
-'ekstraklasa','pierwsza_liga','druga_liga',
-'trzecia_liga_gr1','trzecia_liga_gr2','trzecia_liga_gr3','trzecia_liga_gr4',
-'superpuchar','puchar_polski',
-'champions_league','europa_league','conference_league'
+  'ekstraklasa','pierwsza_liga','druga_liga',
+  'trzecia_liga_gr1','trzecia_liga_gr2','trzecia_liga_gr3','trzecia_liga_gr4',
+  'superpuchar','puchar_polski',
+  'champions_league','europa_league','conference_league'
 ];
 const tableSections = matchSections.map(s => s + '_table');
 
 function showSection(id) {
-document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-document.querySelectorAll('.top-nav a').forEach(a => a.classList.remove('active'));
-document.getElementById(id).classList.add('active');
-document.querySelector(`.top-nav a[data-section="${id}"]`).classList.add('active');
-if (id !== 'home') {
-if (id === 'polskie') showLiga('polskie', 'ekstraklasa');
-else if (id === 'puchary') showLiga('puchary', 'superpuchar');
-else {
-loadSection(id);
-if (tableSections.includes(id)) loadSection(id.replace('_table', ''));
-}
-}
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.top-nav a').forEach(a => a.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  const navLink = document.querySelector(`.top-nav a[data-section="${id}"]`);
+  if (navLink) navLink.classList.add('active');
+  
+  if (id !== 'home') {
+    if (id === 'polskie') showLiga('polskie', 'ekstraklasa');
+    else if (id === 'puchary') showLiga('puchary', 'superpuchar');
+    else {
+      loadSection(id);
+      if (tableSections.includes(id)) loadSection(id.replace('_table', ''));
+    }
+  }
 }
 
-function showLiga(context, ligaId) {
-const container = document.getElementById(context);
-if (!container) return;
-container.querySelectorAll('.liga-subpage').forEach(el => el.classList.remove('active-liga'));
-const target = document.getElementById(ligaId + '-content');
-if (target) target.classList.add('active-liga');
-loadSection(ligaId);
-loadSection(ligaId + '_table');
+function showLiga(context, ligaId, btnEl) {
+  const container = document.getElementById(context);
+  if (!container) return;
+  if (btnEl) {
+    container.querySelectorAll('.liga-btn').forEach(b => b.classList.remove('active'));
+    btnEl.classList.add('active');
+  }
+  container.querySelectorAll('.liga-subpage').forEach(el => el.classList.remove('active-liga'));
+  const target = document.getElementById(ligaId + '-content');
+  if (target) target.classList.add('active-liga');
+  loadSection(ligaId);
+  loadSection(ligaId + '_table');
 }
 
 auth.onAuthStateChanged(user => {
-isAdmin = user && user.email === "admin@sgstrefagola.pl";
-document.getElementById('loginForm').classList.toggle('hidden', isAdmin);
-document.getElementById('adminTools').classList.toggle('hidden', !isAdmin);
-if (isAdmin) {
-const allSections = [...articleSections, ...matchSections, ...tableSections];
-allSections.forEach(loadSection);
-}
+  isAdmin = user && user.email === "admin@sgstrefagola.pl";
+  document.getElementById('loginForm').classList.toggle('hidden', isAdmin);
+  document.getElementById('adminTools').classList.toggle('hidden', !isAdmin);
+  if (isAdmin) {
+    document.getElementById('adminPanel').classList.remove('hidden');
+    const allSections = [...articleSections, ...matchSections, ...tableSections];
+    allSections.forEach(loadSection);
+  }
 });
 
 function loginAdmin() {
-const pass = document.getElementById('adminPass').value;
-auth.signInWithEmailAndPassword("admin@sgstrefagola.pl", pass)
-.catch(() => document.getElementById('loginErr').textContent = "Błędne hasło");
+  const pass = document.getElementById('adminPass').value;
+  auth.signInWithEmailAndPassword("admin@sgstrefagola.pl", pass)
+  .catch(() => document.getElementById('loginErr').textContent = "Błędne hasło administratora.");
 }
 
 function logoutAdmin() { auth.signOut(); }
@@ -777,570 +905,563 @@ function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
 // 1. MODAL ARTYKUŁU
 // ----------------------------------------------------
 function openArticleModal(section = 'news', docId = null, data = null) {
-if (!isAdmin && docId) return;
-currentEditId = docId;
-currentEditSection = section;
-document.getElementById('artErr').textContent = '';
-document.getElementById('artSection').value = section;
+  if (!isAdmin && docId) return;
+  currentEditId = docId;
+  currentEditSection = section;
+  document.getElementById('artErr').textContent = '';
+  document.getElementById('artSection').value = section;
 
-if (data) {
-document.getElementById('articleModalTitle').textContent = 'Edytuj artykuł';
-document.getElementById('artTitle').value = data.title || '';
-document.getElementById('artContent').value = data.content || '';
-document.getElementById('artImage').value = data.imageUrl || '';
-document.getElementById('artVideo').value = data.videoUrl || '';
-document.getElementById('artDelBtn').style.display = 'inline-block';
-} else {
-document.getElementById('articleModalTitle').textContent = 'Dodaj artykuł';
-document.getElementById('artTitle').value = '';
-document.getElementById('artContent').value = '';
-document.getElementById('artImage').value = '';
-document.getElementById('artVideo').value = '';
-document.getElementById('artDelBtn').style.display = 'none';
-}
-document.getElementById('articleModal').classList.remove('hidden');
+  if (data) {
+    document.getElementById('articleModalTitle').textContent = 'Edytuj artykuł';
+    document.getElementById('artTitle').value = data.title || '';
+    document.getElementById('artContent').value = data.content || '';
+    document.getElementById('artImage').value = data.imageUrl || '';
+    document.getElementById('artVideo').value = data.videoUrl || '';
+    document.getElementById('artDelBtn').style.display = 'inline-block';
+  } else {
+    document.getElementById('articleModalTitle').textContent = 'Dodaj artykuł';
+    document.getElementById('artTitle').value = '';
+    document.getElementById('artContent').value = '';
+    document.getElementById('artImage').value = '';
+    document.getElementById('artVideo').value = '';
+    document.getElementById('artDelBtn').style.display = 'none';
+  }
+  document.getElementById('articleModal').classList.remove('hidden');
 }
 
 async function saveArticle() {
-const sec = document.getElementById('artSection').value;
-const title = document.getElementById('artTitle').value.trim();
-const content = document.getElementById('artContent').value;
-const imageUrl = document.getElementById('artImage').value.trim();
-const videoUrl = document.getElementById('artVideo').value.trim();
-const err = document.getElementById('artErr');
+  const sec = document.getElementById('artSection').value;
+  const title = document.getElementById('artTitle').value.trim();
+  const content = document.getElementById('artContent').value;
+  const imageUrl = document.getElementById('artImage').value.trim();
+  const videoUrl = document.getElementById('artVideo').value.trim();
+  const err = document.getElementById('artErr');
 
-if (!title || !content) { err.textContent = "Tytuł i treść są wymagane."; return; }
-const data = { title, content, imageUrl: imageUrl || null, videoUrl: videoUrl || null };
-try {
-if (currentEditId) {
-await db.collection(sec).doc(currentEditId).update(data);
-} else {
-await db.collection(sec).add({ ...data, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
-}
-closeModal('articleModal');
-loadSection(sec);
-} catch (e) { err.textContent = "Błąd zapisu artykułu."; }
+  if (!title || !content) { err.textContent = "Tytuł i treść są wymagane."; return; }
+  const data = { title, content, imageUrl: imageUrl || null, videoUrl: videoUrl || null };
+  try {
+    if (currentEditId) {
+      await db.collection(sec).doc(currentEditId).update(data);
+    } else {
+      await db.collection(sec).add({ ...data, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+    }
+    closeModal('articleModal');
+    loadSection(sec);
+  } catch (e) { err.textContent = "Błąd zapisu artykułu."; }
 }
 
 async function deleteArticle() {
-if (!confirm("Na pewno chcesz usunąć ten artykuł?")) return;
-try {
-const sec = document.getElementById('artSection').value;
-await db.collection(sec).doc(currentEditId).delete();
-closeModal('articleModal');
-loadSection(sec);
-} catch (e) { document.getElementById('artErr').textContent = "Błąd usuwania."; }
+  if (!confirm("Usunąć ten artykuł?")) return;
+  try {
+    const sec = document.getElementById('artSection').value;
+    await db.collection(sec).doc(currentEditId).delete();
+    closeModal('articleModal');
+    loadSection(sec);
+  } catch (e) { document.getElementById('artErr').textContent = "Błąd usuwania."; }
 }
 
 // ----------------------------------------------------
-// 2. MODAL MECZÓW (POJEDYNCZE + MASOWE)
+// 2. MODAL MECZÓW ( WZÓR Z INDEX 24 )
 // ----------------------------------------------------
 function switchMatchTab(mode) {
-const singleView = document.getElementById('matchSingleView');
-const bulkView = document.getElementById('matchBulkView');
-const btnSingle = document.getElementById('btnMatchSingleTab');
-const btnBulk = document.getElementById('btnMatchBulkTab');
+  const singleView = document.getElementById('matchSingleView');
+  const bulkView = document.getElementById('matchBulkView');
+  const btnSingle = document.getElementById('btnMatchSingleTab');
+  const btnBulk = document.getElementById('btnMatchBulkTab');
 
-if (mode === 'single') {
-singleView.style.display = 'block';
-bulkView.style.display = 'none';
-btnSingle.className = 'btn btn-primary';
-btnBulk.className = 'btn btn-secondary';
-} else {
-singleView.style.display = 'none';
-bulkView.style.display = 'block';
-btnSingle.className = 'btn btn-secondary';
-btnBulk.className = 'btn btn-primary';
-}
+  if (mode === 'single') {
+    singleView.style.display = 'block';
+    bulkView.style.display = 'none';
+    btnSingle.className = 'btn btn-primary';
+    btnBulk.className = 'btn btn-secondary';
+  } else {
+    singleView.style.display = 'none';
+    bulkView.style.display = 'block';
+    btnSingle.className = 'btn btn-secondary';
+    btnBulk.className = 'btn btn-primary';
+  }
 }
 
 function openMatchModal(section = 'ekstraklasa', docId = null, data = null) {
-if (!isAdmin && docId) return;
-currentEditId = docId;
-currentEditSection = section;
-document.getElementById('matchErr').textContent = '';
-document.getElementById('matchSection').value = section;
-switchMatchTab('single');
+  if (!isAdmin && docId) return;
+  currentEditId = docId;
+  currentEditSection = section;
+  document.getElementById('matchErr').textContent = '';
+  document.getElementById('matchSection').value = section;
+  switchMatchTab('single');
 
-if (data) {
-document.getElementById('matchModalTitle').textContent = 'Edytuj mecz';
-document.getElementById('matchTabSwitcher').style.display = 'none';
-document.getElementById('matchRound').value = data.title || '';
-document.getElementById('matchHomeTeam').value = data.homeTeam || '';
-document.getElementById('matchHomeLogo').value = data.logoHome || '';
-document.getElementById('matchAwayTeam').value = data.awayTeam || '';
-document.getElementById('matchAwayLogo').value = data.logoAway || '';
-document.getElementById('matchDate').value = data.date || '';
-document.getElementById('matchScore').value = data.score || '';
-document.getElementById('matchDelBtn').style.display = 'inline-block';
-} else {
-document.getElementById('matchModalTitle').textContent = 'Dodaj mecze';
-document.getElementById('matchTabSwitcher').style.display = 'flex';
-document.getElementById('matchRound').value = '';
-document.getElementById('matchHomeTeam').value = '';
-document.getElementById('matchHomeLogo').value = '';
-document.getElementById('matchAwayTeam').value = '';
-document.getElementById('matchAwayLogo').value = '';
-document.getElementById('matchDate').value = '';
-document.getElementById('matchScore').value = '';
-document.getElementById('bulkMatchText').value = '';
-document.getElementById('matchDelBtn').style.display = 'none';
-}
-document.getElementById('matchModal').classList.remove('hidden');
+  if (data) {
+    document.getElementById('matchModalTitle').textContent = 'Edytuj mecz';
+    document.getElementById('matchTabSwitcher').style.display = 'none';
+    document.getElementById('matchRound').value = data.title || '';
+    document.getElementById('matchHomeTeam').value = data.homeTeam || '';
+    document.getElementById('matchHomeLogo').value = data.logoHome || '';
+    document.getElementById('matchAwayTeam').value = data.awayTeam || '';
+    document.getElementById('matchAwayLogo').value = data.logoAway || '';
+    document.getElementById('matchDate').value = data.date || '';
+    document.getElementById('matchScore').value = data.score || '';
+    document.getElementById('matchDelBtn').style.display = 'inline-block';
+  } else {
+    document.getElementById('matchModalTitle').textContent = 'Dodaj mecze';
+    document.getElementById('matchTabSwitcher').style.display = 'flex';
+    document.getElementById('matchRound').value = '';
+    document.getElementById('matchHomeTeam').value = '';
+    document.getElementById('matchHomeLogo').value = '';
+    document.getElementById('matchAwayTeam').value = '';
+    document.getElementById('matchAwayLogo').value = '';
+    document.getElementById('matchDate').value = '';
+    document.getElementById('matchScore').value = '';
+    document.getElementById('bulkMatchText').value = '';
+    document.getElementById('matchDelBtn').style.display = 'none';
+  }
+  document.getElementById('matchModal').classList.remove('hidden');
 }
 
 async function saveMatch() {
-const sec = document.getElementById('matchSection').value;
-const title = document.getElementById('matchRound').value.trim();
-const homeTeam = document.getElementById('matchHomeTeam').value.trim();
-const logoHome = document.getElementById('matchHomeLogo').value.trim();
-const awayTeam = document.getElementById('matchAwayTeam').value.trim();
-const logoAway = document.getElementById('matchAwayLogo').value.trim();
-const date = document.getElementById('matchDate').value.trim();
-const score = document.getElementById('matchScore').value.trim();
-const err = document.getElementById('matchErr');
+  const sec = document.getElementById('matchSection').value;
+  const title = document.getElementById('matchRound').value.trim();
+  const homeTeam = document.getElementById('matchHomeTeam').value.trim();
+  const logoHome = document.getElementById('matchHomeLogo').value.trim();
+  const awayTeam = document.getElementById('matchAwayTeam').value.trim();
+  const logoAway = document.getElementById('matchAwayLogo').value.trim();
+  const date = document.getElementById('matchDate').value.trim();
+  const score = document.getElementById('matchScore').value.trim();
+  const err = document.getElementById('matchErr');
 
-if (!title || !homeTeam || !awayTeam || !date || !score) {
-err.textContent = "Wypełnij wszystkie pola meczu.";
-return;
-}
-const data = {
-title, homeTeam, awayTeam, date, score,
-logoHome: logoHome || teamLogoMap[homeTeam] || null,
-logoAway: logoAway || teamLogoMap[awayTeam] || null
-};
-try {
-if (currentEditId) {
-await db.collection(sec).doc(currentEditId).update(data);
-} else {
-await db.collection(sec).add({ ...data, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
-}
-closeModal('matchModal');
-loadSection(sec);
-} catch (e) { err.textContent = "Błąd zapisu meczu."; }
+  if (!title || !homeTeam || !awayTeam || !date || !score) {
+    err.textContent = "Wypełnij pola meczu.";
+    return;
+  }
+  const data = {
+    title, homeTeam, awayTeam, date, score,
+    logoHome: logoHome || teamLogoMap[homeTeam] || null,
+    logoAway: logoAway || teamLogoMap[awayTeam] || null
+  };
+  try {
+    if (currentEditId) {
+      await db.collection(sec).doc(currentEditId).update(data);
+    } else {
+      await db.collection(sec).add({ ...data, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+    }
+    closeModal('matchModal');
+    loadSection(sec);
+  } catch (e) { err.textContent = "Błąd zapisu meczu."; }
 }
 
-// MASOWE DODAWANIE MECZÓW
 async function saveBulkMatches() {
-const sec = document.getElementById('matchSection').value;
-const defaultRound = document.getElementById('bulkMatchRound').value.trim() || 'Mecze';
-const text = document.getElementById('bulkMatchText').value.trim();
-const err = document.getElementById('matchErr');
+  const sec = document.getElementById('matchSection').value;
+  const defaultRound = document.getElementById('bulkMatchRound').value.trim() || 'Mecze';
+  const text = document.getElementById('bulkMatchText').value.trim();
+  const err = document.getElementById('matchErr');
 
-if (!text) { err.textContent = "Wklej treść z meczami."; return; }
+  if (!text) { err.textContent = "Wklej treść meczów."; return; }
 
-const lines = text.split('\n').filter(l => l.trim() !== '');
-let count = 0;
+  const lines = text.split('\n').filter(l => l.trim() !== '');
 
-try {
-for (let line of lines) {
-const parts = line.split('|').map(p => p.trim());
-if (parts.length >= 2) {
-const homeTeam = parts[0];
-const awayTeam = parts[1];
-const score = parts[2] || '-';
-const date = parts[3] || '-';
-const round = parts[4] || defaultRound;
+  try {
+    for (let line of lines) {
+      const parts = line.split('|').map(p => p.trim());
+      if (parts.length >= 2) {
+        const homeTeam = parts[0];
+        const awayTeam = parts[1];
+        const score = parts[2] || '-';
+        const date = parts[3] || '-';
+        const round = parts[4] || defaultRound;
 
-await db.collection(sec).add({
-title: round,
-homeTeam: homeTeam,
-awayTeam: awayTeam,
-score: score,
-date: date,
-logoHome: teamLogoMap[homeTeam] || null,
-logoAway: teamLogoMap[awayTeam] || null,
-createdAt: firebase.firestore.FieldValue.serverTimestamp()
-});
-count++;
-}
-}
-closeModal('matchModal');
-loadSection(sec);
-} catch(e) { err.textContent = "Błąd podczas masowego dodawania meczów."; }
+        await db.collection(sec).add({
+          title: round,
+          homeTeam: homeTeam,
+          awayTeam: awayTeam,
+          score: score,
+          date: date,
+          logoHome: teamLogoMap[homeTeam] || null,
+          logoAway: teamLogoMap[awayTeam] || null,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+      }
+    }
+    closeModal('matchModal');
+    loadSection(sec);
+  } catch(e) { err.textContent = "Błąd podczas masowego dodawania meczów."; }
 }
 
 async function deleteMatch() {
-if (!confirm("Na pewno chcesz usunąć ten mecz?")) return;
-try {
-const sec = document.getElementById('matchSection').value;
-await db.collection(sec).doc(currentEditId).delete();
-closeModal('matchModal');
-loadSection(sec);
-} catch (e) { document.getElementById('matchErr').textContent = "Błąd usuwania."; }
+  if (!confirm("Usunąć ten mecz?")) return;
+  try {
+    const sec = document.getElementById('matchSection').value;
+    await db.collection(sec).doc(currentEditId).delete();
+    closeModal('matchModal');
+    loadSection(sec);
+  } catch (e) { document.getElementById('matchErr').textContent = "Błąd usuwania."; }
 }
 
 // ----------------------------------------------------
-// 3. MODAL TABELI (POJEDYNCZE + MASOWE)
+// 3. MODAL TABELI
 // ----------------------------------------------------
 function switchTableTab(mode) {
-const singleView = document.getElementById('tableSingleView');
-const bulkView = document.getElementById('tableBulkView');
-const btnSingle = document.getElementById('btnTableSingleTab');
-const btnBulk = document.getElementById('btnTableBulkTab');
+  const singleView = document.getElementById('tableSingleView');
+  const bulkView = document.getElementById('tableBulkView');
+  const btnSingle = document.getElementById('btnTableSingleTab');
+  const btnBulk = document.getElementById('btnTableBulkTab');
 
-if (mode === 'single') {
-singleView.style.display = 'block';
-bulkView.style.display = 'none';
-btnSingle.className = 'btn btn-primary';
-btnBulk.className = 'btn btn-secondary';
-} else {
-singleView.style.display = 'none';
-bulkView.style.display = 'block';
-btnSingle.className = 'btn btn-secondary';
-btnBulk.className = 'btn btn-primary';
-}
+  if (mode === 'single') {
+    singleView.style.display = 'block';
+    bulkView.style.display = 'none';
+    btnSingle.className = 'btn btn-primary';
+    btnBulk.className = 'btn btn-secondary';
+  } else {
+    singleView.style.display = 'none';
+    bulkView.style.display = 'block';
+    btnSingle.className = 'btn btn-secondary';
+    btnBulk.className = 'btn btn-primary';
+  }
 }
 
 function openTableModal(section = 'ekstraklasa_table', docId = null, data = null) {
-if (!isAdmin && docId) return;
-currentEditId = docId;
-currentEditSection = section;
-document.getElementById('tableErr').textContent = '';
-document.getElementById('tableSection').value = section;
-switchTableTab('single');
+  if (!isAdmin && docId) return;
+  currentEditId = docId;
+  currentEditSection = section;
+  document.getElementById('tableErr').textContent = '';
+  document.getElementById('tableSection').value = section;
+  switchTableTab('single');
 
-if (data) {
-document.getElementById('tableModalTitle').textContent = 'Edytuj pozycję w tabeli';
-document.getElementById('tableTabSwitcher').style.display = 'none';
-document.getElementById('tablePos').value = data.position || '';
-document.getElementById('tableTeam').value = data.teamName || '';
-document.getElementById('tableLogo').value = data.teamLogo || '';
-document.getElementById('tableMatches').value = data.matches || '';
-document.getElementById('tablePts').value = data.points !== undefined ? data.points : '';
-document.getElementById('tableDelBtn').style.display = 'inline-block';
-} else {
-document.getElementById('tableModalTitle').textContent = 'Dodaj do tabeli';
-document.getElementById('tableTabSwitcher').style.display = 'flex';
-document.getElementById('tablePos').value = '';
-document.getElementById('tableTeam').value = '';
-document.getElementById('tableLogo').value = '';
-document.getElementById('tableMatches').value = '';
-document.getElementById('tablePts').value = '';
-document.getElementById('bulkTableText').value = '';
-document.getElementById('tableDelBtn').style.display = 'none';
-}
-document.getElementById('tableModal').classList.remove('hidden');
+  if (data) {
+    document.getElementById('tableModalTitle').textContent = 'Edytuj pozycję w tabeli';
+    document.getElementById('tableTabSwitcher').style.display = 'none';
+    document.getElementById('tablePos').value = data.position || '';
+    document.getElementById('tableTeam').value = data.teamName || '';
+    document.getElementById('tableLogo').value = data.teamLogo || '';
+    document.getElementById('tableMatches').value = data.matches || '';
+    document.getElementById('tablePts').value = data.points !== undefined ? data.points : '';
+    document.getElementById('tableDelBtn').style.display = 'inline-block';
+  } else {
+    document.getElementById('tableModalTitle').textContent = 'Dodaj do tabeli';
+    document.getElementById('tableTabSwitcher').style.display = 'flex';
+    document.getElementById('tablePos').value = '';
+    document.getElementById('tableTeam').value = '';
+    document.getElementById('tableLogo').value = '';
+    document.getElementById('tableMatches').value = '';
+    document.getElementById('tablePts').value = '';
+    document.getElementById('bulkTableText').value = '';
+    document.getElementById('tableDelBtn').style.display = 'none';
+  }
+  document.getElementById('tableModal').classList.remove('hidden');
 }
 
 async function saveTableEntry() {
-const sec = document.getElementById('tableSection').value;
-const position = document.getElementById('tablePos').value.trim();
-const teamName = document.getElementById('tableTeam').value.trim();
-const teamLogo = document.getElementById('tableLogo').value.trim();
-const matches = document.getElementById('tableMatches').value.trim();
-const points = document.getElementById('tablePts').value.trim();
-const err = document.getElementById('tableErr');
+  const sec = document.getElementById('tableSection').value;
+  const position = document.getElementById('tablePos').value.trim();
+  const teamName = document.getElementById('tableTeam').value.trim();
+  const teamLogo = document.getElementById('tableLogo').value.trim();
+  const matches = document.getElementById('tableMatches').value.trim();
+  const points = document.getElementById('tablePts').value.trim();
+  const err = document.getElementById('tableErr');
 
-if (!position || !teamName || !matches || points === '') {
-err.textContent = "Wypełnij pozycję, nazwę drużyny, mecze i punkty.";
-return;
-}
-const data = {
-position: parseInt(position),
-teamName,
-teamLogo: teamLogo || teamLogoMap[teamName] || null,
-matches,
-points: parseInt(points)
-};
-try {
-if (currentEditId) {
-await db.collection(sec).doc(currentEditId).update(data);
-} else {
-await db.collection(sec).add({ ...data, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
-}
-closeModal('tableModal');
-loadSection(sec);
-} catch (e) { err.textContent = "Błąd zapisu tabeli."; }
+  if (!position || !teamName || !matches || points === '') {
+    err.textContent = "Uzupełnij wszystkie dane.";
+    return;
+  }
+  const data = {
+    position: parseInt(position),
+    teamName,
+    teamLogo: teamLogo || teamLogoMap[teamName] || null,
+    matches,
+    points: parseInt(points)
+  };
+  try {
+    if (currentEditId) {
+      await db.collection(sec).doc(currentEditId).update(data);
+    } else {
+      await db.collection(sec).add({ ...data, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+    }
+    closeModal('tableModal');
+    loadSection(sec);
+  } catch (e) { err.textContent = "Błąd zapisu."; }
 }
 
-// MASOWE DODAWANIE TABELI
 async function saveBulkTable() {
-const sec = document.getElementById('tableSection').value;
-const text = document.getElementById('bulkTableText').value.trim();
-const err = document.getElementById('tableErr');
+  const sec = document.getElementById('tableSection').value;
+  const text = document.getElementById('bulkTableText').value.trim();
+  const err = document.getElementById('tableErr');
 
-if (!text) { err.textContent = "Wklej treść tabeli."; return; }
+  if (!text) { err.textContent = "Wklej treść tabeli."; return; }
 
-const lines = text.split('\n').filter(l => l.trim() !== '');
+  const lines = text.split('\n').filter(l => l.trim() !== '');
 
-try {
-for (let line of lines) {
-const parts = line.split('|').map(p => p.trim());
-if (parts.length >= 4) {
-const pos = parseInt(parts[0]);
-const teamName = parts[1];
-const matches = parts[2];
-const pts = parseInt(parts[3]);
+  try {
+    for (let line of lines) {
+      const parts = line.split('|').map(p => p.trim());
+      if (parts.length >= 4) {
+        const pos = parseInt(parts[0]);
+        const teamName = parts[1];
+        const matches = parts[2];
+        const pts = parseInt(parts[3]);
 
-await db.collection(sec).add({
-position: pos,
-teamName: teamName,
-teamLogo: teamLogoMap[teamName] || null,
-matches: matches,
-points: pts,
-createdAt: firebase.firestore.FieldValue.serverTimestamp()
-});
-}
-}
-closeModal('tableModal');
-loadSection(sec);
-} catch(e) { err.textContent = "Błąd podczas masowego dodawania tabeli."; }
+        await db.collection(sec).add({
+          position: pos,
+          teamName: teamName,
+          teamLogo: teamLogoMap[teamName] || null,
+          matches: matches,
+          points: pts,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+      }
+    }
+    closeModal('tableModal');
+    loadSection(sec);
+  } catch(e) { err.textContent = "Błąd dodawania tabeli."; }
 }
 
 async function deleteTableEntry() {
-if (!confirm("Na pewno chcesz usunąć tę drużynę z tabeli?")) return;
-try {
-const sec = document.getElementById('tableSection').value;
-await db.collection(sec).doc(currentEditId).delete();
-closeModal('tableModal');
-loadSection(sec);
-} catch (e) { document.getElementById('tableErr').textContent = "Błąd usuwania."; }
+  if (!confirm("Usunąć tę drużynę?")) return;
+  try {
+    const sec = document.getElementById('tableSection').value;
+    await db.collection(sec).doc(currentEditId).delete();
+    closeModal('tableModal');
+    loadSection(sec);
+  } catch (e) { document.getElementById('tableErr').textContent = "Błąd usuwania."; }
 }
 
-// GENEROWANIE MEDIA EMBED
 function embedVideo(url) {
-if (!url) return '';
-const yt = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/);
-if (yt) return `<iframe src="https://www.youtube.com/embed/${yt[1]}" frameborder="0" allowfullscreen></iframe>`;
-if (url.endsWith('.mp4') || url.endsWith('.webm')) return `<video controls style="width:100%"><source src="${url}" type="video/mp4"></video>`;
-return `<a href="${url}" target="_blank" style="display:inline-block;padding:6px 12px;background:#ff3b3b;color:white;border-radius:4px;text-decoration:none;">Otwórz film</a>`;
+  if (!url) return '';
+  const yt = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/);
+  if (yt) return `<iframe src="https://www.youtube.com/embed/${yt[1]}" frameborder="0" allowfullscreen></iframe>`;
+  if (url.endsWith('.mp4') || url.endsWith('.webm')) return `<video controls style="width:100%"><source src="${url}" type="video/mp4"></video>`;
+  return `<a href="${url}" target="_blank" style="display:inline-block;padding:6px 12px;background:#ff3b3b;color:white;border-radius:4px;text-decoration:none;">Otwórz film</a>`;
 }
 
-// WCZYTYWANIE DANYCH DO STRONY
+// WCZYTYWANIE DANYCH
 async function loadSection(section) {
-if (articleSections.includes(section)) {
-const container = document.getElementById(section + '-list');
-if (!container) return;
-try {
-const snap = await db.collection(section).orderBy("createdAt", "desc").get();
-if (snap.empty) { container.innerHTML = "<p>Brak treści.</p>"; return; }
-let html = '';
-snap.forEach(doc => {
-const d = doc.data();
-const editBtn = isAdmin ? `<button class="edit-btn" onclick="openArticleModal('${section}', '${doc.id}', ${JSON.stringify(d).replace(/"/g, '&quot;')})">Edytuj</button>` : '';
-const delBtn = isAdmin ? `<button class="delete-btn" onclick="openArticleModal('${section}', '${doc.id}', ${JSON.stringify(d).replace(/"/g, '&quot;')})">Usuń</button>` : '';
-let media = '';
-if (d.imageUrl) media += `<img src="${d.imageUrl}" alt="Zdjęcie">`;
-if (d.videoUrl) media += embedVideo(d.videoUrl);
-html += `
-<div class="content-item">
-${editBtn}${delBtn}
-<h3 style="cursor:pointer;" onclick="openPostModal(${JSON.stringify(d).replace(/"/g, '&quot;')})">${d.title}</h3>
-<div class="article-content">${d.content}</div>
-${media}
-</div>
-`;
-});
-container.innerHTML = html;
-} catch (e) { container.innerHTML = "<p>Błąd ładowania treści.</p>"; }
-} else if (matchSections.includes(section)) {
-const container = document.getElementById(section + '-list');
-if (!container) return;
-try {
-const snap = await db.collection(section).orderBy("createdAt", "desc").get();
-if (snap.empty) { container.innerHTML = "<p>Brak meczów.</p>"; return; }
-let html = '';
-let currentRound = '';
-snap.forEach(doc => {
-const d = doc.data();
-const round = d.title || 'Bez kolejki';
-if (round !== currentRound) {
-html += `<div class="match-header">${round}</div>`;
-currentRound = round;
-}
-const actions = isAdmin ? `<button class="edit-btn" style="position:absolute;top:10px;right:10px;" onclick="openMatchModal('${section}', '${doc.id}', ${JSON.stringify(d).replace(/"/g, '&quot;')})">Edytuj</button>` : '';
-html += `
-<div class="match-row">
-<div class="match-date">${d.date || '-'}</div>
-<div class="team-name" style="cursor:pointer;" onclick="openClubProfile(${JSON.stringify(d.homeTeam || '').replace(/"/g, '&quot;')}, ${JSON.stringify(d.logoHome || '').replace(/"/g, '&quot;')})">
-${d.logoHome ? `<img class="team-logo" src="${d.logoHome.trim()}" onerror="this.style.display='none'">` : ''}
-<span>${d.homeTeam || '---'}</span>
-</div>
-<div class="score">${d.score || '-'}</div>
-<div class="team-name" style="cursor:pointer;" onclick="openClubProfile(${JSON.stringify(d.awayTeam || '').replace(/"/g, '&quot;')}, ${JSON.stringify(d.logoAway || '').replace(/"/g, '&quot;')})">
-<span>${d.awayTeam || '---'}</span>
-${d.logoAway ? `<img class="team-logo" src="${d.logoAway.trim()}" onerror="this.style.display='none'">` : ''}
-</div>
-${actions}
-</div>
-`;
-});
-container.innerHTML = html;
-} catch (e) { container.innerHTML = "<p>Błąd ładowania meczów.</p>"; }
-} else if (tableSections.includes(section)) {
-const container = document.getElementById(section + '-list');
-if (!container) return;
-try {
-const snap = await db.collection(section).orderBy("position", "asc").get();
-if (snap.empty) { container.querySelector('tbody').innerHTML = `<tr><td colspan="4">Brak drużyn.</td></tr>`; return; }
-let html = '';
-snap.forEach(doc => {
-const d = doc.data();
-let rowClass = '';
-const pos = parseInt(d.position);
+  if (articleSections.includes(section)) {
+    const container = document.getElementById(section + '-list');
+    if (!container) return;
+    try {
+      const snap = await db.collection(section).orderBy("createdAt", "desc").get();
+      if (snap.empty) { container.innerHTML = "<p>Brak treści.</p>"; return; }
+      let html = '';
+      snap.forEach(doc => {
+        const d = doc.data();
+        const editBtn = isAdmin ? `<button class="edit-btn" onclick="openArticleModal('${section}', '${doc.id}', ${JSON.stringify(d).replace(/"/g, '&quot;')})">Edytuj</button>` : '';
+        const delBtn = isAdmin ? `<button class="delete-btn" onclick="openArticleModal('${section}', '${doc.id}', ${JSON.stringify(d).replace(/"/g, '&quot;')})">Usuń</button>` : '';
+        let media = '';
+        if (d.imageUrl) media += `<img src="${d.imageUrl}" alt="Zdjęcie">`;
+        if (d.videoUrl) media += embedVideo(d.videoUrl);
+        html += `
+          <div class="content-item">
+            ${editBtn}${delBtn}
+            <h3 style="cursor:pointer;" onclick="openPostModal(${JSON.stringify(d).replace(/"/g, '&quot;')})">${d.title}</h3>
+            <div class="article-content">${d.content}</div>
+            ${media}
+          </div>
+        `;
+      });
+      container.innerHTML = html;
+    } catch (e) { container.innerHTML = "<p>Błąd ładowania treści.</p>"; }
+  } else if (matchSections.includes(section)) {
+    const container = document.getElementById(section + '-list');
+    if (!container) return;
+    try {
+      const snap = await db.collection(section).orderBy("createdAt", "desc").get();
+      if (snap.empty) { container.innerHTML = "<p>Brak meczów.</p>"; return; }
+      let html = '';
+      let currentRound = '';
+      snap.forEach(doc => {
+        const d = doc.data();
+        const round = d.title || 'Bez kolejki';
+        if (round !== currentRound) {
+          html += `<div class="match-header">${round}</div>`;
+          currentRound = round;
+        }
+        const actions = isAdmin ? `<button class="edit-btn" style="position:absolute;top:10px;right:10px;" onclick="openMatchModal('${section}', '${doc.id}', ${JSON.stringify(d).replace(/"/g, '&quot;')})">Edytuj</button>` : '';
+        html += `
+          <div class="match-row">
+            <div class="match-date">${d.date || '-'}</div>
+            <div class="team-name" style="cursor:pointer;" onclick="openClubProfile(${JSON.stringify(d.homeTeam || '').replace(/"/g, '&quot;')}, ${JSON.stringify(d.logoHome || '').replace(/"/g, '&quot;')})">
+              ${d.logoHome ? `<img class="team-logo" src="${d.logoHome.trim()}" onerror="this.style.display='none'">` : ''}
+              <span>${d.homeTeam || '---'}</span>
+            </div>
+            <div class="score">${d.score || '-'}</div>
+            <div class="team-name" style="cursor:pointer;" onclick="openClubProfile(${JSON.stringify(d.awayTeam || '').replace(/"/g, '&quot;')}, ${JSON.stringify(d.logoAway || '').replace(/"/g, '&quot;')})">
+              <span>${d.awayTeam || '---'}</span>
+              ${d.logoAway ? `<img class="team-logo" src="${d.logoAway.trim()}" onerror="this.style.display='none'">` : ''}
+            </div>
+            ${actions}
+          </div>
+        `;
+      });
+      container.innerHTML = html;
+    } catch (e) { container.innerHTML = "<p>Błąd ładowania meczów.</p>"; }
+  } else if (tableSections.includes(section)) {
+    const container = document.getElementById(section + '-list');
+    if (!container) return;
+    try {
+      const snap = await db.collection(section).orderBy("position", "asc").get();
+      if (snap.empty) { container.querySelector('tbody').innerHTML = `<tr><td colspan="4">Brak drużyn.</td></tr>`; return; }
+      let html = '';
+      snap.forEach(doc => {
+        const d = doc.data();
+        let rowClass = '';
+        const pos = parseInt(d.position);
 
-if (section === 'ekstraklasa_table') {
-if (pos >= 16) rowClass = 'relegation';
-} else if (section === 'pierwsza_liga_table' || section === 'druga_liga_table') {
-if (pos <= 2) rowClass = 'promotion';
-else if (pos >= 3 && pos <= 6) rowClass = 'playoff';
-else if (pos >= 16) rowClass = 'relegation';
-} else if (section.startsWith('trzecia_liga')) {
-if (pos === 1) rowClass = 'promotion';
-else if (pos === 2) rowClass = 'playoff';
-else if (pos >= 15) rowClass = 'relegation';
-}
+        if (section === 'ekstraklasa_table') {
+          if (pos >= 16) rowClass = 'relegation';
+        } else if (section === 'pierwsza_liga_table' || section === 'druga_liga_table') {
+          if (pos <= 2) rowClass = 'promotion';
+          else if (pos >= 3 && pos <= 6) rowClass = 'playoff';
+          else if (pos >= 16) rowClass = 'relegation';
+        } else if (section.startsWith('trzecia_liga')) {
+          if (pos === 1) rowClass = 'promotion';
+          else if (pos === 2) rowClass = 'playoff';
+          else if (pos >= 15) rowClass = 'relegation';
+        }
 
-const actions = isAdmin ? `<td><button class="edit-btn" onclick="openTableModal('${section}', '${doc.id}', ${JSON.stringify(d).replace(/"/g, '&quot;')})">Edytuj</button></td>` : '';
+        const actions = isAdmin ? `<td><button class="edit-btn" onclick="openTableModal('${section}', '${doc.id}', ${JSON.stringify(d).replace(/"/g, '&quot;')})">Edytuj</button></td>` : '';
 
-html += `
-<tr class="${rowClass}">
-<td>${d.position || '-'}</td>
-<td class="team-cell" style="cursor:pointer;" onclick="openClubProfile(${JSON.stringify(d.teamName || '').replace(/"/g, '&quot;')}, ${JSON.stringify(d.teamLogo || '').replace(/"/g, '&quot;')})">
-${d.teamLogo ? `<img class="team-logo-small" src="${d.teamLogo.trim()}" onerror="this.style.display='none'">` : ''}
-<span>${d.teamName || '---'}</span>
-</td>
-<td>${d.matches || '-'}</td>
-<td>${d.points !== undefined ? d.points : '-'}</td>
-${actions}
-</tr>
-`;
-});
-container.querySelector('tbody').innerHTML = html;
+        html += `
+          <tr class="${rowClass}">
+            <td>${d.position || '-'}</td>
+            <td class="team-cell" style="cursor:pointer;" onclick="openClubProfile(${JSON.stringify(d.teamName || '').replace(/"/g, '&quot;')}, ${JSON.stringify(d.teamLogo || '').replace(/"/g, '&quot;')})">
+              ${d.teamLogo ? `<img class="team-logo-small" src="${d.teamLogo.trim()}" onerror="this.style.display='none'">` : ''}
+              <span>${d.teamName || '---'}</span>
+            </td>
+            <td>${d.matches || '-'}</td>
+            <td>${d.points !== undefined ? d.points : '-'}</td>
+            ${actions}
+          </tr>
+        `;
+      });
+      container.querySelector('tbody').innerHTML = html;
 
-let legendHTML = '';
-if (section === 'ekstraklasa_table') {
-legendHTML = '<div class="legend"><span class="relegation"></span> Spadek do 1. ligi (16–18)</div>';
-} else if (section === 'pierwsza_liga_table') {
-legendHTML = `<div class="legend"><span class="promotion"></span> Awans do ekstraklasy (1–2) <span class="playoff"></span> Play-off (3–6) <span class="relegation"></span> Spadek (16–18)</div>`;
-} else if (section === 'druga_liga_table') {
-legendHTML = `<div class="legend"><span class="promotion"></span> Awans do 1. ligi (1–2) <span class="playoff"></span> Play-off (3–6) <span class="relegation"></span> Spadek (16–18)</div>`;
-} else if (section.startsWith('trzecia_liga')) {
-legendHTML = `<div class="legend"><span class="promotion"></span> Awans do 2. ligi (1) <span class="playoff"></span> Play-off (2) <span class="relegation"></span> Spadek (15–18)</div>`;
-}
+      let legendHTML = '';
+      if (section === 'ekstraklasa_table') {
+        legendHTML = '<div class="legend"><span class="relegation"></span> Spadek do 1. ligi (16–18)</div>';
+      } else if (section === 'pierwsza_liga_table') {
+        legendHTML = `<div class="legend"><span class="promotion"></span> Awans do ekstraklasy (1–2) <span class="playoff"></span> Play-off (3–6) <span class="relegation"></span> Spadek (16–18)</div>`;
+      } else if (section === 'druga_liga_table') {
+        legendHTML = `<div class="legend"><span class="promotion"></span> Awans do 1. ligi (1–2) <span class="playoff"></span> Play-off (3–6) <span class="relegation"></span> Spadek (16–18)</div>`;
+      } else if (section.startsWith('trzecia_liga')) {
+        legendHTML = `<div class="legend"><span class="promotion"></span> Awans do 2. ligi (1) <span class="playoff"></span> Play-off (2) <span class="relegation"></span> Spadek (15–18)</div>`;
+      }
 
-const existingLegend = container.nextElementSibling;
-if (existingLegend && existingLegend.classList.contains('legend')) existingLegend.remove();
-if (legendHTML) container.insertAdjacentHTML('afterend', legendHTML);
+      const existingLegend = container.nextElementSibling;
+      if (existingLegend && existingLegend.classList.contains('legend')) existingLegend.remove();
+      if (legendHTML) container.insertAdjacentHTML('afterend', legendHTML);
 
-} catch (e) { container.querySelector('tbody').innerHTML = `<tr><td colspan="4">Błąd ładowania tabeli.</td></tr>`; }
-}
+    } catch (e) { container.querySelector('tbody').innerHTML = `<tr><td colspan="4">Błąd ładowania tabeli.</td></tr>`; }
+  }
 }
 
 document.querySelectorAll('.top-nav a').forEach(link => {
-link.addEventListener('click', (e) => {
-e.preventDefault();
-showSection(link.getAttribute('data-section'));
-});
+  link.addEventListener('click', (e) => {
+    e.preventDefault();
+    showSection(link.getAttribute('data-section'));
+  });
 });
 
 showSection('home');
 
 async function openClubProfile(teamName, logoUrl) {
-if (!teamName) return;
-document.getElementById('clubModal').classList.remove('hidden');
-document.getElementById('clubModalTitle').textContent = teamName;
-const logoEl = document.getElementById('clubModalLogo');
+  if (!teamName) return;
+  document.getElementById('clubModal').classList.remove('hidden');
+  document.getElementById('clubModalTitle').textContent = teamName;
+  const logoEl = document.getElementById('clubModalLogo');
 
-if(!logoUrl && teamLogoMap[teamName]) logoUrl = teamLogoMap[teamName];
+  if(!logoUrl && teamLogoMap[teamName]) logoUrl = teamLogoMap[teamName];
 
-if (logoUrl && logoUrl.trim() !== '') {
-logoEl.src = logoUrl.trim();
-logoEl.style.display = 'block';
-} else {
-logoEl.style.display = 'none';
-}
+  if (logoUrl && logoUrl.trim() !== '') {
+    logoEl.src = logoUrl.trim();
+    logoEl.style.display = 'block';
+  } else {
+    logoEl.style.display = 'none';
+  }
 
-const upContainer = document.getElementById('club-upcoming-list');
-const resContainer = document.getElementById('club-results-list');
-upContainer.innerHTML = '<p style="text-align:center; padding:10px;">Ładowanie...</p>';
-resContainer.innerHTML = '<p style="text-align:center; padding:10px;">Ładowanie...</p>';
+  const upContainer = document.getElementById('club-upcoming-list');
+  const resContainer = document.getElementById('club-results-list');
+  upContainer.innerHTML = '<p style="text-align:center; padding:10px;">Ładowanie...</p>';
+  resContainer.innerHTML = '<p style="text-align:center; padding:10px;">Ładowanie...</p>';
 
-switchClubTab('upcoming');
+  switchClubTab('upcoming');
 
-try {
-let allMatches = [];
-const promises = matchSections.map(section => db.collection(section).get());
-const snaps = await Promise.all(promises);
+  try {
+    let allMatches = [];
+    const promises = matchSections.map(section => db.collection(section).get());
+    const snaps = await Promise.all(promises);
 
-snaps.forEach(snap => {
-if (!snap.empty) {
-snap.forEach(doc => {
-const d = doc.data();
-if (d.homeTeam === teamName || d.awayTeam === teamName) allMatches.push(d);
-});
-}
-});
+    snaps.forEach(snap => {
+      if (!snap.empty) {
+        snap.forEach(doc => {
+          const d = doc.data();
+          if (d.homeTeam === teamName || d.awayTeam === teamName) allMatches.push(d);
+        });
+      }
+    });
 
-let upcoming = [], results = [];
-allMatches.forEach(m => {
-if (m.score && m.score !== '-' && m.score.trim() !== '') results.push(m);
-else upcoming.push(m);
-});
+    let upcoming = [], results = [];
+    allMatches.forEach(m => {
+      if (m.score && m.score !== '-' && m.score.trim() !== '') results.push(m);
+      else upcoming.push(m);
+    });
 
-const renderMatches = (matchesArr, container) => {
-if (matchesArr.length === 0) {
-container.innerHTML = '<p style="padding:10px;text-align:center;color:var(--text-light);">Brak meczów.</p>';
-return;
-}
-let html = '<div class="match-list">';
-matchesArr.forEach(d => {
-html += `
-<div class="match-row" style="grid-template-columns: 1fr 1fr 1fr 1fr;">
-<div class="match-date">${d.date || '-'}</div>
-<div class="team-name">
-${d.logoHome ? `<img class="team-logo" src="${d.logoHome.trim()}" onerror="this.style.display='none'">` : ''}
-<span>${d.homeTeam || '---'}</span>
-</div>
-<div class="score">${d.score || '-'}</div>
-<div class="team-name">
-<span>${d.awayTeam || '---'}</span>
-${d.logoAway ? `<img class="team-logo" src="${d.logoAway.trim()}" onerror="this.style.display='none'">` : ''}
-</div>
-</div>
-`;
-});
-html += '</div>';
-container.innerHTML = html;
-};
+    const renderMatches = (matchesArr, container) => {
+      if (matchesArr.length === 0) {
+        container.innerHTML = '<p style="padding:10px;text-align:center;color:var(--text-light);">Brak meczów.</p>';
+        return;
+      }
+      let html = '<div class="match-list">';
+      matchesArr.forEach(d => {
+        html += `
+          <div class="match-row" style="grid-template-columns: 1fr 1fr 1fr 1fr;">
+            <div class="match-date">${d.date || '-'}</div>
+            <div class="team-name">
+              ${d.logoHome ? `<img class="team-logo" src="${d.logoHome.trim()}" onerror="this.style.display='none'">` : ''}
+              <span>${d.homeTeam || '---'}</span>
+            </div>
+            <div class="score">${d.score || '-'}</div>
+            <div class="team-name">
+              <span>${d.awayTeam || '---'}</span>
+              ${d.logoAway ? `<img class="team-logo" src="${d.logoAway.trim()}" onerror="this.style.display='none'">` : ''}
+            </div>
+          </div>
+        `;
+      });
+      html += '</div>';
+      container.innerHTML = html;
+    };
 
-renderMatches(upcoming, upContainer);
-renderMatches(results, resContainer);
-} catch(e) {
-upContainer.innerHTML = '<p style="text-align:center;color:#ff6b6b;padding:10px;">Błąd ładowania.</p>';
-resContainer.innerHTML = '<p style="text-align:center;color:#ff6b6b;padding:10px;">Błąd ładowania.</p>';
-}
+    renderMatches(upcoming, upContainer);
+    renderMatches(results, resContainer);
+  } catch(e) {
+    upContainer.innerHTML = '<p style="text-align:center;color:#ff6b6b;padding:10px;">Błąd ładowania.</p>';
+    resContainer.innerHTML = '<p style="text-align:center;color:#ff6b6b;padding:10px;">Błąd ładowania.</p>';
+  }
 }
 
 function switchClubTab(tab) {
-const upContainer = document.getElementById('club-upcoming-list');
-const resContainer = document.getElementById('club-results-list');
-const btnUp = document.getElementById('btn-tab-up');
-const btnRes = document.getElementById('btn-tab-res');
+  const upContainer = document.getElementById('club-upcoming-list');
+  const resContainer = document.getElementById('club-results-list');
+  const btnUp = document.getElementById('btn-tab-up');
+  const btnRes = document.getElementById('btn-tab-res');
 
-if (tab === 'upcoming') {
-upContainer.style.display = 'grid';
-resContainer.style.display = 'none';
-btnUp.className = 'btn btn-primary';
-btnRes.className = 'btn';
-btnRes.style.background = '#1a1f2c';
-} else {
-upContainer.style.display = 'none';
-resContainer.style.display = 'grid';
-btnRes.className = 'btn btn-primary';
-btnUp.className = 'btn';
-btnUp.style.background = '#1a1f2c';
-}
+  if (tab === 'upcoming') {
+    upContainer.style.display = 'grid';
+    resContainer.style.display = 'none';
+    btnUp.className = 'btn btn-primary';
+    btnRes.className = 'btn btn-secondary';
+  } else {
+    upContainer.style.display = 'none';
+    resContainer.style.display = 'grid';
+    btnRes.className = 'btn btn-primary';
+    btnUp.className = 'btn btn-secondary';
+  }
 }
 
 function openPostModal(d) {
-document.getElementById('postModal').classList.remove('hidden');
-document.getElementById('postModalTitle').textContent = d.title || 'Artykuł';
-let media = '';
-if (d.imageUrl) media += `<img src="${d.imageUrl}" alt="Zdjęcie" style="max-width:100%;border-radius:6px;margin:10px 0;display:block;">`;
-if (d.videoUrl) media += embedVideo(d.videoUrl);
-document.getElementById('postModalBody').innerHTML = `<div class="article-content" style="line-height:1.6;color:var(--text-light);white-space:pre-wrap;font-size:0.95rem;">${d.content || ''}</div>${media}`;
+  document.getElementById('postModal').classList.remove('hidden');
+  document.getElementById('postModalTitle').textContent = d.title || 'Artykuł';
+  let media = '';
+  if (d.imageUrl) media += `<img src="${d.imageUrl}" alt="Zdjęcie" style="max-width:100%;border-radius:6px;margin:10px 0;display:block;">`;
+  if (d.videoUrl) media += embedVideo(d.videoUrl);
+  document.getElementById('postModalBody').innerHTML = `<div class="article-content" style="line-height:1.6;color:var(--text-light);white-space:pre-wrap;font-size:0.95rem;">${d.content || ''}</div>${media}`;
 }
 </script>
 </body>
