@@ -7,6 +7,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<!-- Dodano FontAwesome dla ładnych ikon -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
@@ -32,6 +34,19 @@ body {
   color: var(--text);
   line-height: 1.6;
 }
+
+/* ANIMACJE */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.anim {
+  animation: fadeUp 0.5s ease-out forwards;
+  opacity: 0;
+}
+.delay-1 { animation-delay: 0.1s; }
+.delay-2 { animation-delay: 0.2s; }
+.delay-3 { animation-delay: 0.3s; }
 
 /* NAWIGACJA */
 .top-nav {
@@ -101,6 +116,16 @@ header img {
   font-weight: 700;
   padding-bottom: 8px;
   border-bottom: 2px solid var(--accent);
+}
+.sub-heading {
+  font-size: 1.15rem;
+  color: var(--accent);
+  margin: 25px 0 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .hero { text-align: center; margin-bottom: 25px; }
@@ -243,7 +268,7 @@ header img {
 .team-cell { display: flex; align-items: center; gap: 10px; justify-content: center; }
 .team-logo-small { width: 22px; height: 22px; border-radius: 50%; object-fit: cover; }
 
-.match-list { display: grid; gap: 8px; }
+.match-list { display: grid; gap: 8px; margin-bottom: 15px; }
 .match-header {
   background: #0b0e15;
   padding: 10px 14px;
@@ -384,7 +409,7 @@ footer {
 </style>
 </head>
 <body>
-<nav class="top-nav">
+<nav class="top-nav anim">
 <div class="nav-container">
 <div class="logo-box" id="logoBtn" onclick="toggleAdminByClick()">
 <img src="logo.png" alt="StrefaGola" onerror="this.style.display='none'" />
@@ -408,7 +433,7 @@ footer {
 </nav>
 
 <main id="main">
-<header>
+<header class="anim delay-1">
 <img src="https://www.ebilet.pl/now/app/uploads/2024/02/shutterstock_2253076431-1-1280x720.jpg" alt="Piłka nożna" />
 </header>
 
@@ -471,18 +496,18 @@ footer {
 <option value="conference_league">Liga Konferencji</option>
 </select>
 
-<!-- TRYB POJEDYNCZY ( WZÓR INDEX 24 ) -->
+<!-- TRYB POJEDYNCZY -->
 <div id="matchSingleView">
 <input type="text" id="matchRound" placeholder="Kolejka (np. KOLEJKA 20)" />
 <div style="margin:10px 0;padding:12px;background:#1a1f2c;border-radius:6px;border:1px solid var(--border);">
 <label>Gospodarz</label>
 <input type="text" id="matchHomeTeam" placeholder="Nazwa drużyny" oninput="autoLogo('matchHomeTeam', 'matchHomeLogo')" style="width:100%;margin:5px 0 8px;" />
-<input type="url" id="matchHomeLogo" placeholder="URL herbu" style="width:100%;" />
+<input type="url" id="matchHomeLogo" placeholder="URL herbu (opcjonalnie)" style="width:100%;" />
 </div>
 <div style="margin:10px 0;padding:12px;background:#1a1f2c;border-radius:6px;border:1px solid var(--border);">
 <label>Gość</label>
 <input type="text" id="matchAwayTeam" placeholder="Nazwa drużyny" oninput="autoLogo('matchAwayTeam', 'matchAwayLogo')" style="width:100%;margin:5px 0 8px;" />
-<input type="url" id="matchAwayLogo" placeholder="URL herbu" style="width:100%;" />
+<input type="url" id="matchAwayLogo" placeholder="URL herbu (opcjonalnie)" style="width:100%;" />
 </div>
 <input type="text" id="matchDate" placeholder="Data i godzina (np. 15.03, 18:00)" />
 <input type="text" id="matchScore" placeholder="Wynik (np. 2:1 lub -)" />
@@ -492,7 +517,7 @@ footer {
 </div>
 </div>
 
-<!-- TRYB MASOWY ( WZÓR INDEX 24 ) -->
+<!-- TRYB MASOWY -->
 <div id="matchBulkView" style="display:none;">
 <input type="text" id="bulkMatchRound" placeholder="Domyślna Kolejka (np. KOLEJKA 20)" />
 <label>Wklej mecze (jeden mecz w linii):</label>
@@ -540,7 +565,7 @@ Jagiellonia Białystok | Lech Poznań | - | 16.03, 20:00"></textarea>
 <div id="tableSingleView">
 <input type="number" id="tablePos" placeholder="Pozycja w tabeli (np. 1)" min="1" />
 <input type="text" id="tableTeam" placeholder="Nazwa drużyny" oninput="autoLogo('tableTeam', 'tableLogo')" />
-<input type="url" id="tableLogo" placeholder="URL herbu drużyny" />
+<input type="url" id="tableLogo" placeholder="URL herbu (opcjonalnie - pobiera się automatycznie)" />
 <input type="text" id="tableMatches" placeholder="Liczba meczów (np. 20)" />
 <input type="number" id="tablePts" placeholder="Punkty (np. 45)" min="0" />
 <div class="modal-actions">
@@ -581,15 +606,15 @@ Jagiellonia Białystok | Lech Poznań | - | 16.03, 20:00"></textarea>
 <button class="btn btn-primary" id="btn-tab-up" onclick="switchClubTab('upcoming')">Nadchodzące</button>
 <button class="btn btn-secondary" id="btn-tab-res" onclick="switchClubTab('results')">Wyniki</button>
 </div>
-<div id="club-upcoming-list" class="match-list"></div>
-<div id="club-results-list" class="match-list" style="display:none;"></div>
+<div id="club-upcoming-list" class="match-list anim"></div>
+<div id="club-results-list" class="match-list anim" style="display:none;"></div>
 </div>
 </div>
 </div>
 
 <!-- 📰 MODAL POSTA -->
 <div id="postModal" class="modal hidden">
-<div class="modal-content">
+<div class="modal-content anim">
 <div class="modal-header">
 <h2 id="postModalTitle" style="margin:0; border:none; padding:0; font-size:1.4rem;">Artykuł</h2>
 <button class="close-btn" onclick="closeModal('postModal')">&times;</button>
@@ -600,28 +625,28 @@ Jagiellonia Białystok | Lech Poznań | - | 16.03, 20:00"></textarea>
 
 <!-- SEKCJE STRONY -->
 <section id="home" class="page active">
-<div class="hero">
+<div class="hero anim delay-2">
 <h1>Witaj w StrefieGola</h1>
 <p>Najnowsze informacje piłkarskie – wyniki, analizy, multimedia i transfery.</p>
 </div>
-<div class="features-grid">
+<div class="features-grid anim delay-3">
 <div class="feature-card"><h3>Polskie ligi</h3><p>Ekstraklasa i niższe szczeble na bieżąco.</p></div>
 <div class="feature-card"><h3>Liga Mistrzów</h3><p>Najważniejsze mecze Europy.</p></div>
 <div class="feature-card"><h3>Puchary</h3><p>Superpuchar i Puchar Polski.</p></div>
 </div>
 </section>
 
-<section id="news" class="page"><h2>Aktualności</h2><div id="news-list" class="content-grid">Ładowanie...</div></section>
-<section id="results" class="page"><h2>Wyniki</h2><div id="results-list" class="content-grid">Ładowanie...</div></section>
-<section id="analysis" class="page"><h2>Analizy</h2><div id="analysis-list" class="content-grid">Ładowanie...</div></section>
-<section id="media" class="page"><h2>Multimedia</h2><div id="media-list" class="content-grid">Ładowanie...</div></section>
-<section id="history" class="page"><h2>Transfery</h2><div id="history-list" class="content-grid">Ładowanie...</div></section>
-<section id="schedule" class="page"><h2>Terminarz</h2><div id="schedule-list" class="content-grid">Ładowanie...</div></section>
+<section id="news" class="page"><h2>Aktualności</h2><div id="news-list" class="content-grid anim">Ładowanie...</div></section>
+<section id="results" class="page"><h2>Wyniki</h2><div id="results-list" class="content-grid anim">Ładowanie...</div></section>
+<section id="analysis" class="page"><h2>Analizy</h2><div id="analysis-list" class="content-grid anim">Ładowanie...</div></section>
+<section id="media" class="page"><h2>Multimedia</h2><div id="media-list" class="content-grid anim">Ładowanie...</div></section>
+<section id="history" class="page"><h2>Transfery</h2><div id="history-list" class="content-grid anim">Ładowanie...</div></section>
+<section id="schedule" class="page"><h2>Terminarz</h2><div id="schedule-list" class="content-grid anim">Ładowanie...</div></section>
 
 <!-- POLSKIE LIGI -->
 <section id="polskie" class="page">
-<h2>Polskie ligi</h2>
-<div class="ligi-nav">
+<h2 class="anim">Polskie ligi</h2>
+<div class="ligi-nav anim delay-1">
 <button class="liga-btn active" onclick="showLiga('polskie', 'ekstraklasa', this)">Ekstraklasa</button>
 <button class="liga-btn" onclick="showLiga('polskie', 'pierwsza_liga', this)">1. liga</button>
 <button class="liga-btn" onclick="showLiga('polskie', 'druga_liga', this)">2. liga</button>
@@ -631,118 +656,106 @@ Jagiellonia Białystok | Lech Poznań | - | 16.03, 20:00"></textarea>
 <button class="liga-btn" onclick="showLiga('polskie', 'trzecia_liga_gr4', this)">3. liga gr IV</button>
 </div>
 <div id="ekstraklasa-content" class="liga-subpage active-liga">
-<h3>Tabela Ekstraklasy</h3>
-<table id="ekstraklasa_table-list" class="table-list">
+<h3 class="anim"><i class="fa-solid fa-table-list"></i> Tabela Ekstraklasy</h3>
+<table id="ekstraklasa_table-list" class="table-list anim">
 <thead><tr><th>#</th><th>Drużyna</th><th>Mecze</th><th>Punkty</th></tr></thead>
 <tbody><tr><td colspan="4">Ładowanie...</td></tr></tbody>
 </table>
-<h3>Mecze Ekstraklasy</h3>
-<div id="ekstraklasa-list" class="match-list">Ładowanie...</div>
+<div id="ekstraklasa-list" class="anim">Ładowanie meczów...</div>
 </div>
 <div id="pierwsza_liga-content" class="liga-subpage">
-<h3>Tabela 1. ligi</h3>
-<table id="pierwsza_liga_table-list" class="table-list">
+<h3 class="anim"><i class="fa-solid fa-table-list"></i> Tabela 1. ligi</h3>
+<table id="pierwsza_liga_table-list" class="table-list anim">
 <thead><tr><th>#</th><th>Drużyna</th><th>Mecze</th><th>Punkty</th></tr></thead>
 <tbody><tr><td colspan="4">Ładowanie...</td></tr></tbody>
 </table>
-<h3>Mecze 1. ligi</h3>
-<div id="pierwsza_liga-list" class="match-list">Ładowanie...</div>
+<div id="pierwsza_liga-list" class="anim">Ładowanie meczów...</div>
 </div>
 <div id="druga_liga-content" class="liga-subpage">
-<h3>Tabela 2. ligi</h3>
-<table id="druga_liga_table-list" class="table-list">
+<h3 class="anim"><i class="fa-solid fa-table-list"></i> Tabela 2. ligi</h3>
+<table id="druga_liga_table-list" class="table-list anim">
 <thead><tr><th>#</th><th>Drużyna</th><th>Mecze</th><th>Punkty</th></tr></thead>
 <tbody><tr><td colspan="4">Ładowanie...</td></tr></tbody>
 </table>
-<h3>Mecze 2. ligi</h3>
-<div id="druga_liga-list" class="match-list">Ładowanie...</div>
+<div id="druga_liga-list" class="anim">Ładowanie meczów...</div>
 </div>
 <div id="trzecia_liga_gr1-content" class="liga-subpage">
-<h3>Tabela 3. ligi gr I</h3>
-<table id="trzecia_liga_gr1_table-list" class="table-list">
+<h3 class="anim"><i class="fa-solid fa-table-list"></i> Tabela 3. ligi gr I</h3>
+<table id="trzecia_liga_gr1_table-list" class="table-list anim">
 <thead><tr><th>#</th><th>Drużyna</th><th>Mecze</th><th>Punkty</th></tr></thead>
 <tbody><tr><td colspan="4">Ładowanie...</td></tr></tbody>
 </table>
-<h3>Mecze 3. ligi gr I</h3>
-<div id="trzecia_liga_gr1-list" class="match-list">Ładowanie...</div>
+<div id="trzecia_liga_gr1-list" class="anim">Ładowanie meczów...</div>
 </div>
 <div id="trzecia_liga_gr2-content" class="liga-subpage">
-<h3>Tabela 3. ligi gr II</h3>
-<table id="trzecia_liga_gr2_table-list" class="table-list">
+<h3 class="anim"><i class="fa-solid fa-table-list"></i> Tabela 3. ligi gr II</h3>
+<table id="trzecia_liga_gr2_table-list" class="table-list anim">
 <thead><tr><th>#</th><th>Drużyna</th><th>Mecze</th><th>Punkty</th></tr></thead>
 <tbody><tr><td colspan="4">Ładowanie...</td></tr></tbody>
 </table>
-<h3>Mecze 3. ligi gr II</h3>
-<div id="trzecia_liga_gr2-list" class="match-list">Ładowanie...</div>
+<div id="trzecia_liga_gr2-list" class="anim">Ładowanie meczów...</div>
 </div>
 <div id="trzecia_liga_gr3-content" class="liga-subpage">
-<h3>Tabela 3. ligi gr III</h3>
-<table id="trzecia_liga_gr3_table-list" class="table-list">
+<h3 class="anim"><i class="fa-solid fa-table-list"></i> Tabela 3. ligi gr III</h3>
+<table id="trzecia_liga_gr3_table-list" class="table-list anim">
 <thead><tr><th>#</th><th>Drużyna</th><th>Mecze</th><th>Punkty</th></tr></thead>
 <tbody><tr><td colspan="4">Ładowanie...</td></tr></tbody>
 </table>
-<h3>Mecze 3. ligi gr III</h3>
-<div id="trzecia_liga_gr3-list" class="match-list">Ładowanie...</div>
+<div id="trzecia_liga_gr3-list" class="anim">Ładowanie meczów...</div>
 </div>
 <div id="trzecia_liga_gr4-content" class="liga-subpage">
-<h3>Tabela 3. ligi gr IV</h3>
-<table id="trzecia_liga_gr4_table-list" class="table-list">
+<h3 class="anim"><i class="fa-solid fa-table-list"></i> Tabela 3. ligi gr IV</h3>
+<table id="trzecia_liga_gr4_table-list" class="table-list anim">
 <thead><tr><th>#</th><th>Drużyna</th><th>Mecze</th><th>Punkty</th></tr></thead>
 <tbody><tr><td colspan="4">Ładowanie...</td></tr></tbody>
 </table>
-<h3>Mecze 3. ligi gr IV</h3>
-<div id="trzecia_liga_gr4-list" class="match-list">Ładowanie...</div>
+<div id="trzecia_liga_gr4-list" class="anim">Ładowanie meczów...</div>
 </div>
 </section>
 
 <!-- PUCHARY -->
 <section id="puchary" class="page">
-<h2>Puchary</h2>
-<div class="ligi-nav">
+<h2 class="anim">Puchary</h2>
+<div class="ligi-nav anim delay-1">
 <button class="liga-btn active" onclick="showLiga('puchary', 'superpuchar', this)">Superpuchar</button>
 <button class="liga-btn" onclick="showLiga('puchary', 'puchar_polski', this)">STS Puchar Polski</button>
 </div>
 <div id="superpuchar-content" class="liga-subpage active-liga">
-<h3>Mecze Superpucharu</h3>
-<div id="superpuchar-list" class="match-list">Ładowanie...</div>
+<div id="superpuchar-list" class="anim">Ładowanie meczów...</div>
 </div>
 <div id="puchar_polski-content" class="liga-subpage">
-<h3>Mecze Pucharu Polski</h3>
-<div id="puchar_polski-list" class="match-list">Ładowanie...</div>
+<div id="puchar_polski-list" class="anim">Ładowanie meczów...</div>
 </div>
 </section>
 
 <!-- EUROPA -->
 <section id="champions_league" class="page">
-<h3>Tabela Ligi Mistrzów</h3>
-<table id="champions_league_table-list" class="table-list">
+<h3 class="anim"><i class="fa-solid fa-table-list"></i> Tabela Ligi Mistrzów</h3>
+<table id="champions_league_table-list" class="table-list anim delay-1">
 <thead><tr><th>#</th><th>Drużyna</th><th>Mecze</th><th>Punkty</th></tr></thead>
 <tbody><tr><td colspan="4">Ładowanie...</td></tr></tbody>
 </table>
-<h3>Mecze Ligi Mistrzów</h3>
-<div id="champions_league-list" class="match-list">Ładowanie...</div>
+<div id="champions_league-list" class="anim delay-2">Ładowanie meczów...</div>
 </section>
 <section id="europa_league" class="page">
-<h3>Tabela Ligi Europy</h3>
-<table id="europa_league_table-list" class="table-list">
+<h3 class="anim"><i class="fa-solid fa-table-list"></i> Tabela Ligi Europy</h3>
+<table id="europa_league_table-list" class="table-list anim delay-1">
 <thead><tr><th>#</th><th>Drużyna</th><th>Mecze</th><th>Punkty</th></tr></thead>
 <tbody><tr><td colspan="4">Ładowanie...</td></tr></tbody>
 </table>
-<h3>Mecze Ligi Europy</h3>
-<div id="europa_league-list" class="match-list">Ładowanie...</div>
+<div id="europa_league-list" class="anim delay-2">Ładowanie meczów...</div>
 </section>
 <section id="conference_league" class="page">
-<h3>Tabela Ligi Konferencji</h3>
-<table id="conference_league_table-list" class="table-list">
+<h3 class="anim"><i class="fa-solid fa-table-list"></i> Tabela Ligi Konferencji</h3>
+<table id="conference_league_table-list" class="table-list anim delay-1">
 <thead><tr><th>#</th><th>Drużyna</th><th>Mecze</th><th>Punkty</th></tr></thead>
 <tbody><tr><td colspan="4">Ładowanie...</td></tr></tbody>
 </table>
-<h3>Mecze Ligi Konferencji</h3>
-<div id="conference_league-list" class="match-list">Ładowanie...</div>
+<div id="conference_league-list" class="anim delay-2">Ładowanie meczów...</div>
 </section>
 
 <!-- 🔐 UKRYTY PANEL ADMINA ( INDEX 24 ) -->
-<div class="admin-bar hidden" id="adminPanel">
+<div class="admin-bar hidden anim" id="adminPanel">
 <h3>Panel administratora</h3>
 <div id="loginForm">
 <input type="password" id="adminPass" placeholder="Hasło administratora" />
@@ -898,7 +911,6 @@ function loginAdmin() {
 }
 
 function logoutAdmin() { auth.signOut(); }
-
 function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
 
 // ----------------------------------------------------
@@ -961,7 +973,7 @@ async function deleteArticle() {
 }
 
 // ----------------------------------------------------
-// 2. MODAL MECZÓW ( WZÓR Z INDEX 24 )
+// 2. MODAL MECZÓW
 // ----------------------------------------------------
 function switchMatchTab(mode) {
   const singleView = document.getElementById('matchSingleView');
@@ -1034,8 +1046,8 @@ async function saveMatch() {
   }
   const data = {
     title, homeTeam, awayTeam, date, score,
-    logoHome: logoHome || teamLogoMap[homeTeam] || null,
-    logoAway: logoAway || teamLogoMap[awayTeam] || null
+    logoHome: logoHome || null,
+    logoAway: logoAway || null
   };
   try {
     if (currentEditId) {
@@ -1074,8 +1086,8 @@ async function saveBulkMatches() {
           awayTeam: awayTeam,
           score: score,
           date: date,
-          logoHome: teamLogoMap[homeTeam] || null,
-          logoAway: teamLogoMap[awayTeam] || null,
+          logoHome: null,
+          logoAway: null,
           createdAt: firebase.firestore.FieldValue.serverTimestamp()
         });
       }
@@ -1164,7 +1176,7 @@ async function saveTableEntry() {
   const data = {
     position: parseInt(position),
     teamName,
-    teamLogo: teamLogo || teamLogoMap[teamName] || null,
+    teamLogo: teamLogo || null,
     matches,
     points: parseInt(points)
   };
@@ -1200,7 +1212,7 @@ async function saveBulkTable() {
         await db.collection(sec).add({
           position: pos,
           teamName: teamName,
-          teamLogo: teamLogoMap[teamName] || null,
+          teamLogo: null,
           matches: matches,
           points: pts,
           createdAt: firebase.firestore.FieldValue.serverTimestamp()
@@ -1247,7 +1259,7 @@ async function loadSection(section) {
         if (d.imageUrl) media += `<img src="${d.imageUrl}" alt="Zdjęcie">`;
         if (d.videoUrl) media += embedVideo(d.videoUrl);
         html += `
-          <div class="content-item">
+          <div class="content-item anim">
             ${editBtn}${delBtn}
             <h3 style="cursor:pointer;" onclick="openPostModal(${JSON.stringify(d).replace(/"/g, '&quot;')})">${d.title}</h3>
             <div class="article-content">${d.content}</div>
@@ -1257,40 +1269,73 @@ async function loadSection(section) {
       });
       container.innerHTML = html;
     } catch (e) { container.innerHTML = "<p>Błąd ładowania treści.</p>"; }
+  
   } else if (matchSections.includes(section)) {
+    // MECZE Z PODZIAŁEM NA NADCHODZĄCE I WYNIKI
     const container = document.getElementById(section + '-list');
     if (!container) return;
     try {
       const snap = await db.collection(section).orderBy("createdAt", "desc").get();
       if (snap.empty) { container.innerHTML = "<p>Brak meczów.</p>"; return; }
-      let html = '';
-      let currentRound = '';
+      
+      let upcomingMatches = [];
+      let resultMatches = [];
+
       snap.forEach(doc => {
         const d = doc.data();
-        const round = d.title || 'Bez kolejki';
-        if (round !== currentRound) {
-          html += `<div class="match-header">${round}</div>`;
-          currentRound = round;
+        d.id = doc.id;
+        // Rozdzielamy: jeśli brak wyniku lub jest "-", trafia do nadchodzących
+        if (!d.score || d.score.trim() === '' || d.score.trim() === '-' || d.score.toLowerCase().includes('przełożony')) {
+          upcomingMatches.push(d);
+        } else {
+          resultMatches.push(d);
         }
-        const actions = isAdmin ? `<button class="edit-btn" style="position:absolute;top:10px;right:10px;" onclick="openMatchModal('${section}', '${doc.id}', ${JSON.stringify(d).replace(/"/g, '&quot;')})">Edytuj</button>` : '';
-        html += `
-          <div class="match-row">
-            <div class="match-date">${d.date || '-'}</div>
-            <div class="team-name" style="cursor:pointer;" onclick="openClubProfile(${JSON.stringify(d.homeTeam || '').replace(/"/g, '&quot;')}, ${JSON.stringify(d.logoHome || '').replace(/"/g, '&quot;')})">
-              ${d.logoHome ? `<img class="team-logo" src="${d.logoHome.trim()}" onerror="this.style.display='none'">` : ''}
-              <span>${d.homeTeam || '---'}</span>
-            </div>
-            <div class="score">${d.score || '-'}</div>
-            <div class="team-name" style="cursor:pointer;" onclick="openClubProfile(${JSON.stringify(d.awayTeam || '').replace(/"/g, '&quot;')}, ${JSON.stringify(d.logoAway || '').replace(/"/g, '&quot;')})">
-              <span>${d.awayTeam || '---'}</span>
-              ${d.logoAway ? `<img class="team-logo" src="${d.logoAway.trim()}" onerror="this.style.display='none'">` : ''}
-            </div>
-            ${actions}
-          </div>
-        `;
       });
-      container.innerHTML = html;
+
+      const renderMatchesGroup = (matchesArr, title, iconClass) => {
+        if (matchesArr.length === 0) return '';
+        let html = `<h4 class="sub-heading anim"><i class="${iconClass}"></i> ${title}</h4><div class="match-list">`;
+        let currentRound = '';
+        
+        matchesArr.forEach(d => {
+          const round = d.title || 'Bez kolejki';
+          if (round !== currentRound) {
+            html += `<div class="match-header anim">${round}</div>`;
+            currentRound = round;
+          }
+          
+          // Automatyczne pobieranie herbu ze słownika!
+          const hLogo = (d.logoHome && d.logoHome.trim() !== '') ? d.logoHome : (teamLogoMap[d.homeTeam] || '');
+          const aLogo = (d.logoAway && d.logoAway.trim() !== '') ? d.logoAway : (teamLogoMap[d.awayTeam] || '');
+
+          const actions = isAdmin ? `<button class="edit-btn" style="position:absolute;top:10px;right:10px;" onclick="openMatchModal('${section}', '${d.id}', ${JSON.stringify(d).replace(/"/g, '&quot;')})">Edytuj</button>` : '';
+
+          html += `
+            <div class="match-row anim">
+              <div class="match-date">${d.date || '-'}</div>
+              <div class="team-name" style="cursor:pointer;" onclick="openClubProfile(${JSON.stringify(d.homeTeam || '').replace(/"/g, '&quot;')}, ${JSON.stringify(hLogo).replace(/"/g, '&quot;')})">
+                ${hLogo ? `<img class="team-logo" src="${hLogo.trim()}" onerror="this.style.display='none'">` : ''}
+                <span>${d.homeTeam || '---'}</span>
+              </div>
+              <div class="score">${d.score || '-'}</div>
+              <div class="team-name" style="cursor:pointer;" onclick="openClubProfile(${JSON.stringify(d.awayTeam || '').replace(/"/g, '&quot;')}, ${JSON.stringify(aLogo).replace(/"/g, '&quot;')})">
+                <span>${d.awayTeam || '---'}</span>
+                ${aLogo ? `<img class="team-logo" src="${aLogo.trim()}" onerror="this.style.display='none'">` : ''}
+              </div>
+              ${actions}
+            </div>
+          `;
+        });
+        html += `</div>`;
+        return html;
+      };
+
+      container.innerHTML = 
+        renderMatchesGroup(upcomingMatches, 'Nadchodzące mecze', 'fa-regular fa-clock') + 
+        renderMatchesGroup(resultMatches, 'Ostatnie wyniki', 'fa-solid fa-flag-checkered');
+
     } catch (e) { container.innerHTML = "<p>Błąd ładowania meczów.</p>"; }
+  
   } else if (tableSections.includes(section)) {
     const container = document.getElementById(section + '-list');
     if (!container) return;
@@ -1316,12 +1361,15 @@ async function loadSection(section) {
         }
 
         const actions = isAdmin ? `<td><button class="edit-btn" onclick="openTableModal('${section}', '${doc.id}', ${JSON.stringify(d).replace(/"/g, '&quot;')})">Edytuj</button></td>` : '';
+        
+        // Automatyczne pobieranie herbu z tabeli
+        const tLogo = (d.teamLogo && d.teamLogo.trim() !== '') ? d.teamLogo : (teamLogoMap[d.teamName] || '');
 
         html += `
           <tr class="${rowClass}">
             <td>${d.position || '-'}</td>
-            <td class="team-cell" style="cursor:pointer;" onclick="openClubProfile(${JSON.stringify(d.teamName || '').replace(/"/g, '&quot;')}, ${JSON.stringify(d.teamLogo || '').replace(/"/g, '&quot;')})">
-              ${d.teamLogo ? `<img class="team-logo-small" src="${d.teamLogo.trim()}" onerror="this.style.display='none'">` : ''}
+            <td class="team-cell" style="cursor:pointer;" onclick="openClubProfile(${JSON.stringify(d.teamName || '').replace(/"/g, '&quot;')}, ${JSON.stringify(tLogo).replace(/"/g, '&quot;')})">
+              ${tLogo ? `<img class="team-logo-small" src="${tLogo.trim()}" onerror="this.style.display='none'">` : ''}
               <span>${d.teamName || '---'}</span>
             </td>
             <td>${d.matches || '-'}</td>
@@ -1334,13 +1382,13 @@ async function loadSection(section) {
 
       let legendHTML = '';
       if (section === 'ekstraklasa_table') {
-        legendHTML = '<div class="legend"><span class="relegation"></span> Spadek do 1. ligi (16–18)</div>';
+        legendHTML = '<div class="legend anim"><span class="relegation"></span> Spadek do 1. ligi (16–18)</div>';
       } else if (section === 'pierwsza_liga_table') {
-        legendHTML = `<div class="legend"><span class="promotion"></span> Awans do ekstraklasy (1–2) <span class="playoff"></span> Play-off (3–6) <span class="relegation"></span> Spadek (16–18)</div>`;
+        legendHTML = `<div class="legend anim"><span class="promotion"></span> Awans do ekstraklasy (1–2) <span class="playoff"></span> Play-off (3–6) <span class="relegation"></span> Spadek (16–18)</div>`;
       } else if (section === 'druga_liga_table') {
-        legendHTML = `<div class="legend"><span class="promotion"></span> Awans do 1. ligi (1–2) <span class="playoff"></span> Play-off (3–6) <span class="relegation"></span> Spadek (16–18)</div>`;
+        legendHTML = `<div class="legend anim"><span class="promotion"></span> Awans do 1. ligi (1–2) <span class="playoff"></span> Play-off (3–6) <span class="relegation"></span> Spadek (16–18)</div>`;
       } else if (section.startsWith('trzecia_liga')) {
-        legendHTML = `<div class="legend"><span class="promotion"></span> Awans do 2. ligi (1) <span class="playoff"></span> Play-off (2) <span class="relegation"></span> Spadek (15–18)</div>`;
+        legendHTML = `<div class="legend anim"><span class="promotion"></span> Awans do 2. ligi (1) <span class="playoff"></span> Play-off (2) <span class="relegation"></span> Spadek (15–18)</div>`;
       }
 
       const existingLegend = container.nextElementSibling;
@@ -1398,8 +1446,11 @@ async function openClubProfile(teamName, logoUrl) {
 
     let upcoming = [], results = [];
     allMatches.forEach(m => {
-      if (m.score && m.score !== '-' && m.score.trim() !== '') results.push(m);
-      else upcoming.push(m);
+      if (m.score && m.score !== '-' && m.score.trim() !== '' && !m.score.toLowerCase().includes('przełożony')) {
+        results.push(m);
+      } else {
+        upcoming.push(m);
+      }
     });
 
     const renderMatches = (matchesArr, container) => {
@@ -1409,17 +1460,21 @@ async function openClubProfile(teamName, logoUrl) {
       }
       let html = '<div class="match-list">';
       matchesArr.forEach(d => {
+        // dynamiczne herby dla profili
+        const hLogo = (d.logoHome && d.logoHome.trim() !== '') ? d.logoHome : (teamLogoMap[d.homeTeam] || '');
+        const aLogo = (d.logoAway && d.logoAway.trim() !== '') ? d.logoAway : (teamLogoMap[d.awayTeam] || '');
+
         html += `
           <div class="match-row" style="grid-template-columns: 1fr 1fr 1fr 1fr;">
             <div class="match-date">${d.date || '-'}</div>
             <div class="team-name">
-              ${d.logoHome ? `<img class="team-logo" src="${d.logoHome.trim()}" onerror="this.style.display='none'">` : ''}
+              ${hLogo ? `<img class="team-logo" src="${hLogo.trim()}" onerror="this.style.display='none'">` : ''}
               <span>${d.homeTeam || '---'}</span>
             </div>
             <div class="score">${d.score || '-'}</div>
             <div class="team-name">
               <span>${d.awayTeam || '---'}</span>
-              ${d.logoAway ? `<img class="team-logo" src="${d.logoAway.trim()}" onerror="this.style.display='none'">` : ''}
+              ${aLogo ? `<img class="team-logo" src="${aLogo.trim()}" onerror="this.style.display='none'">` : ''}
             </div>
           </div>
         `;
