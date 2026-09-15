@@ -33,7 +33,7 @@ body {
   line-height: 1.6;
 }
 
-/* NAWIGACJA */
+/* NAWIGACJA INDEX 27 */
 .top-nav {
   background: #0b0e15;
   border-bottom: 2px solid var(--accent);
@@ -141,7 +141,6 @@ header img {
 .content-item img { max-width: 100%; height: auto; border-radius: 6px; margin: 10px 0; display: block; }
 .content-item iframe, .content-item video { width: 100%; height: 220px; border-radius: 6px; margin: 10px 0; border: none; }
 
-/* PRZYCISKI - NOWY ELEGANCKI DESIGN */
 .btn {
   padding: 9px 18px;
   border: none;
@@ -161,9 +160,7 @@ header img {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0,0,0,0.35);
 }
-.btn:active {
-  transform: translateY(0);
-}
+.btn:active { transform: translateY(0); }
 .btn-primary {
   background: linear-gradient(135deg, #ff3b3b, #d32f2f);
   color: #ffffff;
@@ -272,7 +269,7 @@ header img {
 .team-logo { width: 24px; height: 24px; border-radius: 50%; object-fit: cover; }
 .score { font-weight: 700; font-size: 1.05rem; text-align: center; color: white; background: #0b0e15; padding: 4px 8px; border-radius: 4px; border: 1px solid var(--border); }
 
-/* 🔐 UKRYTY PANEL ADMINA */
+/* PANEL ADMINA */
 .admin-bar {
   background: #090c12;
   padding: 20px;
@@ -412,7 +409,7 @@ footer {
 <img src="https://www.ebilet.pl/now/app/uploads/2024/02/shutterstock_2253076431-1-1280x720.jpg" alt="Piłka nożna" />
 </header>
 
-<!-- 📝 MODAL ARTYKUŁU -->
+<!-- MODAL ARTYKUŁU -->
 <div id="articleModal" class="modal hidden">
 <div class="modal-content">
 <div class="modal-header">
@@ -442,7 +439,7 @@ footer {
 </div>
 </div>
 
-<!-- ⚽ MODAL MECZÓW (SYSTEM Z INDEX 24) -->
+<!-- MODAL MECZÓW (JEDNOSTKOWE + MASOWE) -->
 <div id="matchModal" class="modal hidden">
 <div class="modal-content">
 <div class="modal-header">
@@ -471,7 +468,6 @@ footer {
 <option value="conference_league">Liga Konferencji</option>
 </select>
 
-<!-- TRYB POJEDYNCZY -->
 <div id="matchSingleView">
 <input type="text" id="matchRound" placeholder="Kolejka (np. KOLEJKA 20)" />
 <div style="margin:10px 0;padding:12px;background:#1a1f2c;border-radius:6px;border:1px solid var(--border);">
@@ -492,7 +488,6 @@ footer {
 </div>
 </div>
 
-<!-- TRYB MASOWY -->
 <div id="matchBulkView" style="display:none;">
 <input type="text" id="bulkMatchRound" placeholder="Domyślna Kolejka (np. KOLEJKA 20)" />
 <label>Wklej mecze (jeden mecz w linii):</label>
@@ -509,7 +504,7 @@ Jagiellonia Białystok | Lech Poznań | - | 16.03, 20:00"></textarea>
 </div>
 </div>
 
-<!-- 📊 MODAL TABELI (SYSTEM Z INDEX 24) -->
+<!-- MODAL TABELI (JEDNOSTKOWE + MASOWE) -->
 <div id="tableModal" class="modal hidden">
 <div class="modal-content">
 <div class="modal-header">
@@ -536,7 +531,6 @@ Jagiellonia Białystok | Lech Poznań | - | 16.03, 20:00"></textarea>
 <option value="conference_league_table">Liga Konferencji</option>
 </select>
 
-<!-- TRYB POJEDYNCZY -->
 <div id="tableSingleView">
 <input type="number" id="tablePos" placeholder="Pozycja w tabeli (np. 1)" min="1" />
 <input type="text" id="tableTeam" placeholder="Nazwa drużyny" oninput="autoLogo('tableTeam', 'tableLogo')" />
@@ -549,7 +543,6 @@ Jagiellonia Białystok | Lech Poznań | - | 16.03, 20:00"></textarea>
 </div>
 </div>
 
-<!-- TRYB MASOWY -->
 <div id="tableBulkView" style="display:none;">
 <label>Wklej tabelę (jedna drużyna w linii):</label>
 <small style="color:var(--text-light);display:block;margin-bottom:6px;">Wzór: Pozycja | Drużyna | Mecze | Punkty</small>
@@ -566,7 +559,7 @@ Jagiellonia Białystok | Lech Poznań | - | 16.03, 20:00"></textarea>
 </div>
 </div>
 
-<!-- 🛡️ MODAL PROFILU KLUBU -->
+<!-- MODAL PROFILU KLUBU -->
 <div id="clubModal" class="modal hidden">
 <div class="modal-content">
 <div class="modal-header">
@@ -587,7 +580,7 @@ Jagiellonia Białystok | Lech Poznań | - | 16.03, 20:00"></textarea>
 </div>
 </div>
 
-<!-- 📰 MODAL POSTA -->
+<!-- MODAL POSTA -->
 <div id="postModal" class="modal hidden">
 <div class="modal-content">
 <div class="modal-header">
@@ -618,7 +611,7 @@ Jagiellonia Białystok | Lech Poznań | - | 16.03, 20:00"></textarea>
 <section id="history" class="page"><h2>Transfery</h2><div id="history-list" class="content-grid">Ładowanie...</div></section>
 <section id="schedule" class="page"><h2>Terminarz</h2><div id="schedule-list" class="content-grid">Ładowanie...</div></section>
 
-<!-- POLSKIE LIGI -->
+<!-- POLSKIE LIGI (INDEX 27) -->
 <section id="polskie" class="page">
 <h2>Polskie ligi</h2>
 <div class="ligi-nav">
@@ -695,7 +688,7 @@ Jagiellonia Białystok | Lech Poznań | - | 16.03, 20:00"></textarea>
 </div>
 </section>
 
-<!-- PUCHARY -->
+<!-- PUCHARY (INDEX 27) -->
 <section id="puchary" class="page">
 <h2>Puchary</h2>
 <div class="ligi-nav">
@@ -712,7 +705,7 @@ Jagiellonia Białystok | Lech Poznań | - | 16.03, 20:00"></textarea>
 </div>
 </section>
 
-<!-- EUROPA -->
+<!-- EUROPA (INDEX 27) -->
 <section id="champions_league" class="page">
 <h3>Tabela Ligi Mistrzów</h3>
 <table id="champions_league_table-list" class="table-list">
@@ -741,11 +734,11 @@ Jagiellonia Białystok | Lech Poznań | - | 16.03, 20:00"></textarea>
 <div id="conference_league-list" class="match-list">Ładowanie...</div>
 </section>
 
-<!-- 🔐 UKRYTY PANEL ADMINA -->
+<!-- UKRYTY PANEL ADMINA (INDEX 24 + 27 STYLE) -->
 <div class="admin-bar hidden" id="adminPanel">
 <h3>Panel administratora</h3>
 <div id="loginForm">
-<input type="password" id="adminPass" placeholder="Hasło administratora" onkeydown="if(event.key==='Enter') loginAdmin()" />
+<input type="password" id="adminPass" placeholder="Hasło administratora" />
 <button class="btn btn-primary" onclick="loginAdmin()">Zaloguj</button>
 <p id="loginErr" class="error"></p>
 </div>
@@ -764,7 +757,7 @@ Jagiellonia Białystok | Lech Poznań | - | 16.03, 20:00"></textarea>
 
 <script src="firebase-config.js"></script>
 <script>
-// MAPA DRUŻYN -> HERBY
+// SLOWNIK LOGOTYPOW DRUZYN
 const teamLogoMap = {
 "Wisła Płock": "https://pliki.meczyki.pl/live-score/soccer/participant/1651/25w.webp",
 "Górnik Zabrze": "https://pliki.meczyki.pl/live-score/soccer/participant/1655/25w.webp",
@@ -819,7 +812,7 @@ function autoLogo(teamInputId, logoInputId) {
   }
 }
 
-// MECHANIZM UKRYTYCH KLIKNIĘĆ PANELU ADMINA
+// OTWIERANIE PANELU ADMINA (3 KLIKNIĘCIA W LOGO / FOOTER)
 let clickCount = 0;
 let clickTimer = null;
 function toggleAdminByClick() {
@@ -839,6 +832,7 @@ function toggleAdminByClick() {
 let isAdmin = false;
 let currentEditId = null;
 let currentEditSection = null;
+let currentActiveLeague = 'ekstraklasa';
 
 const articleSections = ['news','results','analysis','media','history','schedule'];
 const matchSections = [
@@ -847,22 +841,24 @@ const matchSections = [
   'superpuchar','puchar_polski',
   'champions_league','europa_league','conference_league'
 ];
-const tableSections = matchSections.map(s => s + '_table');
+const tableSections = matchSections.filter(s => s !== 'superpuchar' && s !== 'puchar_polski').map(s => s + '_table');
 
 function showSection(id) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.top-nav a').forEach(a => a.classList.remove('active'));
-  const targetPage = document.getElementById(id);
-  if (targetPage) targetPage.classList.add('active');
+  document.getElementById(id).classList.add('active');
   const navLink = document.querySelector(`.top-nav a[data-section="${id}"]`);
   if (navLink) navLink.classList.add('active');
   
   if (id !== 'home') {
-    if (id === 'polskie') showLiga('polskie', 'ekstraklasa');
-    else if (id === 'puchary') showLiga('puchary', 'superpuchar');
-    else {
+    if (id === 'polskie') {
+      showLiga('polskie', 'ekstraklasa');
+    } else if (id === 'puchary') {
+      showLiga('puchary', 'superpuchar');
+    } else {
+      currentActiveLeague = id;
       loadSection(id);
-      if (matchSections.includes(id) && tableSections.includes(id + '_table')) {
+      if (tableSections.includes(id + '_table')) {
         loadSection(id + '_table');
       }
     }
@@ -879,8 +875,12 @@ function showLiga(context, ligaId, btnEl) {
   container.querySelectorAll('.liga-subpage').forEach(el => el.classList.remove('active-liga'));
   const target = document.getElementById(ligaId + '-content');
   if (target) target.classList.add('active-liga');
+  
+  currentActiveLeague = ligaId;
   loadSection(ligaId);
-  loadSection(ligaId + '_table');
+  if (tableSections.includes(ligaId + '_table')) {
+    loadSection(ligaId + '_table');
+  }
 }
 
 auth.onAuthStateChanged(user => {
@@ -889,9 +889,9 @@ auth.onAuthStateChanged(user => {
   document.getElementById('adminTools').classList.toggle('hidden', !isAdmin);
   if (isAdmin) {
     document.getElementById('adminPanel').classList.remove('hidden');
-    const allSections = [...articleSections, ...matchSections, ...tableSections];
-    allSections.forEach(loadSection);
   }
+  const allSections = [...articleSections, ...matchSections, ...tableSections];
+  allSections.forEach(loadSection);
 });
 
 function loginAdmin() {
@@ -904,9 +904,7 @@ function logoutAdmin() { auth.signOut(); }
 
 function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
 
-// ----------------------------------------------------
-// 1. MODAL ARTYKUŁU
-// ----------------------------------------------------
+// 1. ZARZĄDZANIE ARTYKUŁAMI
 function openArticleModal(section = 'news', docId = null, data = null) {
   if (!isAdmin && docId) return;
   currentEditId = docId;
@@ -944,30 +942,26 @@ async function saveArticle() {
   const data = { title, content, imageUrl: imageUrl || null, videoUrl: videoUrl || null };
   try {
     if (currentEditId) {
-      const targetSec = currentEditSection || sec;
-      await db.collection(targetSec).doc(currentEditId).update(data);
+      await db.collection(sec).doc(currentEditId).update(data);
     } else {
       await db.collection(sec).add({ ...data, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
     }
     closeModal('articleModal');
-    loadSection(currentEditSection || sec);
-    if (sec !== currentEditSection) loadSection(sec);
+    loadSection(sec);
   } catch (e) { err.textContent = "Błąd zapisu artykułu."; }
 }
 
 async function deleteArticle() {
   if (!confirm("Usunąć ten artykuł?")) return;
   try {
-    const sec = currentEditSection || document.getElementById('artSection').value;
+    const sec = document.getElementById('artSection').value;
     await db.collection(sec).doc(currentEditId).delete();
     closeModal('articleModal');
     loadSection(sec);
   } catch (e) { document.getElementById('artErr').textContent = "Błąd usuwania."; }
 }
 
-// ----------------------------------------------------
-// 2. MODAL MECZÓW (SYSTEM Z INDEX 24)
-// ----------------------------------------------------
+// 2. ZARZĄDZANIE MECZAMI (POJEDYNCZE + MASOWE)
 function switchMatchTab(mode) {
   const singleView = document.getElementById('matchSingleView');
   const bulkView = document.getElementById('matchBulkView');
@@ -987,12 +981,19 @@ function switchMatchTab(mode) {
   }
 }
 
-function openMatchModal(section = 'ekstraklasa', docId = null, data = null) {
+function openMatchModal(section = currentActiveLeague, docId = null, data = null) {
   if (!isAdmin && docId) return;
   currentEditId = docId;
   currentEditSection = section;
   document.getElementById('matchErr').textContent = '';
-  document.getElementById('matchSection').value = section;
+  
+  const selectEl = document.getElementById('matchSection');
+  if (matchSections.includes(section)) {
+    selectEl.value = section;
+  } else {
+    selectEl.value = currentActiveLeague;
+  }
+  
   switchMatchTab('single');
 
   if (data) {
@@ -1016,8 +1017,8 @@ function openMatchModal(section = 'ekstraklasa', docId = null, data = null) {
     document.getElementById('matchAwayLogo').value = '';
     document.getElementById('matchDate').value = '';
     document.getElementById('matchScore').value = '';
-    document.getElementById('bulkMatchRound').value = '';
     document.getElementById('bulkMatchText').value = '';
+    document.getElementById('bulkMatchRound').value = '';
     document.getElementById('matchDelBtn').style.display = 'none';
   }
   document.getElementById('matchModal').classList.remove('hidden');
@@ -1045,14 +1046,12 @@ async function saveMatch() {
   };
   try {
     if (currentEditId) {
-      const targetSec = currentEditSection || sec;
-      await db.collection(targetSec).doc(currentEditId).update(data);
+      await db.collection(sec).doc(currentEditId).update(data);
     } else {
       await db.collection(sec).add({ ...data, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
     }
     closeModal('matchModal');
-    loadSection(currentEditSection || sec);
-    if (sec !== currentEditSection) loadSection(sec);
+    loadSection(sec);
   } catch (e) { err.textContent = "Błąd zapisu meczu."; }
 }
 
@@ -1068,7 +1067,10 @@ async function saveBulkMatches() {
 
   try {
     for (let line of lines) {
-      const parts = line.split('|').map(p => p.trim());
+      let parts = line.split('|').map(p => p.trim());
+      if (parts.length < 2) {
+        parts = line.split('\t').map(p => p.trim());
+      }
       if (parts.length >= 2) {
         const homeTeam = parts[0];
         const awayTeam = parts[1];
@@ -1096,16 +1098,14 @@ async function saveBulkMatches() {
 async function deleteMatch() {
   if (!confirm("Usunąć ten mecz?")) return;
   try {
-    const sec = currentEditSection || document.getElementById('matchSection').value;
+    const sec = document.getElementById('matchSection').value;
     await db.collection(sec).doc(currentEditId).delete();
     closeModal('matchModal');
     loadSection(sec);
   } catch (e) { document.getElementById('matchErr').textContent = "Błąd usuwania."; }
 }
 
-// ----------------------------------------------------
-// 3. MODAL TABELI (SYSTEM Z INDEX 24)
-// ----------------------------------------------------
+// 3. ZARZĄDZANIE TABELAMI (POJEDYNCZE + MASOWE)
 function switchTableTab(mode) {
   const singleView = document.getElementById('tableSingleView');
   const bulkView = document.getElementById('tableBulkView');
@@ -1125,12 +1125,19 @@ function switchTableTab(mode) {
   }
 }
 
-function openTableModal(section = 'ekstraklasa_table', docId = null, data = null) {
+function openTableModal(section = currentActiveLeague + '_table', docId = null, data = null) {
   if (!isAdmin && docId) return;
   currentEditId = docId;
   currentEditSection = section;
   document.getElementById('tableErr').textContent = '';
-  document.getElementById('tableSection').value = section;
+  
+  const selectEl = document.getElementById('tableSection');
+  if (tableSections.includes(section)) {
+    selectEl.value = section;
+  } else {
+    selectEl.value = tableSections.includes(currentActiveLeague + '_table') ? (currentActiveLeague + '_table') : 'ekstraklasa_table';
+  }
+  
   switchTableTab('single');
 
   if (data) {
@@ -1178,14 +1185,12 @@ async function saveTableEntry() {
   };
   try {
     if (currentEditId) {
-      const targetSec = currentEditSection || sec;
-      await db.collection(targetSec).doc(currentEditId).update(data);
+      await db.collection(sec).doc(currentEditId).update(data);
     } else {
       await db.collection(sec).add({ ...data, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
     }
     closeModal('tableModal');
-    loadSection(currentEditSection || sec);
-    if (sec !== currentEditSection) loadSection(sec);
+    loadSection(sec);
   } catch (e) { err.textContent = "Błąd zapisu."; }
 }
 
@@ -1200,12 +1205,16 @@ async function saveBulkTable() {
 
   try {
     for (let line of lines) {
-      const parts = line.split('|').map(p => p.trim());
+      let parts = line.split('|').map(p => p.trim());
+      if (parts.length < 3) {
+        parts = line.split('\t').map(p => p.trim());
+      }
       if (parts.length >= 4) {
-        const pos = parseInt(parts[0]);
+        const posStr = parts[0].replace('.', '').trim();
+        const pos = parseInt(posStr) || 1;
         const teamName = parts[1];
         const matches = parts[2];
-        const pts = parseInt(parts[3]);
+        const pts = parseInt(parts[3]) || 0;
 
         await db.collection(sec).add({
           position: pos,
@@ -1225,7 +1234,7 @@ async function saveBulkTable() {
 async function deleteTableEntry() {
   if (!confirm("Usunąć tę drużynę?")) return;
   try {
-    const sec = currentEditSection || document.getElementById('tableSection').value;
+    const sec = document.getElementById('tableSection').value;
     await db.collection(sec).doc(currentEditId).delete();
     closeModal('tableModal');
     loadSection(sec);
@@ -1240,7 +1249,7 @@ function embedVideo(url) {
   return `<a href="${url}" target="_blank" style="display:inline-block;padding:6px 12px;background:#ff3b3b;color:white;border-radius:4px;text-decoration:none;">Otwórz film</a>`;
 }
 
-// WCZYTYWANIE DANYCH
+// WCZYTYWANIE WIDOKÓW
 async function loadSection(section) {
   if (articleSections.includes(section)) {
     const container = document.getElementById(section + '-list');
@@ -1304,13 +1313,17 @@ async function loadSection(section) {
   } else if (tableSections.includes(section)) {
     const container = document.getElementById(section + '-list');
     if (!container) return;
+    const theadEl = container.querySelector('thead');
+    const tbodyEl = container.querySelector('tbody');
+    const colCount = isAdmin ? 5 : 4;
+
+    if (theadEl) {
+      theadEl.innerHTML = `<tr><th>#</th><th>Drużyna</th><th>Mecze</th><th>Punkty</th>${isAdmin ? '<th>Akcje</th>' : ''}</tr>`;
+    }
+
     try {
       const snap = await db.collection(section).orderBy("position", "asc").get();
-      const headRow = container.querySelector('thead tr');
-      if (headRow) {
-        headRow.innerHTML = `<th>#</th><th>Drużyna</th><th>Mecze</th><th>Punkty</th>${isAdmin ? '<th>Akcja</th>' : ''}`;
-      }
-      if (snap.empty) { container.querySelector('tbody').innerHTML = `<tr><td colspan="${isAdmin ? 5 : 4}">Brak drużyn.</td></tr>`; return; }
+      if (snap.empty) { tbodyEl.innerHTML = `<tr><td colspan="${colCount}">Brak drużyn.</td></tr>`; return; }
       let html = '';
       snap.forEach(doc => {
         const d = doc.data();
@@ -1344,7 +1357,7 @@ async function loadSection(section) {
           </tr>
         `;
       });
-      container.querySelector('tbody').innerHTML = html;
+      tbodyEl.innerHTML = html;
 
       let legendHTML = '';
       if (section === 'ekstraklasa_table') {
@@ -1361,7 +1374,7 @@ async function loadSection(section) {
       if (existingLegend && existingLegend.classList.contains('legend')) existingLegend.remove();
       if (legendHTML) container.insertAdjacentHTML('afterend', legendHTML);
 
-    } catch (e) { container.querySelector('tbody').innerHTML = `<tr><td colspan="${isAdmin ? 5 : 4}">Błąd ładowania tabeli.</td></tr>`; }
+    } catch (e) { tbodyEl.innerHTML = `<tr><td colspan="${colCount}">Błąd ładowania tabeli.</td></tr>`; }
   }
 }
 
