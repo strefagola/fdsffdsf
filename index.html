@@ -580,6 +580,40 @@ footer {
 </div>
 </div>
 </div>
+
+<!-- MODAL PROFILU KLUBU (Funkcja z index 24) -->
+<div id="clubModal" class="modal hidden">
+<div class="modal-content">
+<div class="modal-header">
+<div style="display:flex; align-items:center; gap:10px;">
+<img id="clubModalLogo" src="" alt="Logo" style="width:34px;height:34px;border-radius:50%;object-fit:cover;display:none;">
+<h2 id="clubModalTitle" style="margin:0; border:none; padding:0; font-size:1.4rem;">Profil Klubu</h2>
+</div>
+<button class="close-btn" onclick="closeClubProfile()">&times;</button>
+</div>
+<div class="modal-body">
+<div style="display:flex; gap:10px; margin-bottom:15px;">
+<button class="btn btn-primary" id="btn-tab-up" onclick="switchClubTab('upcoming')">Nadchodzące</button>
+<button class="btn" style="background:#1a1f2c;color:white;border:1px solid var(--border);" id="btn-tab-res" onclick="switchClubTab('results')">Wyniki</button>
+</div>
+<div id="club-upcoming-list" class="match-list"></div>
+<div id="club-results-list" class="match-list" style="display:none;"></div>
+</div>
+</div>
+</div>
+
+<!-- MODAL POSTA (Funkcja z index 24) -->
+<div id="postModal" class="modal hidden">
+<div class="modal-content">
+<div class="modal-header">
+<h2 id="postModalTitle" style="margin:0; border:none; padding:0; font-size:1.4rem;">Artykuł</h2>
+<button class="close-btn" onclick="closePostModal()">&times;</button>
+</div>
+<div class="modal-body" id="postModalBody">
+</div>
+</div>
+</div>
+
 <!-- SEKCJE -->
 <section id="home" class="page active">
 <div class="hero">
@@ -737,6 +771,10 @@ footer {
 <footer>
 <p>© 2025 StrefaGola (SG) • strefa@gola.hub.pl</p>
 </footer>
+
+<!-- Sekretny przycisk Admina (Funkcja z index 24) -->
+<div class="secret-trigger" id="mobile-admin-trigger" style="position:fixed;bottom:0;right:0;width:70px;height:70px;z-index:999;cursor:default;" onclick="document.getElementById('adminPanel').scrollIntoView({behavior: 'smooth'})"></div>
+
 <script src="firebase-config.js"></script>
 <script>
 // ✅ MAPA DRUŻYN → HERBY
@@ -1220,7 +1258,7 @@ if (d.videoUrl) media += embedVideo(d.videoUrl);
 html += `
 <div class="content-item">
 ${editBtn}${delBtn}
-<h3>${d.title}</h3>
+<h3 style="cursor:pointer;" onclick="openPostModal(${JSON.stringify(d).replace(/"/g, '&quot;')})">${d.title}</h3>
 <div class="article-content">${d.content}</div>
 ${media}
 </div>
@@ -1254,12 +1292,12 @@ const actions = isAdmin ?
 html += `
 <div class="match-row">
 <div class="match-date">${d.date || '-'}</div>
-<div class="team-name">
+<div class="team-name" style="cursor:pointer;" onclick="openClubProfile(${JSON.stringify(d.homeTeam || '').replace(/"/g, '&quot;')}, ${JSON.stringify(d.logoHome || '').replace(/"/g, '&quot;')})">
 ${d.logoHome ? `<img class="team-logo" src="${d.logoHome.trim()}" onerror="this.style.display='none'">` : ''}
 <span>${d.homeTeam || '---'}</span>
 </div>
 <div class="score">${d.score || '-'}</div>
-<div class="team-name">
+<div class="team-name" style="cursor:pointer;" onclick="openClubProfile(${JSON.stringify(d.awayTeam || '').replace(/"/g, '&quot;')}, ${JSON.stringify(d.logoAway || '').replace(/"/g, '&quot;')})">
 <span>${d.awayTeam || '---'}</span>
 ${d.logoAway ? `<img class="team-logo" src="${d.logoAway.trim()}" onerror="this.style.display='none'">` : ''}
 </div>
@@ -1307,7 +1345,7 @@ const actions = isAdmin ?
 html += `
 <tr class="${rowClass}">
 <td>${d.position || '-'}</td>
-<td class="team-cell">
+<td class="team-cell" style="cursor:pointer;" onclick="openClubProfile(${JSON.stringify(d.teamName || '').replace(/"/g, '&quot;')}, ${JSON.stringify(d.teamLogo || '').replace(/"/g, '&quot;')})">
 ${d.teamLogo ? `<img class="team-logo-small" src="${d.teamLogo.trim()}" onerror="this.style.display='none'">` : ''}
 <span>${d.teamName || '---'}</span>
 </td>
@@ -1380,6 +1418,147 @@ if (teamNameInput) teamNameInput.addEventListener('input', updateTableTeamLogo);
 });
 
 showSection('home');
+
+// ----------------------------------------------------
+// ✅ NOWE FUNKCJE Z INDEX 24 (ZACHOWANY STYL INDEX 25)
+// ----------------------------------------------------
+
+async function openClubProfile(teamName, logoUrl) {
+    if (!teamName) return;
+    document.getElementById('clubModal').classList.remove('hidden');
+    document.getElementById('clubModalTitle').textContent = teamName;
+    const logoEl = document.getElementById('clubModalLogo');
+    
+    // Uzupełnienie loga, jeśli brakuje
+    if(!logoUrl && teamLogoMap[teamName]) {
+        logoUrl = teamLogoMap[teamName];
+    }
+
+    if (logoUrl && logoUrl.trim() !== '') {
+        logoEl.src = logoUrl.trim();
+        logoEl.style.display = 'block';
+    } else {
+        logoEl.style.display = 'none';
+    }
+
+    const upContainer = document.getElementById('club-upcoming-list');
+    const resContainer = document.getElementById('club-results-list');
+    upContainer.innerHTML = '<p style="text-align:center; padding:10px;">Ładowanie...</p>';
+    resContainer.innerHTML = '<p style="text-align:center; padding:10px;">Ładowanie...</p>';
+
+    switchClubTab('upcoming');
+
+    try {
+        let allMatches = [];
+        // Przeszukujemy wszystkie kolekcje meczowe z index 25
+        const promises = matchSections.map(section => db.collection(section).get());
+        const snaps = await Promise.all(promises);
+        
+        snaps.forEach(snap => {
+            if (!snap.empty) {
+                snap.forEach(doc => {
+                    const d = doc.data();
+                    if (d.homeTeam === teamName || d.awayTeam === teamName) {
+                        allMatches.push(d);
+                    }
+                });
+            }
+        });
+
+        let upcoming = [];
+        let results = [];
+
+        // Dzielimy mecze na zaplanowane i zakończone na podstawie wyniku
+        allMatches.forEach(m => {
+            const hasScore = m.score && m.score !== '-' && m.score.trim() !== '';
+            if (hasScore) results.push(m);
+            else upcoming.push(m);
+        });
+
+        const renderMatches = (matchesArr, container) => {
+            if (matchesArr.length === 0) {
+                container.innerHTML = '<p style="padding:10px;text-align:center;color:var(--text-light);">Brak meczów.</p>';
+                return;
+            }
+            
+            let html = '<div class="match-list">';
+            matchesArr.forEach(d => {
+                html += `
+                <div class="match-row" style="grid-template-columns: 1fr 1fr 1fr 1fr;">
+                    <div class="match-date">${d.date || '-'}</div>
+                    <div class="team-name">
+                        ${d.logoHome ? `<img class="team-logo" src="${d.logoHome.trim()}" onerror="this.style.display='none'">` : ''}
+                        <span>${d.homeTeam || '---'}</span>
+                    </div>
+                    <div class="score">${d.score || '-'}</div>
+                    <div class="team-name">
+                        <span>${d.awayTeam || '---'}</span>
+                        ${d.logoAway ? `<img class="team-logo" src="${d.logoAway.trim()}" onerror="this.style.display='none'">` : ''}
+                    </div>
+                </div>
+                `;
+            });
+            html += '</div>';
+            container.innerHTML = html;
+        };
+
+        renderMatches(upcoming, upContainer);
+        renderMatches(results, resContainer);
+
+    } catch(e) {
+        upContainer.innerHTML = '<p style="text-align:center;color:#ff6b6b;padding:10px;">Błąd ładowania.</p>';
+        resContainer.innerHTML = '<p style="text-align:center;color:#ff6b6b;padding:10px;">Błąd ładowania.</p>';
+    }
+}
+
+function closeClubProfile() {
+    document.getElementById('clubModal').classList.add('hidden');
+}
+
+function switchClubTab(tab) {
+    const upContainer = document.getElementById('club-upcoming-list');
+    const resContainer = document.getElementById('club-results-list');
+    const btnUp = document.getElementById('btn-tab-up');
+    const btnRes = document.getElementById('btn-tab-res');
+
+    if (tab === 'upcoming') {
+        upContainer.style.display = 'grid';
+        resContainer.style.display = 'none';
+        btnUp.className = 'btn btn-primary';
+        btnUp.style.background = 'var(--accent)';
+        btnUp.style.border = 'none';
+        btnRes.className = 'btn';
+        btnRes.style.background = '#1a1f2c';
+        btnRes.style.border = '1px solid var(--border)';
+    } else {
+        upContainer.style.display = 'none';
+        resContainer.style.display = 'grid';
+        btnRes.className = 'btn btn-primary';
+        btnRes.style.background = 'var(--accent)';
+        btnRes.style.border = 'none';
+        btnUp.className = 'btn';
+        btnUp.style.background = '#1a1f2c';
+        btnUp.style.border = '1px solid var(--border)';
+    }
+}
+
+function openPostModal(d) {
+    document.getElementById('postModal').classList.remove('hidden');
+    document.getElementById('postModalTitle').textContent = d.title || 'Artykuł';
+    
+    let media = '';
+    if (d.imageUrl) media += `<img src="${d.imageUrl}" alt="Zdjęcie" style="max-width:100%;border-radius:6px;margin:10px 0;display:block;">`;
+    if (d.videoUrl) media += embedVideo(d.videoUrl);
+
+    document.getElementById('postModalBody').innerHTML = `
+        <div class="article-content" style="line-height:1.6;color:var(--text-light);white-space:pre-wrap;font-size:0.95rem;">${d.content || ''}</div>
+        ${media}
+    `;
+}
+
+function closePostModal() {
+    document.getElementById('postModal').classList.add('hidden');
+}
 </script>
 </body>
 </html>
