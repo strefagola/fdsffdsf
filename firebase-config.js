@@ -1,6 +1,5 @@
-// firebase-config.js
 const firebaseConfig = {
-  apiKey: "AIzaSyD8FLtqBTHXGfjAyuaG5hDDAqB_tky9S28",
+  apiKey: "AIzaSyD8FLtqBTHXGfjAyUAy5G8DDAqB_tky9S28",
   authDomain: "sgstrefa.firebaseapp.com",
   projectId: "sgstrefa",
   storageBucket: "sgstrefa.firebasestorage.app",
