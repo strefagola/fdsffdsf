@@ -468,7 +468,73 @@ footer {
 		height: 18px;
 	}
 }
-</style>
+
+        /* Dodatkowe animacje i jednolite herby */
+        @keyframes pageIn{
+            from{opacity:0;transform:translateY(14px)}
+            to{opacity:1;transform:translateY(0)}
+        }
+        @keyframes crestIn{
+            from{opacity:0;transform:scale(.82) rotate(-3deg)}
+            to{opacity:1;transform:scale(1) rotate(0)}
+        }
+        .page-enter{animation:pageIn .42s var(--ease) both;}
+        .card{will-change:transform,opacity;}
+        .card{animation:fadeUp .5s var(--ease) both;}
+        .card:nth-child(2){animation-delay:.04s}
+        .card:nth-child(3){animation-delay:.08s}
+        .card:nth-child(4){animation-delay:.12s}
+        .card:nth-child(5){animation-delay:.16s}
+        .team-crest,.table-crest,.modal-crest{
+            object-fit:contain;
+            background:rgba(255,255,255,0.07);
+            border:1px solid rgba(255,255,255,0.12);
+            box-shadow:0 5px 14px rgba(0,0,0,.22);
+        }
+        .team-crest{
+            width:42px;height:42px;min-width:42px;min-height:42px;
+            padding:4px;border-radius:12px;
+            animation:crestIn .35s var(--ease) both;
+        }
+        .table-crest{
+            width:34px;height:34px;min-width:34px;min-height:34px;
+            padding:3px;border-radius:10px;
+        }
+        .team-cell .team-name{cursor:pointer;transition:color .2s var(--ease);}
+        .team-cell .team-name:hover{color:var(--green);}
+        .club-profile-actions{
+            display:flex;gap:8px;margin-bottom:1.2rem;
+            border-bottom:1px solid var(--border);padding-bottom:12px;
+        }
+        .club-profile-actions .btn-sm.active{
+            background:var(--green)!important;color:var(--navy)!important;
+        }
+        .club-empty{padding:1.2rem;text-align:center;color:var(--muted);}
+        .profile-match{
+            background:rgba(255,255,255,.035);
+            border:1px solid var(--border);
+            border-radius:14px;padding:12px 14px;
+            transition:transform .2s var(--ease),border-color .2s var(--ease);
+        }
+        .profile-match:hover{transform:translateY(-2px);border-color:rgba(126,211,33,.3);}
+        .profile-match .pm-teams{
+            display:grid;grid-template-columns:1fr 64px 1fr;
+            align-items:center;gap:10px;
+        }
+        .profile-match .pm-team{
+            display:flex;align-items:center;gap:8px;min-width:0;
+            font-size:.82rem;font-weight:600;
+        }
+        .profile-match .pm-team.away{justify-content:flex-end;text-align:right;}
+        .profile-match .pm-score{text-align:center;font-family:'Outfit';font-weight:800;}
+        .profile-match .pm-date{text-align:center;color:var(--muted);font-size:.68rem;margin-top:7px;}
+        .profile-match .pm-date.up{color:var(--green);}
+        @media(max-width:960px){
+            .team-crest{width:36px;height:36px;min-width:36px;min-height:36px;padding:3px;}
+            .table-crest{width:30px;height:30px;min-width:30px;min-height:30px;}
+        }
+
+    </style>
 </head>
 <body>
 <nav class="top-nav">
@@ -1097,7 +1163,10 @@ function showSection(id){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.top-nav a').forEach(a=>a.classList.remove('active'));
   const page=document.getElementById(id);
-  if(page) page.classList.add('active');
+  if(page){
+    page.classList.add('active','page-enter');
+    requestAnimationFrame(()=>setTimeout(()=>page.classList.remove('page-enter'),450));
+  }
   const link=document.querySelector(`.top-nav a[data-section="${id}"]`);
   if(link) link.classList.add('active');
 
@@ -1250,6 +1319,7 @@ async function saveMatch(){
   try{
     if(currentDocId) await db.collection(section).doc(currentDocId).update(data);
     else await db.collection(section).add({...data,createdAt:firebase.firestore.FieldValue.serverTimestamp()});
+    clubMatchesCache.clear();
     await recalculateStandings(section);
     closeModal();
     await loadSection(section);
@@ -1317,13 +1387,21 @@ function sortMatches(arr){
 function matchCard(d){
   const finished=matchFinished(d);
   const score=finished?getScoreText(d):'vs';
+  const home=JSON.stringify(String(d.homeTeam||''));
+  const away=JSON.stringify(String(d.awayTeam||''));
   return `<div class="card">
     <div class="league-label"><i class="fa-solid fa-circle"></i>${esc(L[d.league]||d.league||'Liga')}
       ${finished?'':'<span class="badge-up">Nadchodzący</span>'}</div>
     <div class="match-row">
-      <div class="team-wrap">${crestFor(d.homeTeam,d.logoHome)}<span class="team-name" onclick="openClubProfile('${esc(d.homeTeam)}')">${esc(d.homeTeam||'?')}</span></div>
+      <div class="team-wrap">
+        ${crestFor(d.homeTeam,d.logoHome)}
+        <span class="team-name" onclick="openClubProfile(${home})">${esc(d.homeTeam||'?')}</span>
+      </div>
       <div class="score-box ${finished?'':'vs'}">${esc(score)}</div>
-      <div class="team-wrap away"><span class="team-name" onclick="openClubProfile('${esc(d.awayTeam)}')">${esc(d.awayTeam||'?')}</span>${crestFor(d.awayTeam,d.logoAway)}</div>
+      <div class="team-wrap away">
+        <span class="team-name" onclick="openClubProfile(${away})">${esc(d.awayTeam||'?')}</span>
+        ${crestFor(d.awayTeam,d.logoAway)}
+      </div>
     </div>
     <div class="match-date ${finished?'':'up'}">${esc(formatDate(d.date)||d.date||'')}</div>
   </div>`;
@@ -1334,17 +1412,19 @@ async function loadSection(section){
     const c=document.getElementById(section+'-list'); if(!c) return;
     try{
       const data=(await getDocs(section)).sort((a,b)=>timestampValue(b.createdAt)-timestampValue(a.createdAt));
-      c.innerHTML=data.length?data.map(d=>`
-        <div class="card">
+      c.innerHTML=data.length?data.map((d,i)=>`
+        <div class="card" ${isAdmin?'':'onclick="openArticleModal('+i+', '+JSON.stringify(section)+')"'} style="${isAdmin?'':'cursor:pointer;'}">
           ${isAdmin?`<div style="display:flex;gap:4px;justify-content:flex-end;">
-            <button class="btn-sm" onclick='openEditForm("${section}","${d.id}",${JSON.stringify(d).replace(/'/g,"&#39;")})'>Edytuj</button>
-            <button class="btn-sm btn-del" onclick='openEditForm("${section}","${d.id}",${JSON.stringify(d).replace(/'/g,"&#39;")})'>Usuń</button>
+            <button class="btn-sm" onclick='event.stopPropagation();openEditForm("${section}","${d.id}",${JSON.stringify(d).replace(/'/g,"&#39;")})'>Edytuj</button>
+            <button class="btn-sm btn-del" onclick='event.stopPropagation();openEditForm("${section}","${d.id}",${JSON.stringify(d).replace(/'/g,"&#39;")})'>Usuń</button>
           </div>`:''}
           <h3>${esc(d.title)}</h3>
           <div style="color:var(--muted);white-space:pre-wrap;overflow-wrap:break-word;">${esc(d.content)}</div>
           ${d.imageUrl?`<img src="${esc(d.imageUrl)}" alt="Zdjęcie">`:''}
           ${d.videoUrl?embedVideo(d.videoUrl):''}
+          ${isAdmin?'':'<div style="margin-top:1rem;color:var(--green);font-size:.76rem;font-weight:700;text-transform:uppercase;letter-spacing:.7px;">Czytaj więcej →</div>'}
         </div>`).join(''):'<p style="color:var(--muted);">Brak treści.</p>';
+      window.articleCache = data;
     }catch(e){c.innerHTML='<p style="color:#ff6b6b;">Błąd ładowania treści.</p>';console.error(e);}
     return;
   }
@@ -1370,9 +1450,9 @@ async function loadSection(section){
         const finished=matchFinished(d);
         html+=`<div class="match-row" style="position:relative;padding-right:${isAdmin?'150px':'12px'};">
           <div class="match-date">${esc(formatDate(d.date)||d.date||'-')}</div>
-          <div class="team-name">${crestFor(d.homeTeam,d.logoHome)}<span>${esc(d.homeTeam||'---')}</span></div>
+          <div class="team-name" onclick='openClubProfile(${JSON.stringify(String(d.homeTeam||''))})'>${crestFor(d.homeTeam,d.logoHome)}<span>${esc(d.homeTeam||'---')}</span></div>
           <div class="score">${esc(finished?getScoreText(d):'vs')}</div>
-          <div class="team-name"><span>${esc(d.awayTeam||'---')}</span>${crestFor(d.awayTeam,d.logoAway)}</div>${actions}
+          <div class="team-name" onclick='openClubProfile(${JSON.stringify(String(d.awayTeam||''))})'><span>${esc(d.awayTeam||'---')}</span>${crestFor(d.awayTeam,d.logoAway)}</div>${actions}
         </div>`;
       }
       c.innerHTML=html;
@@ -1406,7 +1486,7 @@ async function loadSection(section){
         const actions=isAdmin?`<td><button class="edit-btn" onclick='openEditForm("${section}","${d.id}",${JSON.stringify(d).replace(/'/g,"&#39;")})'>Edytuj</button><button class="delete-btn" onclick='openEditForm("${section}","${d.id}",${JSON.stringify(d).replace(/'/g,"&#39;")})'>Usuń</button></td>`:'';
         return `<tr class="${rowClass(league,pos)}">
           <td>${pos||'-'}</td>
-          <td class="team-cell">${crestSmall(d.teamName,d.teamLogo)}<span>${esc(d.teamName||'---')}</span></td>
+          <td class="team-cell">${crestSmall(d.teamName,d.teamLogo)}<span class="team-name" onclick='openClubProfile(${JSON.stringify(String(d.teamName||''))})'>${esc(d.teamName||'---')}</span></td>
           <td>${esc(d.matches??'-')}</td>
           <td>${esc(d.points??'-')}</td>${actions}
         </tr>`;
@@ -1428,6 +1508,99 @@ function renderLegend(league,table){
   if(z.releg.length) items.push(`<div class="legend-item"><span class="legend-dot dot-releg"></span>Spadek: ${z.releg.join(', ')}</div>`);
   wrap.innerHTML=items.join('');
   table.parentElement?.appendChild(wrap);
+}
+
+
+/* ===== FUNKCJE PRZENIESIONE Z WERSJI 24 ===== */
+const clubMatchesCache = new Map();
+
+function renderClubMatch(d){
+  const finished=matchFinished(d);
+  const score=finished?getScoreText(d):'vs';
+  return `<div class="profile-match">
+    <div class="pm-teams">
+      <div class="pm-team">${crestFor(d.homeTeam,d.logoHome)}<span>${esc(d.homeTeam||'---')}</span></div>
+      <div class="pm-score">${esc(score)}</div>
+      <div class="pm-team away"><span>${esc(d.awayTeam||'---')}</span>${crestFor(d.awayTeam,d.logoAway)}</div>
+    </div>
+    <div class="pm-date ${finished?'':'up'}">${esc(formatDate(d.date)||d.date||'-')} · ${esc(L[d.league]||d.league||'Liga')}</div>
+  </div>`;
+}
+
+function switchModalMatches(type){
+  const upEl=document.getElementById('modal-upcoming');
+  const resEl=document.getElementById('modal-results');
+  const tabUp=document.getElementById('modal-tab-up');
+  const tabRes=document.getElementById('modal-tab-res');
+  if(!upEl||!resEl) return;
+  const up=type==='up';
+  upEl.style.display=up?'grid':'none';
+  resEl.style.display=up?'none':'grid';
+  if(tabUp) tabUp.classList.toggle('active',up);
+  if(tabRes) tabRes.classList.toggle('active',!up);
+}
+
+async function openClubProfile(teamName){
+  if(!teamName) return;
+  const name=String(teamName).trim();
+  const modal=document.getElementById('club-modal');
+  if(!modal) return;
+
+  const src=String(teamLogoMap[name]||'').trim();
+  document.getElementById('modal-crest-container').innerHTML=src
+    ? `<img src="${esc(src)}" class="modal-crest" alt="">`
+    : `<div class="modal-crest" style="display:flex;align-items:center;justify-content:center;font-size:2rem;color:var(--muted);"><i class="fa-solid fa-shield"></i></div>`;
+  document.getElementById('modal-team-name').textContent=name;
+  document.getElementById('modal-upcoming').innerHTML='<div class="club-empty">Ładowanie meczów...</div>';
+  document.getElementById('modal-results').innerHTML='<div class="club-empty">Ładowanie wyników...</div>';
+  switchModalMatches('up');
+  modal.classList.add('active');
+
+  try{
+    let teamMatches=clubMatchesCache.get(name.toLowerCase());
+    if(!teamMatches){
+      const lists=await Promise.all(matchSections.map(s=>getDocs(s).catch(()=>[])));
+      teamMatches=lists.flat().filter(m=>
+        (m.homeTeam&&m.homeTeam.trim().toLowerCase()===name.toLowerCase()) ||
+        (m.awayTeam&&m.awayTeam.trim().toLowerCase()===name.toLowerCase())
+      );
+      clubMatchesCache.set(name.toLowerCase(),teamMatches);
+    }
+    const now=Date.now();
+    const upcoming=teamMatches.filter(m=>!matchFinished(m) && matchDateMs(m)>=now).sort((a,b)=>matchDateMs(a)-matchDateMs(b));
+    const results=teamMatches.filter(m=>matchFinished(m)).sort((a,b)=>matchDateMs(b)-matchDateMs(a));
+    document.getElementById('modal-upcoming').innerHTML=upcoming.length?upcoming.slice(0,12).map(renderClubMatch).join(''):'<div class="club-empty">Brak nadchodzących spotkań.</div>';
+    document.getElementById('modal-results').innerHTML=results.length?results.slice(0,12).map(renderClubMatch).join(''):'<div class="club-empty">Brak ostatnich wyników.</div>';
+  }catch(e){
+    console.error(e);
+    document.getElementById('modal-upcoming').innerHTML='<div class="club-empty" style="color:#ff6b6b;">Nie udało się załadować meczów.</div>';
+    document.getElementById('modal-results').innerHTML='<div class="club-empty" style="color:#ff6b6b;">Nie udało się załadować wyników.</div>';
+  }
+}
+
+function closeClubProfile(){
+  const modal=document.getElementById('club-modal');
+  if(modal) modal.classList.remove('active');
+}
+
+function openArticleModal(index,section){
+  const data=window.articleCache||[];
+  const p=data[index];
+  if(!p) return;
+  const body=document.getElementById('article-preview-body');
+  if(!body) return;
+  body.innerHTML=`
+    <div class="league-label"><i class="fa-solid fa-bullhorn"></i> ${esc(L[p.league]||section||'Informacja')}</div>
+    <h2 class="modal-title" style="margin-bottom:1rem;">${esc(p.title||'')}</h2>
+    ${p.imageUrl?`<img src="${esc(p.imageUrl)}" alt="Zdjęcie" style="width:100%;max-height:360px;object-fit:cover;border-radius:14px;margin-bottom:1rem;">`:''}
+    <div style="color:var(--white);font-size:.95rem;line-height:1.75;white-space:pre-wrap;overflow-wrap:break-word;">${esc(p.content||'')}</div>
+    ${p.videoUrl?`<div style="margin-top:1rem;">${embedVideo(p.videoUrl)}</div>`:''}
+  `;
+  document.getElementById('article-preview-modal').classList.add('active');
+}
+
+function closeArticleModal(){
+  document.getElementById('article-preview-modal')?.classList.remove('active');
 }
 
 async function recalculateStandings(league){
