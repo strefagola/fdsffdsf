@@ -1,10 +1,11 @@
 const firebaseConfig = {
-  apiKey: "AIzaSyD8FLtqBTHXGfjAyUAy5G8DDAqB_tky9S28",
-  authDomain: "sgstrefa.firebaseapp.com",
-  projectId: "sgstrefa",
-  storageBucket: "sgstrefa.firebasestorage.app",
-  messagingSenderId: "396163945444",
-  appId: "1:396163945444:web:99632a4dda16b08f412df1",
+  apiKey: "AIzaSyDYUu7tOwONLUuCWpI3LRPuzCVqSxuuZHU",
+  authDomain: "facebook-1b634.firebaseapp.com",
+  projectId: "facebook-1b634",
+  storageBucket: "facebook-1b634.firebasestorage.app",
+  messagingSenderId: "53424277943",
+  appId: "1:53424277943:web:5323c9a7f64e2f5f0a0032",
+  measurementId: "G-CNXLHRLY71"
 };
 
 firebase.initializeApp(firebaseConfig);
