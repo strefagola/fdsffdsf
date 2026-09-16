@@ -1071,6 +1071,7 @@ function updateTableTeamLogo(){
 function getZones(league){ return zonesCache[league] || DEFAULT_ZONES[league] || {promo:[],playoff:[],releg:[]}; }
 
 async function loadZones(league, force=false){
+  if(!db) return (zonesCache[league]=DEFAULT_ZONES[league]||{promo:[],playoff:[],releg:[]});
   if(!force && zonesCache[league]) return zonesCache[league];
   try{
     const snap=await db.collection('zones').doc(league).get();
@@ -1307,6 +1308,7 @@ function embedVideo(url){
 }
 
 async function getDocs(section){
+  if(!db) throw new Error('Brak Firebase Firestore');
   const snap=await db.collection(section).get();
   return snap.docs.map(d=>({id:d.id,...d.data()}));
 }
@@ -1709,21 +1711,40 @@ function focusAdminBlock(id){
 function loginAdmin(){
   const pass=document.getElementById('adminPass').value;
   document.getElementById('loginErr').textContent='';
+  if(!auth || typeof auth.signInWithEmailAndPassword!=='function'){
+    document.getElementById('loginErr').textContent='Brak połączenia z Firebase. Sprawdź firebase-config.js';
+    return;
+  }
   auth.signInWithEmailAndPassword('admin@sgstrefagola.pl',pass)
     .catch(()=>document.getElementById('loginErr').textContent='Błędne hasło');
 }
-function logoutAdmin(){auth.signOut();}
+function logoutAdmin(){if(auth && typeof auth.signOut==='function') auth.signOut();}
 
-auth.onAuthStateChanged(async user=>{
-  isAdmin=!!user && user.email==='admin@sgstrefagola.pl';
-  document.getElementById('loginForm').classList.toggle('hidden',isAdmin);
-  document.getElementById('adminTools').classList.toggle('hidden',!isAdmin);
-  if(isAdmin){
-    populateAdminSelectors();
-    await loadAdminM();
-    await loadAdminT();
-  }
+// Nawigacja strony musi działać niezależnie od stanu Firebase.
+document.querySelectorAll('.top-nav a[data-section]').forEach(link=>{
+  link.addEventListener('click',function(e){
+    e.preventDefault();
+    showSection(this.getAttribute('data-section'));
+  });
 });
+
+// Jedyna baza danych używana przez stronę: window.db z firebase-config.js.
+if(auth && typeof auth.onAuthStateChanged === 'function'){
+  auth.onAuthStateChanged(async user=>{
+    isAdmin=!!user && user.email==='admin@sgstrefagola.pl';
+    const loginForm=document.getElementById('loginForm');
+    const adminTools=document.getElementById('adminTools');
+    if(loginForm) loginForm.classList.toggle('hidden',isAdmin);
+    if(adminTools) adminTools.classList.toggle('hidden',!isAdmin);
+    if(isAdmin){
+      populateAdminSelectors();
+      await loadAdminM();
+      await loadAdminT();
+    }
+  });
+}else{
+  console.warn('Brak Firebase Auth. Sprawdź firebase-config.js. Strona publiczna nadal działa.');
+}
 
 document.getElementById('modalSection')?.addEventListener('change',function(){setModalType(this.value);});
 
@@ -1734,8 +1755,10 @@ document.addEventListener('DOMContentLoaded',()=>{
   if(t)t.addEventListener('input',updateTableTeamLogo);
   populateAdminSelectors();
   showSection('home');
-  Promise.allSettled(matchSections.flatMap(l=>[loadSection(l),loadSection(l+'_table')]));
-  articleSections.forEach(loadSection);
+  if(db){
+    Promise.allSettled(matchSections.flatMap(l=>[loadSection(l),loadSection(l+'_table')]));
+    articleSections.forEach(loadSection);
+  }
 });
 
 showSection('home');
