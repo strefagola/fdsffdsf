@@ -569,8 +569,13 @@ footer {
 <input type="number" id="modalPosition" placeholder="Pozycja (1-20)" min="1" max="100" />
 <input type="text" id="modalTeamName" placeholder="Nazwa drużyny" />
 <input type="url" id="modalTeamLogo" placeholder="URL herbu drużyny" />
-<input type="text" id="modalMatches" placeholder="Mecze (np. WWPPW)" />
+<input type="text" id="modalMatches" placeholder="Mecze / forma (np. WWPPW)" />
 <input type="number" id="modalPoints" placeholder="Liczba punktów" min="0" />
+<label style="display:flex;align-items:center;gap:10px;margin:4px 0 8px;color:var(--muted);font-size:0.8rem;cursor:pointer;">
+<input type="checkbox" id="modalManualStats" style="width:auto;margin:0;accent-color:var(--green);">
+<span>Ręcznie ustaw statystyki (Mecze, punkty, forma)</span>
+</label>
+<p style="font-size:0.72rem;color:var(--muted);margin:0 0 6px;">Bez zaznaczenia liczba meczów, punkty i forma są wyliczane z zakończonych spotkań tej ligi.</p>
 </div>
 <div class="modal-actions">
 <button class="btn btn-primary" id="modalSaveBtn" onclick="handleSave()">Zapisz</button>
@@ -727,10 +732,67 @@ footer {
 <p id="loginErr" class="error"></p>
 </div>
 <div id="adminTools" class="hidden">
+<div class="admin-actions-grid">
 <button class="btn btn-primary" onclick="openAddForm('news')">+ Artykuł</button>
 <button class="btn btn-primary" onclick="openAddMatchOrTable('match')">+ Mecz</button>
-<button class="btn btn-primary" onclick="openAddMatchOrTable('table')">+ Tabela</button>
-<button class="btn btn-danger" onclick="logoutAdmin()" style="margin-left:10px;">Wyloguj</button>
+<button class="btn btn-primary" onclick="openAddMatchOrTable('table')">+ Drużyna do tabeli</button>
+<button class="btn btn-primary" onclick="toggleAdvancedAdmin()">⚙ Zarządzanie meczami i tabelami</button>
+<button class="btn btn-danger" onclick="logoutAdmin()">Wyloguj</button>
+</div>
+<div id="advancedAdmin" class="advanced-admin hidden">
+<div class="admin-section-title">Zarządzanie spotkaniami</div>
+<div class="form-grid">
+<button class="btn btn-primary" onclick="openAddMatchOrTable('match')">Dodaj pojedynczy mecz</button>
+<button class="btn btn-primary" onclick="focusAdminBlock('bulkMatches')">Masowe dodawanie meczów</button>
+</div>
+<div class="card admin-tool-card" id="bulkMatches">
+<h3>Masowe dodawanie meczów</h3>
+<p>Jeden mecz w jednej linii: <strong>Gospodarz vs Gość, 2026-09-14, 18:00</strong> albo z wynikiem: <strong>Gospodarz vs Gość, 2026-09-14, 18:00, 2:1</strong>.</p>
+<select id="bulkMatchLeague"></select>
+<textarea id="bulkMatchLines" placeholder="Legia Warszawa vs Lech Poznań, 2026-09-14, 18:00&#10;Wisła Kraków vs Stal Mielec, 2026-09-21, 17:30, 2:1"></textarea>
+<button class="btn" onclick="saveMatchesBulk()">Dodaj mecze masowo</button>
+</div>
+<div class="card admin-tool-card">
+<h3>Masowa aktualizacja wyników</h3>
+<p>Aktualizuje tylko istniejące mecze bez wyniku. Nie tworzy nowych spotkań.</p>
+<select id="bulkUpdateLeague"></select>
+<textarea id="bulkUpdateLines" placeholder="Legia Warszawa vs Lech Poznań, 2026-09-14, 18:00, 2:1&#10;Wisła Kraków vs Stal Mielec, 2026-09-21, 17:30, 0:0"></textarea>
+<button class="btn" onclick="updateResultsBulkExisting()">Aktualizuj wyniki</button>
+</div>
+<div class="card admin-tool-card">
+<h3>Masowe dodawanie wyników</h3>
+<p>Możesz dodać zakończone mecze od razu: <strong>Gospodarz vs Gość, 2026-09-14, 18:00, 2:1</strong> albo <strong>Gospodarz vs Gość, 2:1</strong>.</p>
+<select id="bulkResultLeague"></select>
+<textarea id="bulkResultLines" placeholder="Legia Warszawa vs Lech Poznań, 2026-09-14, 18:00, 2:1&#10;Wisła Kraków vs Stal Mielec, 0:0"></textarea>
+<button class="btn" onclick="saveResultsBulk()">Dodaj wyniki masowo</button>
+</div>
+<div class="admin-section-title">Zarządzanie tabelami</div>
+<div class="card admin-tool-card">
+<h3>Masowe dodawanie drużyn</h3>
+<p>Wzór: <strong>Nazwa drużyny, link do herbu, automatycznie</strong> albo <strong>Nazwa drużyny, link, ręcznie, M, Pkt, Forma</strong>.</p>
+<select id="bulkTeamLeague"></select>
+<textarea id="bulkTeamLines" placeholder="Legia Warszawa, https://example.com/herb.png, automatycznie&#10;Lech Poznań, https://example.com/herb.png, ręcznie, 5, 12, WWPPW"></textarea>
+<button class="btn" onclick="saveTeamsBulk()">Dodaj drużyny masowo</button>
+</div>
+<div class="card admin-tool-card">
+<h3>Strefy tabeli</h3>
+<p>Podaj numery pozycji oddzielone przecinkami. Strefy sterują kolorami w tabeli.</p>
+<select id="zoneLeague"></select>
+<div class="form-grid-3">
+<input id="zonePromo" placeholder="Awans, np. 1,2">
+<input id="zonePlayoff" placeholder="Baraże, np. 3,4">
+<input id="zoneReleg" placeholder="Spadek, np. 17,18">
+</div>
+<button class="btn" onclick="saveZones()">Zapisz strefy ligi</button>
+</div>
+<div class="admin-section-title">Baza danych</div>
+<div class="card admin-tool-card">
+<h3>Spotkania w bazie</h3><div id="admin-mlist" class="grid"></div>
+</div>
+<div class="card admin-tool-card">
+<h3>Drużyny w tabelach</h3><div id="admin-tlist" class="grid"></div>
+</div>
+</div>
 </div>
 </div>
 </main>
@@ -739,7 +801,12 @@ footer {
 </footer>
 <script src="firebase-config.js"></script>
 <script>
-// ✅ MAPA DRUŻYN → HERBY
+
+const db = window.db;
+const auth = window.auth;
+
+if (!db || !auth) console.error('Firebase nie zostało załadowane. Sprawdź firebase-config.js.');
+
 const teamLogoMap = {
 "Wisła Płock": "https://pliki.meczyki.pl/live-score/soccer/participant/1651/25w.webp",
 "Górnik Zabrze": "https://pliki.meczyki.pl/live-score/soccer/participant/1655/25w.webp",
@@ -869,517 +936,810 @@ const teamLogoMap = {
 "Sparta Kazimierza Wielka": "https://tmssl.akamaized.net/images/wappen/head/31043.png  "
 };
 
-// ✅ FUNKCJE AUTOMATYCZNEGO UZUPEŁNIANIA HERBÓW
-function updateHomeTeamLogo() {
-  const teamName = document.getElementById('modalHomeTeam').value.trim();
-  const logoInput = document.getElementById('modalLogoHome');
-  if (teamLogoMap[teamName]) {
-    logoInput.value = teamLogoMap[teamName].trim();
-  } else {
-    logoInput.value = '';
-  }
-}
-
-function updateAwayTeamLogo() {
-  const teamName = document.getElementById('modalAwayTeam').value.trim();
-  const logoInput = document.getElementById('modalLogoAway');
-  if (teamLogoMap[teamName]) {
-    logoInput.value = teamLogoMap[teamName].trim();
-  } else {
-    logoInput.value = '';
-  }
-}
-
-function updateTableTeamLogo() {
-  const teamName = document.getElementById('modalTeamName').value.trim();
-  const logoInput = document.getElementById('modalTeamLogo');
-  if (teamLogoMap[teamName]) {
-    logoInput.value = teamLogoMap[teamName].trim();
-  } else {
-    logoInput.value = '';
-  }
-}
-
 let isAdmin = false;
 let currentDocId = null;
 let currentSection = null;
+let currentDb = db;
+
 const articleSections = ['news','results','analysis','media','history','schedule'];
+
 const matchSections = [
-'ekstraklasa','pierwsza_liga','druga_liga',
-'trzecia_liga_gr1','trzecia_liga_gr2','trzecia_liga_gr3','trzecia_liga_gr4',
-'superpuchar','puchar_polski',
-'champions_league','europa_league','conference_league'
+  'ekstraklasa','pierwsza_liga','druga_liga',
+  'trzecia_liga_gr1','trzecia_liga_gr2','trzecia_liga_gr3','trzecia_liga_gr4',
+  'superpuchar','puchar_polski',
+  'champions_league','europa_league','conference_league'
 ];
+
 const tableSections = matchSections.map(s => s + '_table');
 
-function showSection(id) {
-document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-document.querySelectorAll('.top-nav a').forEach(a => a.classList.remove('active'));
-document.getElementById(id).classList.add('active');
-document.querySelector(`.top-nav a[data-section="${id}"]`).classList.add('active');
-if (id !== 'home') {
-if (id === 'polskie') showLiga('polskie', 'ekstraklasa');
-else if (id === 'puchary') showLiga('puchary', 'superpuchar');
-else {
-loadSection(id);
-if (tableSections.includes(id)) loadSection(id.replace('_table', ''));
-}
-}
-}
-
-function showLiga(context, ligaId) {
-const container = document.getElementById(context);
-if (!container) return;
-container.querySelectorAll('.liga-subpage').forEach(el => el.classList.remove('active-liga'));
-const target = document.getElementById(ligaId + '-content');
-if (target) target.classList.add('active-liga');
-loadSection(ligaId);
-loadSection(ligaId + '_table');
-}
-
-auth.onAuthStateChanged(user => {
-isAdmin = user && user.email === "admin@sgstrefagola.pl";
-document.getElementById('loginForm').classList.toggle('hidden', isAdmin);
-document.getElementById('adminTools').classList.toggle('hidden', !isAdmin);
-if (isAdmin) {
-const allSections = [...articleSections, ...matchSections, ...tableSections];
-allSections.forEach(loadSection);
-}
-});
-
-function loginAdmin() {
-const pass = document.getElementById('adminPass').value;
-auth.signInWithEmailAndPassword("admin@sgstrefagola.pl", pass)
-.catch(() => document.getElementById('loginErr').textContent = "Błędne hasło");
-}
-
-function logoutAdmin() {
-auth.signOut();
-}
-
-function openAddForm(section) {
-if (!isAdmin) return;
-currentDocId = null;
-currentSection = section;
-document.getElementById('modalSection').value = section;
-resetModal();
-if (articleSections.includes(section)) {
-document.getElementById('articleFields').style.display = 'block';
-document.getElementById('matchFields').style.display = 'none';
-document.getElementById('tableFields').style.display = 'none';
-document.getElementById('modalSaveBtn').textContent = 'Zapisz artykuł';
-document.getElementById('modalTitle').textContent = 'Dodaj artykuł';
-} else if (matchSections.includes(section)) {
-document.getElementById('articleFields').style.display = 'none';
-document.getElementById('matchFields').style.display = 'block';
-document.getElementById('tableFields').style.display = 'none';
-document.getElementById('modalSaveBtn').textContent = 'Zapisz mecz';
-document.getElementById('modalTitle').textContent = 'Dodaj mecz';
-} else if (tableSections.includes(section)) {
-document.getElementById('articleFields').style.display = 'none';
-document.getElementById('matchFields').style.display = 'none';
-document.getElementById('tableFields').style.display = 'block';
-document.getElementById('modalSaveBtn').textContent = 'Zapisz drużynę';
-document.getElementById('modalTitle').textContent = 'Dodaj drużynę';
-}
-document.getElementById('modalDelBtn').style.display = 'none';
-document.getElementById('modal').classList.remove('hidden');
-}
-
-function openAddMatchOrTable(type) {
-if (!isAdmin) return;
-currentDocId = null;
-currentSection = null;
-resetModal();
-
-const select = document.getElementById('modalSection');
-const allowedSections = type === 'match' ? matchSections : tableSections;
-
-Array.from(select.options).forEach(opt => {
-opt.style.display = allowedSections.includes(opt.value) ? 'block' : 'none';
-});
-
-select.value = allowedSections[0];
-
-document.getElementById('articleFields').style.display = 'none';
-document.getElementById('matchFields').style.display = type === 'match' ? 'block' : 'none';
-document.getElementById('tableFields').style.display = type === 'table' ? 'block' : 'none';
-
-document.getElementById('modalDelBtn').style.display = 'none';
-document.getElementById('modalSaveBtn').textContent = type === 'match' ? 'Dodaj mecz' : 'Dodaj drużynę';
-document.getElementById('modalTitle').textContent = type === 'match' ? 'Dodaj mecz' : 'Dodaj drużynę do tabeli';
-
-document.getElementById('modal').classList.remove('hidden');
-}
-
-function openEditForm(section, docId, data) {
-if (!isAdmin) return;
-currentDocId = docId;
-currentSection = section;
-resetModal();
-
-document.getElementById('modalSection').value = section;
-
-if (articleSections.includes(section)) {
-document.getElementById('modalTitleInput').value = data.title || '';
-document.getElementById('modalContent').value = data.content || '';
-document.getElementById('modalImage').value = data.imageUrl || '';
-document.getElementById('modalVideo').value = data.videoUrl || '';
-document.getElementById('articleFields').style.display = 'block';
-document.getElementById('matchFields').style.display = 'none';
-document.getElementById('tableFields').style.display = 'none';
-document.getElementById('modalSaveBtn').textContent = 'Zapisz artykuł';
-} else if (matchSections.includes(section)) {
-document.getElementById('modalTitleInputMatch').value = data.title || '';
-document.getElementById('modalHomeTeam').value = data.homeTeam || '';
-document.getElementById('modalAwayTeam').value = data.awayTeam || '';
-document.getElementById('modalDate').value = data.date || '';
-document.getElementById('modalScore').value = data.score || '';
-document.getElementById('modalLogoHome').value = data.logoHome || '';
-document.getElementById('modalLogoAway').value = data.logoAway || '';
-document.getElementById('articleFields').style.display = 'none';
-document.getElementById('matchFields').style.display = 'block';
-document.getElementById('tableFields').style.display = 'none';
-document.getElementById('modalSaveBtn').textContent = 'Zapisz mecz';
-} else if (tableSections.includes(section)) {
-document.getElementById('modalPosition').value = data.position || '';
-document.getElementById('modalTeamName').value = data.teamName || '';
-document.getElementById('modalTeamLogo').value = data.teamLogo || '';
-document.getElementById('modalMatches').value = data.matches || '';
-document.getElementById('modalPoints').value = data.points || '';
-document.getElementById('articleFields').style.display = 'none';
-document.getElementById('matchFields').style.display = 'none';
-document.getElementById('tableFields').style.display = 'block';
-document.getElementById('modalSaveBtn').textContent = 'Zapisz drużynę';
-}
-
-document.getElementById('modalDelBtn').style.display = 'inline-block';
-document.getElementById('modal').classList.remove('hidden');
-}
-
-function resetModal() {
-document.getElementById('modalErr').textContent = '';
-}
-
-function closeModal() {
-document.getElementById('modal').classList.add('hidden');
-}
-
-function handleSave() {
-const section = document.getElementById('modalSection').value;
-if (articleSections.includes(section)) {
-saveArticle();
-} else if (matchSections.includes(section)) {
-saveMatch();
-} else if (tableSections.includes(section)) {
-saveTableEntry();
-}
-}
-
-async function saveArticle() {
-const title = document.getElementById('modalTitleInput').value.trim();
-const content = document.getElementById('modalContent').value;
-const imageUrl = document.getElementById('modalImage').value.trim();
-const videoUrl = document.getElementById('modalVideo').value.trim();
-const err = document.getElementById('modalErr');
-if (!title || !content) {
-err.textContent = "Tytuł i treść są wymagane.";
-return;
-}
-const section = document.getElementById('modalSection').value;
-const data = { title, content, imageUrl: imageUrl || null, videoUrl: videoUrl || null };
-try {
-if (currentDocId) {
-await db.collection(currentSection).doc(currentDocId).update(data);
-} else {
-await db.collection(section).add({ ...data, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
-}
-closeModal();
-loadSection(section);
-} catch (e) {
-err.textContent = "Błąd zapisu.";
-}
-}
-
-async function saveMatch() {
-const title = document.getElementById('modalTitleInputMatch').value.trim();
-const homeTeam = document.getElementById('modalHomeTeam').value.trim();
-const awayTeam = document.getElementById('modalAwayTeam').value.trim();
-const date = document.getElementById('modalDate').value.trim();
-const score = document.getElementById('modalScore').value.trim();
-const logoHome = document.getElementById('modalLogoHome').value.trim();
-const logoAway = document.getElementById('modalLogoAway').value.trim();
-const err = document.getElementById('modalErr');
-if (!title || !homeTeam || !awayTeam || !date || !score) {
-err.textContent = "Wypełnij wszystkie pola meczu.";
-return;
-}
-const section = document.getElementById('modalSection').value;
-const data = {
-title, homeTeam, awayTeam, date, score,
-logoHome: logoHome || null,
-logoAway: logoAway || null
+const L = {
+  ekstraklasa:'Ekstraklasa',
+  pierwsza_liga:'1. liga',
+  druga_liga:'2. liga',
+  trzecia_liga_gr1:'3. liga gr I',
+  trzecia_liga_gr2:'3. liga gr II',
+  trzecia_liga_gr3:'3. liga gr III',
+  trzecia_liga_gr4:'3. liga gr IV',
+  superpuchar:'Superpuchar',
+  puchar_polski:'STS Puchar Polski',
+  champions_league:'Liga Mistrzów',
+  europa_league:'Liga Europy',
+  conference_league:'Liga Konferencji'
 };
-try {
-if (currentDocId) {
-await db.collection(section).doc(currentDocId).update(data);
-} else {
-await db.collection(section).add({ ...data, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
-}
-closeModal();
-loadSection(section);
-const activePageId = document.querySelector('.page.active')?.id;
-if (['polskie','puchary'].includes(activePageId)) {
-showLiga(activePageId, section);
-}
-} catch (e) {
-err.textContent = "Błąd zapisu meczu.";
-}
-}
 
-async function saveTableEntry() {
-const position = document.getElementById('modalPosition').value.trim();
-const teamName = document.getElementById('modalTeamName').value.trim();
-const teamLogo = document.getElementById('modalTeamLogo').value.trim();
-const matches = document.getElementById('modalMatches').value.trim();
-const points = document.getElementById('modalPoints').value.trim();
-const err = document.getElementById('modalErr');
-if (!position || !teamName || !matches || points === '') {
-err.textContent = "Wypełnij wszystkie pola tabeli.";
-return;
-}
-const section = document.getElementById('modalSection').value;
-const data = {
-position: parseInt(position),
-teamName,
-teamLogo: teamLogo || null,
-matches,
-points: parseInt(points)
+const DEFAULT_ZONES = {
+  ekstraklasa:{promo:[],playoff:[],releg:[16,17,18]},
+  pierwsza_liga:{promo:[1,2],playoff:[3,4,5,6],releg:[16,17,18]},
+  druga_liga:{promo:[1,2],playoff:[3,4,5,6],releg:[16,17,18]},
+  trzecia_liga_gr1:{promo:[1],playoff:[2],releg:[15,16,17,18]},
+  trzecia_liga_gr2:{promo:[1],playoff:[2],releg:[15,16,17,18]},
+  trzecia_liga_gr3:{promo:[1],playoff:[2],releg:[15,16,17,18]},
+  trzecia_liga_gr4:{promo:[1],playoff:[2],releg:[15,16,17,18]},
+  superpuchar:{promo:[],playoff:[],releg:[]},
+  puchar_polski:{promo:[],playoff:[],releg:[]},
+  champions_league:{promo:[],playoff:[],releg:[]},
+  europa_league:{promo:[],playoff:[],releg:[]},
+  conference_league:{promo:[],playoff:[],releg:[]}
 };
-try {
-if (currentDocId) {
-await db.collection(section).doc(currentDocId).update(data);
-} else {
-await db.collection(section).add({ ...data, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
-}
-closeModal();
-loadSection(section);
-} catch (e) {
-err.textContent = "Błąd zapisu drużyny.";
-}
+
+const zonesCache = {};
+
+function esc(v){
+  return String(v ?? '').replace(/[&<>"']/g, c => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  }[c]));
 }
 
-async function deleteContent() {
-if (!confirm("Na pewno chcesz usunąć?")) return;
-try {
-const section = document.getElementById('modalSection').value;
-await db.collection(section).doc(currentDocId).delete();
-closeModal();
-loadSection(section);
-const activePageId = document.querySelector('.page.active')?.id;
-if (section.endsWith('_table')) {
-const base = section.replace('_table', '');
-loadSection(base);
-}
-if (['polskie','puchary'].includes(activePageId) && matchSections.includes(section)) {
-showLiga(activePageId, section);
-}
-} catch (e) {
-document.getElementById('modalErr').textContent = "Błąd usuwania.";
-}
+function timestampValue(v){
+  if(!v) return 0;
+  if(typeof v === 'object' && typeof v.seconds === 'number') return v.seconds * 1000;
+  if(v instanceof Date) return v.getTime();
+  const n = Date.parse(v);
+  return Number.isNaN(n) ? 0 : n;
 }
 
-function embedVideo(url) {
-if (!url) return '';
-const yt = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/);
-if (yt) return `<iframe src="https://www.youtube.com/embed/${yt[1]}" frameborder="0" allowfullscreen></iframe>`;
-if (url.endsWith('.mp4') || url.endsWith('.webm')) return `<video controls style="width:100%"><source src="${url}" type="video/mp4"></video>`;
-return `<a href="${url}" target="_blank" style="display:inline-block;padding:6px 12px;background:#ff3b3b;color:white;border-radius:4px;text-decoration:none;">Otwórz film</a>`;
+function formatDate(v){
+  const t = timestampValue(v);
+  if(!t) return '';
+  return new Date(t).toLocaleString('pl-PL',{
+    day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'
+  });
 }
 
-async function loadSection(section) {
-if (articleSections.includes(section)) {
-const container = document.getElementById(section + '-list');
-if (!container) return;
-try {
-const snap = await db.collection(section).orderBy("createdAt", "desc").get();
-if (snap.empty) {
-container.innerHTML = "<p>Brak treści.</p>";
-return;
+function toLocalInput(v){
+  const t = timestampValue(v);
+  if(!t) return '';
+  const d = new Date(t), p = n => String(n).padStart(2,'0');
+  return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`;
 }
-let html = '';
-snap.forEach(doc => {
-const d = doc.data();
-const editBtn = isAdmin ?
-`<button class="edit-btn" onclick="openEditForm('${section}', '${doc.id}', ${JSON.stringify(d).replace(/"/g, '&quot;')})">Edytuj</button>` : '';
-const delBtn = isAdmin ?
-`<button class="delete-btn" onclick="openEditForm('${section}', '${doc.id}', ${JSON.stringify(d).replace(/"/g, '&quot;')})">Usuń</button>` : '';
-let media = '';
-if (d.imageUrl) media += `<img src="${d.imageUrl}" alt="Zdjęcie">`;
-if (d.videoUrl) media += embedVideo(d.videoUrl);
-html += `
-<div class="content-item">
-${editBtn}${delBtn}
-<h3>${d.title}</h3>
-<div class="article-content">${d.content}</div>
-${media}
-</div>
-`;
+
+function parseDateValue(v){
+  if(!v) return firebase.firestore.FieldValue.serverTimestamp();
+  if(typeof v === 'object' && typeof v.seconds === 'number') return v;
+  const d = new Date(v);
+  if(!Number.isNaN(d.getTime())) return firebase.firestore.Timestamp.fromDate(d);
+  return v;
+}
+
+function parseScore(score){
+  const m = String(score ?? '').trim().match(/^(\d+)\s*[:\-]\s*(\d+)$/);
+  return m ? {home:parseInt(m[1],10), away:parseInt(m[2],10)} : null;
+}
+
+function getScoreText(d){
+  if(d.score) return d.score;
+  if(d.scoreHome !== null && d.scoreHome !== undefined && d.scoreAway !== null && d.scoreAway !== undefined)
+    return `${d.scoreHome}:${d.scoreAway}`;
+  return '-';
+}
+
+function matchFinished(d){
+  const s = parseScore(d.score);
+  return !!(s || (d.scoreHome !== null && d.scoreHome !== undefined && d.scoreAway !== null && d.scoreAway !== undefined));
+}
+
+function matchDateMs(d){ return timestampValue(d.date); }
+
+function crestFor(team, explicit){
+  const src = String(explicit || teamLogoMap[String(team || '').trim()] || '').trim();
+  return src ? `<img src="${esc(src)}" class="team-crest" alt="" onerror="this.style.display='none'">`
+             : `<div class="team-crest" style="display:flex;align-items:center;justify-content:center;font-size:.65rem;color:var(--muted);"><i class="fa-solid fa-shield"></i></div>`;
+}
+
+function crestSmall(team, explicit){
+  const src = String(explicit || teamLogoMap[String(team || '').trim()] || '').trim();
+  return src ? `<img src="${esc(src)}" class="table-crest" alt="" onerror="this.style.display='none'">`
+             : `<div class="table-crest" style="display:flex;align-items:center;justify-content:center;font-size:.55rem;color:var(--muted);"><i class="fa-solid fa-shield"></i></div>`;
+}
+
+function updateHomeTeamLogo(){
+  const name=document.getElementById('modalHomeTeam')?.value.trim();
+  const input=document.getElementById('modalLogoHome');
+  if(input) input.value=(teamLogoMap[name]||'').trim();
+}
+function updateAwayTeamLogo(){
+  const name=document.getElementById('modalAwayTeam')?.value.trim();
+  const input=document.getElementById('modalLogoAway');
+  if(input) input.value=(teamLogoMap[name]||'').trim();
+}
+function updateTableTeamLogo(){
+  const name=document.getElementById('modalTeamName')?.value.trim();
+  const input=document.getElementById('modalTeamLogo');
+  if(input) input.value=(teamLogoMap[name]||'').trim();
+}
+
+function getZones(league){ return zonesCache[league] || DEFAULT_ZONES[league] || {promo:[],playoff:[],releg:[]}; }
+
+async function loadZones(league, force=false){
+  if(!force && zonesCache[league]) return zonesCache[league];
+  try{
+    const snap=await db.collection('zones').doc(league).get();
+    zonesCache[league]=snap.exists ? {
+      promo:Array.isArray(snap.data().promo)?snap.data().promo:[],
+      playoff:Array.isArray(snap.data().playoff)?snap.data().playoff:(snap.data().barage||[]),
+      releg:Array.isArray(snap.data().releg)?snap.data().releg:[]
+    } : (DEFAULT_ZONES[league]||{promo:[],playoff:[],releg:[]});
+  }catch(e){ zonesCache[league]=DEFAULT_ZONES[league]||{promo:[],playoff:[],releg:[]}; }
+  return zonesCache[league];
+}
+
+function parsePositions(v){
+  return String(v||'').split(',').map(x=>parseInt(x.trim(),10)).filter(Number.isFinite);
+}
+
+function rowClass(league,pos){
+  const z=getZones(league);
+  if(z.promo.includes(pos)) return 'row-promo';
+  if(z.playoff.includes(pos)) return 'row-barage';
+  if(z.releg.includes(pos)) return 'row-releg';
+  return '';
+}
+
+function showSection(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.top-nav a').forEach(a=>a.classList.remove('active'));
+  const page=document.getElementById(id);
+  if(page) page.classList.add('active');
+  const link=document.querySelector(`.top-nav a[data-section="${id}"]`);
+  if(link) link.classList.add('active');
+
+  if(id==='polskie') showLiga('polskie','ekstraklasa');
+  else if(id==='puchary') showLiga('puchary','superpuchar');
+  else if(id!=='home') loadSection(id);
+}
+
+function showLiga(context, ligaId){
+  const container=document.getElementById(context);
+  if(!container) return;
+  container.querySelectorAll('.liga-subpage').forEach(el=>el.classList.remove('active-liga'));
+  const target=document.getElementById(ligaId+'-content');
+  if(target) target.classList.add('active-liga');
+  loadSection(ligaId);
+  loadSection(ligaId+'_table');
+}
+
+function openAddForm(section){
+  if(!isAdmin) return;
+  currentDocId=null; currentSection=section; currentDb=db;
+  resetModal();
+  const select=document.getElementById('modalSection');
+  if(select) select.value=section;
+  setModalType(section);
+  document.getElementById('modalDelBtn').style.display='none';
+  document.getElementById('modal').classList.remove('hidden');
+}
+
+function openAddMatchOrTable(type){
+  if(!isAdmin) return;
+  currentDocId=null; currentSection=null; currentDb=db;
+  resetModal();
+  const allowed=type==='match'?matchSections:tableSections;
+  const select=document.getElementById('modalSection');
+  Array.from(select.options).forEach(o=>o.style.display=allowed.includes(o.value)?'block':'none');
+  select.value=allowed[0];
+  setModalType(allowed[0]);
+  document.getElementById('modalDelBtn').style.display='none';
+  document.getElementById('modal').classList.remove('hidden');
+}
+
+function setModalType(section){
+  const article=articleSections.includes(section);
+  const match=matchSections.includes(section);
+  const table=tableSections.includes(section);
+  document.getElementById('articleFields').style.display=article?'block':'none';
+  document.getElementById('matchFields').style.display=match?'block':'none';
+  document.getElementById('tableFields').style.display=table?'block':'none';
+  document.getElementById('modalSaveBtn').textContent=article?'Zapisz artykuł':match?'Zapisz mecz':'Zapisz drużynę';
+  document.getElementById('modalTitle').textContent=currentDocId?'Edytuj':article?'Dodaj artykuł':match?'Dodaj mecz':'Dodaj drużynę do tabeli';
+  if(table){
+    const manual=document.getElementById('modalManualStats');
+    if(manual) manual.checked=false;
+  }
+}
+
+function resetModal(){
+  document.getElementById('modalErr').textContent='';
+  ['modalTitleInput','modalContent','modalImage','modalVideo','modalTitleInputMatch','modalHomeTeam','modalLogoHome','modalAwayTeam','modalLogoAway','modalDate','modalScore','modalPosition','modalTeamName','modalTeamLogo','modalMatches','modalPoints'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.value='';
+  });
+  const manual=document.getElementById('modalManualStats'); if(manual) manual.checked=false;
+  const select=document.getElementById('modalSection');
+  Array.from(select.options).forEach(o=>o.style.display='block');
+}
+
+function closeModal(){
+  document.getElementById('modal').classList.add('hidden');
+  currentDocId=null; currentSection=null; currentDb=db;
+}
+
+function handleSave(){
+  const section=document.getElementById('modalSection').value;
+  if(articleSections.includes(section)) return saveArticle();
+  if(matchSections.includes(section)) return saveMatch();
+  return saveTableEntry();
+}
+
+function openEditForm(section,id,data){
+  if(!isAdmin) return;
+  currentDocId=id; currentSection=section; currentDb=db;
+  resetModal();
+  document.getElementById('modalSection').value=section;
+  setModalType(section);
+
+  if(articleSections.includes(section)){
+    document.getElementById('modalTitleInput').value=data.title||'';
+    document.getElementById('modalContent').value=data.content||'';
+    document.getElementById('modalImage').value=data.imageUrl||'';
+    document.getElementById('modalVideo').value=data.videoUrl||'';
+  }else if(matchSections.includes(section)){
+    document.getElementById('modalTitleInputMatch').value=data.title||'';
+    document.getElementById('modalHomeTeam').value=data.homeTeam||'';
+    document.getElementById('modalAwayTeam').value=data.awayTeam||'';
+    document.getElementById('modalLogoHome').value=data.logoHome||teamLogoMap[data.homeTeam]||'';
+    document.getElementById('modalLogoAway').value=data.logoAway||teamLogoMap[data.awayTeam]||'';
+    document.getElementById('modalDate').value=toLocalInput(data.date)||data.date||'';
+    document.getElementById('modalScore').value=getScoreText(data)==='-'?'':getScoreText(data);
+  }else{
+    document.getElementById('modalPosition').value=data.position??'';
+    document.getElementById('modalTeamName').value=data.teamName||'';
+    document.getElementById('modalTeamLogo').value=data.teamLogo||teamLogoMap[data.teamName]||'';
+    document.getElementById('modalMatches').value=data.matches||'';
+    document.getElementById('modalPoints').value=data.points??'';
+    document.getElementById('modalManualStats').checked=data.manual===true;
+  }
+  document.getElementById('modalDelBtn').style.display='inline-block';
+  document.getElementById('modal').classList.remove('hidden');
+}
+
+async function saveArticle(){
+  if(!isAdmin) return;
+  const section=document.getElementById('modalSection').value;
+  const data={
+    title:document.getElementById('modalTitleInput').value.trim(),
+    content:document.getElementById('modalContent').value,
+    imageUrl:document.getElementById('modalImage').value.trim()||null,
+    videoUrl:document.getElementById('modalVideo').value.trim()||null
+  };
+  if(!data.title||!data.content){document.getElementById('modalErr').textContent='Tytuł i treść są wymagane.';return;}
+  try{
+    if(currentDocId) await db.collection(section).doc(currentDocId).update(data);
+    else await db.collection(section).add({...data,createdAt:firebase.firestore.FieldValue.serverTimestamp()});
+    closeModal(); await loadSection(section);
+  }catch(e){document.getElementById('modalErr').textContent='Błąd zapisu artykułu.';console.error(e);}
+}
+
+async function saveMatch(){
+  if(!isAdmin) return;
+  const section=document.getElementById('modalSection').value;
+  const homeTeam=document.getElementById('modalHomeTeam').value.trim();
+  const awayTeam=document.getElementById('modalAwayTeam').value.trim();
+  const score=document.getElementById('modalScore').value.trim();
+  const date=document.getElementById('modalDate').value.trim();
+  if(!homeTeam||!awayTeam||!date){document.getElementById('modalErr').textContent='Podaj gospodarza, gościa oraz datę.';return;}
+  const parsed=parseScore(score);
+  const data={
+    title:document.getElementById('modalTitleInputMatch').value.trim()||'Spotkanie',
+    homeTeam,awayTeam,
+    date:parseDateValue(date),
+    score:score||null,
+    scoreHome:parsed?parsed.home:null,
+    scoreAway:parsed?parsed.away:null,
+    status:parsed?'finished':'upcoming',
+    logoHome:document.getElementById('modalLogoHome').value.trim()||teamLogoMap[homeTeam]||null,
+    logoAway:document.getElementById('modalLogoAway').value.trim()||teamLogoMap[awayTeam]||null,
+    league:section
+  };
+  try{
+    if(currentDocId) await db.collection(section).doc(currentDocId).update(data);
+    else await db.collection(section).add({...data,createdAt:firebase.firestore.FieldValue.serverTimestamp()});
+    await recalculateStandings(section);
+    closeModal();
+    await loadSection(section);
+    await loadSection(section+'_table');
+    await loadAdminM();
+    await loadAdminT();
+  }catch(e){document.getElementById('modalErr').textContent='Błąd zapisu meczu.';console.error(e);}
+}
+
+async function saveTableEntry(){
+  if(!isAdmin) return;
+  const section=document.getElementById('modalSection').value;
+  const teamName=document.getElementById('modalTeamName').value.trim();
+  const manual=document.getElementById('modalManualStats').checked;
+  if(!teamName){document.getElementById('modalErr').textContent='Podaj nazwę drużyny.';return;}
+  const position=parseInt(document.getElementById('modalPosition').value,10);
+  if(!Number.isFinite(position)||position<1){document.getElementById('modalErr').textContent='Podaj poprawną pozycję.';return;}
+  const data={
+    position,
+    teamName,
+    teamLogo:document.getElementById('modalTeamLogo').value.trim()||teamLogoMap[teamName]||null,
+    matches:manual ? (document.getElementById('modalMatches').value.trim()||'0') : '0',
+    points:manual ? (parseInt(document.getElementById('modalPoints').value,10)||0) : 0,
+    manual
+  };
+  try{
+    if(currentDocId) await db.collection(section).doc(currentDocId).update(data);
+    else await db.collection(section).add({...data,createdAt:firebase.firestore.FieldValue.serverTimestamp()});
+    await recalculateStandings(section.replace('_table',''));
+    closeModal(); await loadSection(section); await loadAdminT();
+  }catch(e){document.getElementById('modalErr').textContent='Błąd zapisu drużyny.';console.error(e);}
+}
+
+async function deleteContent(){
+  if(!isAdmin||!currentDocId) return;
+  if(!confirm('Na pewno chcesz usunąć?')) return;
+  const section=document.getElementById('modalSection').value;
+  try{
+    await db.collection(section).doc(currentDocId).delete();
+    closeModal();
+    await loadSection(section);
+    if(matchSections.includes(section)) await loadSection(section+'_table');
+    await loadAdminM(); await loadAdminT();
+  }catch(e){document.getElementById('modalErr').textContent='Błąd usuwania.';console.error(e);}
+}
+
+function embedVideo(url){
+  if(!url) return '';
+  const yt=url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/);
+  if(yt) return `<iframe src="https://www.youtube.com/embed/${yt[1]}" frameborder="0" allowfullscreen></iframe>`;
+  if(/\.(mp4|webm)(?:\?.*)?$/i.test(url)) return `<video controls style="width:100%"><source src="${esc(url)}"></video>`;
+  return `<a href="${esc(url)}" target="_blank" rel="noopener" style="display:inline-block;padding:8px 12px;background:var(--green);color:var(--navy);border-radius:8px;text-decoration:none;">Otwórz film</a>`;
+}
+
+async function getDocs(section){
+  const snap=await db.collection(section).get();
+  return snap.docs.map(d=>({id:d.id,...d.data()}));
+}
+
+function sortMatches(arr){
+  return arr.sort((a,b)=>matchDateMs(a)-matchDateMs(b));
+}
+
+function matchCard(d){
+  const finished=matchFinished(d);
+  const score=finished?getScoreText(d):'vs';
+  return `<div class="card">
+    <div class="league-label"><i class="fa-solid fa-circle"></i>${esc(L[d.league]||d.league||'Liga')}
+      ${finished?'':'<span class="badge-up">Nadchodzący</span>'}</div>
+    <div class="match-row">
+      <div class="team-wrap">${crestFor(d.homeTeam,d.logoHome)}<span class="team-name" onclick="openClubProfile('${esc(d.homeTeam)}')">${esc(d.homeTeam||'?')}</span></div>
+      <div class="score-box ${finished?'':'vs'}">${esc(score)}</div>
+      <div class="team-wrap away"><span class="team-name" onclick="openClubProfile('${esc(d.awayTeam)}')">${esc(d.awayTeam||'?')}</span>${crestFor(d.awayTeam,d.logoAway)}</div>
+    </div>
+    <div class="match-date ${finished?'':'up'}">${esc(formatDate(d.date)||d.date||'')}</div>
+  </div>`;
+}
+
+async function loadSection(section){
+  if(articleSections.includes(section)){
+    const c=document.getElementById(section+'-list'); if(!c) return;
+    try{
+      const data=(await getDocs(section)).sort((a,b)=>timestampValue(b.createdAt)-timestampValue(a.createdAt));
+      c.innerHTML=data.length?data.map(d=>`
+        <div class="card">
+          ${isAdmin?`<div style="display:flex;gap:4px;justify-content:flex-end;">
+            <button class="btn-sm" onclick='openEditForm("${section}","${d.id}",${JSON.stringify(d).replace(/'/g,"&#39;")})'>Edytuj</button>
+            <button class="btn-sm btn-del" onclick='openEditForm("${section}","${d.id}",${JSON.stringify(d).replace(/'/g,"&#39;")})'>Usuń</button>
+          </div>`:''}
+          <h3>${esc(d.title)}</h3>
+          <div style="color:var(--muted);white-space:pre-wrap;overflow-wrap:break-word;">${esc(d.content)}</div>
+          ${d.imageUrl?`<img src="${esc(d.imageUrl)}" alt="Zdjęcie">`:''}
+          ${d.videoUrl?embedVideo(d.videoUrl):''}
+        </div>`).join(''):'<p style="color:var(--muted);">Brak treści.</p>';
+    }catch(e){c.innerHTML='<p style="color:#ff6b6b;">Błąd ładowania treści.</p>';console.error(e);}
+    return;
+  }
+
+  if(matchSections.includes(section)){
+    const c=document.getElementById(section+'-list'); if(!c) return;
+    try{
+      let data=sortMatches(await getDocs(section));
+      const now=Date.now();
+      const upcoming=data.filter(d=>!matchFinished(d) || matchDateMs(d)>now && !matchFinished(d));
+      const finished=data.filter(d=>matchFinished(d)).sort((a,b)=>matchDateMs(b)-matchDateMs(a));
+      data=[...upcoming,...finished];
+      if(!data.length){c.innerHTML='<p style="color:var(--muted);">Brak meczów.</p>';return;}
+      let html='';
+      let round='';
+      for(const d of data){
+        const r=d.title||'Spotkania';
+        if(r!==round){html+=`<div class="match-header"><span>${esc(r)}</span><span>${esc(L[section]||'')}</span></div>`;round=r;}
+        const actions=isAdmin?`<div style="position:absolute;right:10px;top:10px;display:flex;gap:4px;">
+          <button class="btn-sm" onclick='openEditForm("${section}","${d.id}",${JSON.stringify(d).replace(/'/g,"&#39;")})'>Edytuj</button>
+          <button class="btn-sm btn-del" onclick='openEditForm("${section}","${d.id}",${JSON.stringify(d).replace(/'/g,"&#39;")})'>Usuń</button>
+        </div>`:'';
+        const finished=matchFinished(d);
+        html+=`<div class="match-row" style="position:relative;padding-right:${isAdmin?'150px':'12px'};">
+          <div class="match-date">${esc(formatDate(d.date)||d.date||'-')}</div>
+          <div class="team-name">${crestFor(d.homeTeam,d.logoHome)}<span>${esc(d.homeTeam||'---')}</span></div>
+          <div class="score">${esc(finished?getScoreText(d):'vs')}</div>
+          <div class="team-name"><span>${esc(d.awayTeam||'---')}</span>${crestFor(d.awayTeam,d.logoAway)}</div>${actions}
+        </div>`;
+      }
+      c.innerHTML=html;
+    }catch(e){c.innerHTML='<p style="color:#ff6b6b;">Błąd ładowania meczów.</p>';console.error(e);}
+    return;
+  }
+
+  if(tableSections.includes(section)){
+    const c=document.getElementById(section+'-list'); if(!c) return;
+    try{
+      const league=section.replace('_table','');
+      await loadZones(league);
+      let data=await getDocs(section);
+
+      // Compatibility with old 24-style standings document, if present in the same Firebase project.
+      if(!data.length){
+        const legacy=await db.collection('standings').doc(league).get();
+        if(legacy.exists && Array.isArray(legacy.data().teams)){
+          data=legacy.data().teams.map((t,i)=>({
+            id:`legacy-${i}`,position:i+1,teamName:t.name,teamLogo:t.crest,
+            matches:t.m||0,points:t.pts||0,manual:t.manual!==false
+          }));
+        }
+      }
+
+      data.sort((a,b)=>(parseInt(a.position)||999)-(parseInt(b.position)||999));
+      const tbody=c.querySelector('tbody');
+      if(!data.length){tbody.innerHTML='<tr><td colspan="5">Brak drużyn.</td></tr>';return;}
+      tbody.innerHTML=data.map(d=>{
+        const pos=parseInt(d.position)||0;
+        const actions=isAdmin?`<td><button class="edit-btn" onclick='openEditForm("${section}","${d.id}",${JSON.stringify(d).replace(/'/g,"&#39;")})'>Edytuj</button><button class="delete-btn" onclick='openEditForm("${section}","${d.id}",${JSON.stringify(d).replace(/'/g,"&#39;")})'>Usuń</button></td>`:'';
+        return `<tr class="${rowClass(league,pos)}">
+          <td>${pos||'-'}</td>
+          <td class="team-cell">${crestSmall(d.teamName,d.teamLogo)}<span>${esc(d.teamName||'---')}</span></td>
+          <td>${esc(d.matches??'-')}</td>
+          <td>${esc(d.points??'-')}</td>${actions}
+        </tr>`;
+      }).join('');
+      renderLegend(league,c);
+    }catch(e){c.querySelector('tbody').innerHTML='<tr><td colspan="5">Błąd ładowania tabeli.</td></tr>';console.error(e);}
+  }
+}
+
+function renderLegend(league,table){
+  const old=table.parentElement?.querySelector('.dynamic-legend');
+  if(old) old.remove();
+  const z=getZones(league);
+  if(!z.promo.length&&!z.playoff.length&&!z.releg.length) return;
+  const wrap=document.createElement('div'); wrap.className='legend dynamic-legend';
+  const items=[];
+  if(z.promo.length) items.push(`<div class="legend-item"><span class="legend-dot dot-promo"></span>Awans: ${z.promo.join(', ')}</div>`);
+  if(z.playoff.length) items.push(`<div class="legend-item"><span class="legend-dot dot-barage"></span>Baraże: ${z.playoff.join(', ')}</div>`);
+  if(z.releg.length) items.push(`<div class="legend-item"><span class="legend-dot dot-releg"></span>Spadek: ${z.releg.join(', ')}</div>`);
+  wrap.innerHTML=items.join('');
+  table.parentElement?.appendChild(wrap);
+}
+
+async function recalculateStandings(league){
+  if(!league||!matchSections.includes(league)) return;
+  try{
+    const teamsSnap=await db.collection(league+'_table').get();
+    const teams=teamsSnap.docs.map(d=>({id:d.id,...d.data()}));
+    if(!teams.length) return;
+    const matches=(await getDocs(league)).filter(matchFinished);
+    const stats={};
+    for(const t of teams) stats[t.teamName]={m:0,pts:0,w:0,d:0,l:0,gf:0,ga:0,form:[]};
+    for(const m of matches){
+      const s=parseScore(m.score)||(
+        m.scoreHome!==null&&m.scoreHome!==undefined&&m.scoreAway!==null&&m.scoreAway!==undefined
+        ? {home:Number(m.scoreHome),away:Number(m.scoreAway)}:null
+      );
+      if(!s) continue;
+      const h=stats[m.homeTeam], a=stats[m.awayTeam];
+      if(!h||!a) continue;
+      h.m++;a.m++;h.gf+=s.home;h.ga+=s.away;a.gf+=s.away;a.ga+=s.home;
+      if(s.home>s.away){h.pts+=3;h.w++;a.l++;h.form.push('W');a.form.push('L');}
+      else if(s.home<s.away){a.pts+=3;a.w++;h.l++;h.form.push('L');a.form.push('W');}
+      else {h.pts++;a.pts++;h.d++;a.d++;h.form.push('D');a.form.push('D');}
+    }
+
+    const updates=[];
+    for(const t of teams){
+      if(t.manual===true) continue;
+      const st=stats[t.teamName]||{m:0,pts:0,form:[]};
+      updates.push(db.collection(league+'_table').doc(t.id).update({
+        matches:st.m,
+        points:st.pts,
+        form:st.form.slice(-5).join(''),
+        updatedAt:firebase.firestore.FieldValue.serverTimestamp()
+      }));
+    }
+    if(updates.length) await Promise.all(updates);
+
+    const fresh=(await db.collection(league+'_table').get()).docs.map(d=>({id:d.id,...d.data()}));
+    fresh.sort((a,b)=>{
+      const pa=Number(a.points)||0,pb=Number(b.points)||0;
+      if(pb!==pa) return pb-pa;
+      return 0;
+    });
+    await Promise.all(fresh.map((t,i)=>db.collection(league+'_table').doc(t.id).update({position:i+1})));
+  }catch(e){console.warn('recalculateStandings:',e);}
+}
+
+function parseBulkMatchLine(line){
+  const parts=line.split(',').map(x=>x.trim()).filter(Boolean);
+  if(parts.length<2) return null;
+  const vs=parts[0].split(/\s+vs\s+/i);
+  if(vs.length!==2) return null;
+  let date='',time='',score='';
+  if(parts.length>=4){date=parts[1];time=parts[2];score=parts[3];}
+  else if(parts.length===3){
+    if(/^\d{1,2}:\d{2}$/.test(parts[2]) && /^\d{4}-\d{2}-\d{2}$/.test(parts[1])){date=parts[1];time=parts[2];}
+    else score=parts[2];
+  }
+  return {homeTeam:vs[0].trim(),awayTeam:vs[1].trim(),date,time,score};
+}
+
+function bulkDate(date,time){
+  if(!date) return firebase.firestore.FieldValue.serverTimestamp();
+  const d=new Date(`${date}${time?'T'+time:''}`);
+  return Number.isNaN(d.getTime())?date:firebase.firestore.Timestamp.fromDate(d);
+}
+
+async function saveMatchesBulk(){
+  if(!isAdmin) return;
+  const league=document.getElementById('bulkMatchLeague').value;
+  const lines=document.getElementById('bulkMatchLines').value.split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
+  if(!lines.length){alert('Wklej przynajmniej jeden mecz.');return;}
+  let added=0,errors=[];
+  for(let i=0;i<lines.length;i++){
+    const p=parseBulkMatchLine(lines[i]);
+    if(!p||!p.homeTeam||!p.awayTeam){errors.push(i+1);continue;}
+    const s=parseScore(p.score);
+    try{
+      await db.collection(league).add({
+        title:'Spotkania',
+        homeTeam:p.homeTeam,awayTeam:p.awayTeam,
+        date:bulkDate(p.date,p.time),
+        score:p.score||null,scoreHome:s?s.home:null,scoreAway:s?s.away:null,
+        status:s?'finished':'upcoming',
+        logoHome:teamLogoMap[p.homeTeam]||null,logoAway:teamLogoMap[p.awayTeam]||null,
+        league,createdAt:firebase.firestore.FieldValue.serverTimestamp()
+      });
+      added++;
+    }catch(e){errors.push(i+1);}
+  }
+  await recalculateStandings(league);
+  document.getElementById('bulkMatchLines').value='';
+  await loadSection(league); await loadSection(league+'_table'); await loadAdminM(); await loadAdminT();
+  alert(`Dodano ${added} meczów.${errors.length?' Pominięto linie: '+errors.join(', ')+'.':''}`);
+}
+
+async function findExistingMatch(league,home,away,dateMs){
+  const docs=await getDocs(league);
+  return docs.find(d=>{
+    const sameTeams=String(d.homeTeam||'').trim().toLowerCase()===home.trim().toLowerCase()
+      && String(d.awayTeam||'').trim().toLowerCase()===away.trim().toLowerCase();
+    const dm=matchDateMs(d);
+    return sameTeams && (!dateMs || !dm || Math.abs(dm-dateMs)<120000);
+  });
+}
+
+async function updateResultsBulkExisting(){
+  if(!isAdmin) return;
+  const league=document.getElementById('bulkUpdateLeague').value;
+  const lines=document.getElementById('bulkUpdateLines').value.split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
+  let updated=0,skipped=[];
+  for(let i=0;i<lines.length;i++){
+    const p=parseBulkMatchLine(lines[i]), s=parseScore(p?.score);
+    if(!p||!s){skipped.push(i+1);continue;}
+    const found=await findExistingMatch(league,p.homeTeam,p.awayTeam,p.date?timestampValue(bulkDate(p.date,p.time)):0);
+    if(!found||matchFinished(found)){skipped.push(i+1);continue;}
+    await db.collection(league).doc(found.id).update({
+      score:p.score,scoreHome:s.home,scoreAway:s.away,status:'finished',
+      updatedAt:firebase.firestore.FieldValue.serverTimestamp()
+    });
+    updated++;
+  }
+  await recalculateStandings(league);
+  document.getElementById('bulkUpdateLines').value='';
+  await loadSection(league); await loadSection(league+'_table'); await loadAdminM(); await loadAdminT();
+  alert(`Zaktualizowano ${updated} wyników.${skipped.length?' Pominięto linie: '+skipped.join(', ')+'.':''}`);
+}
+
+async function saveResultsBulk(){
+  if(!isAdmin) return;
+  const league=document.getElementById('bulkResultLeague').value;
+  const lines=document.getElementById('bulkResultLines').value.split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
+  let added=0,errors=[];
+  for(let i=0;i<lines.length;i++){
+    const p=parseBulkMatchLine(lines[i]), s=parseScore(p?.score);
+    if(!p||!s){errors.push(i+1);continue;}
+    await db.collection(league).add({
+      title:'Wyniki',
+      homeTeam:p.homeTeam,awayTeam:p.awayTeam,
+      date:bulkDate(p.date,p.time),
+      score:p.score,scoreHome:s.home,scoreAway:s.away,status:'finished',
+      logoHome:teamLogoMap[p.homeTeam]||null,logoAway:teamLogoMap[p.awayTeam]||null,
+      league,createdAt:firebase.firestore.FieldValue.serverTimestamp()
+    });
+    added++;
+  }
+  await recalculateStandings(league);
+  document.getElementById('bulkResultLines').value='';
+  await loadSection(league); await loadSection(league+'_table'); await loadAdminM(); await loadAdminT();
+  alert(`Dodano ${added} wyników.${errors.length?' Pominięto linie: '+errors.join(', ')+'.':''}`);
+}
+
+async function saveTeamsBulk(){
+  if(!isAdmin) return;
+  const league=document.getElementById('bulkTeamLeague').value;
+  const lines=document.getElementById('bulkTeamLines').value.split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
+  let added=0,errors=[];
+  const existing=(await getDocs(league+'_table'));
+  const names=new Set(existing.map(x=>String(x.teamName||'').toLowerCase()));
+  for(let i=0;i<lines.length;i++){
+    const parts=lines[i].split(',').map(x=>x.trim());
+    if(parts.length<2){errors.push(i+1);continue;}
+    const name=parts[0],logo=parts[1]||teamLogoMap[name]||'';
+    const mode=(parts[2]||'automatycznie').toLowerCase();
+    const manual=['ręcznie','recznie','manual'].includes(mode);
+    if(!name||names.has(name.toLowerCase())){errors.push(i+1);continue;}
+    const data={
+      position:existing.length+added+1,teamName:name,teamLogo:logo,manual,
+      matches:manual?(parts[3]||'0'):'0',
+      points:manual?(parseInt(parts[4],10)||0):0,
+      form:manual?(parts[5]||''):''
+    };
+    await db.collection(league+'_table').add({...data,createdAt:firebase.firestore.FieldValue.serverTimestamp()});
+    names.add(name.toLowerCase());added++;
+  }
+  await recalculateStandings(league);
+  document.getElementById('bulkTeamLines').value='';
+  await loadSection(league+'_table'); await loadAdminT();
+  alert(`Dodano ${added} drużyn.${errors.length?' Pominięto linie: '+errors.join(', ')+'.':''}`);
+}
+
+async function saveZones(){
+  if(!isAdmin) return;
+  const league=document.getElementById('zoneLeague').value;
+  const data={
+    promo:parsePositions(document.getElementById('zonePromo').value),
+    playoff:parsePositions(document.getElementById('zonePlayoff').value),
+    releg:parsePositions(document.getElementById('zoneReleg').value)
+  };
+  await db.collection('zones').doc(league).set(data,{merge:true});
+  zonesCache[league]=data;
+  await loadSection(league+'_table');
+  alert('Strefy ligi zostały zapisane.');
+}
+
+function editM(id,d){ openEditForm(d.league||Object.keys(L)[0],id,d); }
+async function delM(id,league){
+  if(!isAdmin||!confirm('Usunąć spotkanie?')) return;
+  const snap=await db.collection(league).doc(id).get();
+  await db.collection(league).doc(id).delete();
+  await recalculateStandings(league);
+  await loadSection(league);await loadSection(league+'_table');await loadAdminM();await loadAdminT();
+}
+function editT(league,id,t){openEditForm(league+'_table',id,t);}
+async function delT(league,id){
+  if(!isAdmin||!confirm('Na pewno usunąć tę drużynę?')) return;
+  await db.collection(league+'_table').doc(id).delete();
+  await loadSection(league+'_table');await loadAdminT();
+}
+
+async function loadAdminM(){
+  const c=document.getElementById('admin-mlist'); if(!c) return;
+  try{
+    let all=[];
+    for(const league of matchSections){
+      const docs=await getDocs(league);
+      all.push(...docs.map(d=>({...d,league})));
+    }
+    all.sort((a,b)=>matchDateMs(a)-matchDateMs(b));
+    c.innerHTML=all.length?all.map(m=>`
+      <div class="admin-item">
+        <div class="admin-item-main">
+          <div class="admin-item-title">${esc(m.homeTeam)} vs ${esc(m.awayTeam)}</div>
+          <div class="admin-item-meta">${esc(L[m.league])} • ${esc(formatDate(m.date)||m.date||'-')} • ${matchFinished(m)?'Wynik '+esc(getScoreText(m)):'Nadchodzący'}</div>
+        </div>
+        <div class="admin-item-actions">
+          <button class="btn-sm" onclick='openEditForm("${m.league}","${m.id}",${JSON.stringify(m).replace(/'/g,"&#39;")})'>Edytuj</button>
+          <button class="btn-sm btn-del" onclick="delM('${m.id}','${m.league}')">Usuń</button>
+        </div>
+      </div>`).join(''):'<p style="color:var(--muted);">Brak spotkań.</p>';
+  }catch(e){c.innerHTML='<p style="color:#ff6b6b;">Błąd ładowania spotkań.</p>';console.error(e);}
+}
+
+async function loadAdminT(){
+  const c=document.getElementById('admin-tlist'); if(!c) return;
+  try{
+    let html='';
+    for(const league of matchSections){
+      const docs=await getDocs(league+'_table');
+      if(!docs.length) continue;
+      html+=`<div style="margin-bottom:1rem;"><div class="league-label"><i class="fa-solid fa-circle"></i>${esc(L[league])}</div>`;
+      docs.sort((a,b)=>(Number(a.position)||999)-(Number(b.position)||999));
+      html+=docs.map(t=>`<div class="admin-item">
+        <div style="display:flex;align-items:center;gap:9px;min-width:0;">${crestSmall(t.teamName,t.teamLogo)}
+          <div class="admin-item-main"><div class="admin-item-title">${esc(t.teamName)}</div>
+          <div class="admin-item-meta">${t.manual===true?'RĘCZNIE':'AUTOMATYCZNIE'} • M: ${esc(t.matches??0)} • Pkt: ${esc(t.points??0)}</div></div>
+        </div>
+        <div class="admin-item-actions"><button class="btn-sm" onclick='editT("${league}","${t.id}",${JSON.stringify(t).replace(/'/g,"&#39;")})'>Edytuj</button><button class="btn-sm btn-del" onclick="delT('${league}','${t.id}')">Usuń</button></div>
+      </div>`).join('');
+      html+='</div>';
+    }
+    c.innerHTML=html||'<p style="color:var(--muted);">Brak drużyn w tabelach.</p>';
+  }catch(e){c.innerHTML='<p style="color:#ff6b6b;">Błąd ładowania drużyn.</p>';console.error(e);}
+}
+
+function populateAdminSelectors(){
+  const ids=['bulkMatchLeague','bulkUpdateLeague','bulkResultLeague','bulkTeamLeague','zoneLeague'];
+  ids.forEach(id=>{
+    const el=document.getElementById(id);if(!el)return;
+    el.innerHTML=matchSections.map(l=>`<option value="${l}">${esc(L[l])}</option>`).join('');
+  });
+}
+
+function toggleAdvancedAdmin(){
+  const el=document.getElementById('advancedAdmin');
+  if(!el)return;
+  el.classList.toggle('hidden');
+  if(!el.classList.contains('hidden')){loadAdminM();loadAdminT();}
+}
+
+function focusAdminBlock(id){
+  const el=document.getElementById(id); if(!el)return;
+  document.getElementById('advancedAdmin').classList.remove('hidden');
+  el.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function loginAdmin(){
+  const pass=document.getElementById('adminPass').value;
+  document.getElementById('loginErr').textContent='';
+  auth.signInWithEmailAndPassword('admin@sgstrefagola.pl',pass)
+    .catch(()=>document.getElementById('loginErr').textContent='Błędne hasło');
+}
+function logoutAdmin(){auth.signOut();}
+
+auth.onAuthStateChanged(async user=>{
+  isAdmin=!!user && user.email==='admin@sgstrefagola.pl';
+  document.getElementById('loginForm').classList.toggle('hidden',isAdmin);
+  document.getElementById('adminTools').classList.toggle('hidden',!isAdmin);
+  if(isAdmin){
+    populateAdminSelectors();
+    await loadAdminM();
+    await loadAdminT();
+  }
 });
-container.innerHTML = html;
-} catch (e) {
-container.innerHTML = "<p>Błąd ładowania treści.</p>";
-}
-} else if (matchSections.includes(section)) {
-const container = document.getElementById(section + '-list');
-if (!container) return;
-try {
-const snap = await db.collection(section).orderBy("createdAt", "desc").get();
-if (snap.empty) {
-container.innerHTML = "<p>Brak meczów.</p>";
-return;
-}
-let html = '';
-let currentRound = '';
-snap.forEach(doc => {
-const d = doc.data();
-const round = d.title || 'Bez kolejki';
-if (round !== currentRound) {
-html += `<div class="match-header">${round}</div>`;
-currentRound = round;
-}
-const actions = isAdmin ?
-`<button class="edit-btn" style="position:absolute;top:10px;right:10px;" onclick="openEditForm('${section}', '${doc.id}', ${JSON.stringify(d).replace(/"/g, '&quot;')})">Edytuj</button>
-<button class="delete-btn" style="position:absolute;top:10px;right:70px;" onclick="openEditForm('${section}', '${doc.id}', ${JSON.stringify(d).replace(/"/g, '&quot;')})">Usuń</button>` : '';
-html += `
-<div class="match-row">
-<div class="match-date">${d.date || '-'}</div>
-<div class="team-name">
-${d.logoHome ? `<img class="team-logo" src="${d.logoHome.trim()}" onerror="this.style.display='none'">` : ''}
-<span>${d.homeTeam || '---'}</span>
-</div>
-<div class="score">${d.score || '-'}</div>
-<div class="team-name">
-<span>${d.awayTeam || '---'}</span>
-${d.logoAway ? `<img class="team-logo" src="${d.logoAway.trim()}" onerror="this.style.display='none'">` : ''}
-</div>
-${actions}
-</div>
-`;
-});
-container.innerHTML = html;
-} catch (e) {
-container.innerHTML = "<p>Błąd ładowania meczów.</p>";
-}
-} else if (tableSections.includes(section)) {
-const container = document.getElementById(section + '-list');
-if (!container) return;
-try {
-const snap = await db.collection(section).orderBy("position", "asc").get();
-if (snap.empty) {
-container.querySelector('tbody').innerHTML = `<tr><td colspan="4">Brak drużyn.</td></tr>`;
-return;
-}
-let html = '';
-snap.forEach(doc => {
-const d = doc.data();
-let rowClass = '';
-const pos = parseInt(d.position);
 
-if (section === 'ekstraklasa_table') {
-if (pos >= 16) rowClass = 'relegation';
-} else if (section === 'pierwsza_liga_table' || section === 'druga_liga_table') {
-if (pos <= 2) rowClass = 'promotion';
-else if (pos >= 3 && pos <= 6) rowClass = 'playoff';
-else if (pos >= 16) rowClass = 'relegation';
-} else if (section.startsWith('trzecia_liga')) {
-if (pos === 1) rowClass = 'promotion';
-else if (pos === 2) rowClass = 'playoff';
-else if (pos >= 15) rowClass = 'relegation';
-}
+document.getElementById('modalSection')?.addEventListener('change',function(){setModalType(this.value);});
 
-const actions = isAdmin ?
-`<td>
-  <button class="edit-btn" onclick="openEditForm('${section}', '${doc.id}', ${JSON.stringify(d).replace(/"/g, '&quot;')})">Edytuj</button>
-  <button class="delete-btn" onclick="openEditForm('${section}', '${doc.id}', ${JSON.stringify(d).replace(/"/g, '&quot;')})">Usuń</button>
-</td>` : '';
-
-html += `
-<tr class="${rowClass}">
-<td>${d.position || '-'}</td>
-<td class="team-cell">
-${d.teamLogo ? `<img class="team-logo-small" src="${d.teamLogo.trim()}" onerror="this.style.display='none'">` : ''}
-<span>${d.teamName || '---'}</span>
-</td>
-<td>${d.matches || '-'}</td>
-<td>${d.points || '-'}</td>
-${actions}
-</tr>
-`;
-});
-container.querySelector('tbody').innerHTML = html;
-
-let legendHTML = '';
-if (section === 'ekstraklasa_table') {
-legendHTML = '<div class="legend"><span class="relegation"></span> Spadek do 1. ligi (16–18)</div>';
-} else if (section === 'pierwsza_liga_table') {
-legendHTML = `
-<div class="legend">
-<span class="promotion"></span> Awans do ekstraklasy (1–2)
-<span class="playoff"></span> Play-off o awans: Półfinał (3–6)
-<span class="relegation"></span> Spadek do 2. ligi (16–18)
-</div>
-`;
-} else if (section === 'druga_liga_table') {
-legendHTML = `
-<div class="legend">
-<span class="promotion"></span> Awans do 1. ligi (1–2)
-<span class="playoff"></span> Play-off o awans: Półfinał (3–6)
-<span class="relegation"></span> Spadek do 3. ligi (16–18)
-</div>
-`;
-} else if (section.startsWith('trzecia_liga')) {
-legendHTML = `
-<div class="legend">
-<span class="promotion"></span> Awans do 2. ligi (1)
-<span class="playoff"></span> Betclic 2. Liga – Play-off o awans (2)
-<span class="relegation"></span> Spadek do 4. ligi (15–18)
-</div>
-`;
-}
-
-const existingLegend = container.nextElementSibling;
-if (existingLegend && existingLegend.classList.contains('legend')) {
-existingLegend.remove();
-}
-if (legendHTML) {
-container.insertAdjacentHTML('afterend', legendHTML);
-}
-
-} catch (e) {
-container.querySelector('tbody').innerHTML = `<tr><td colspan="4">Błąd ładowania tabeli.</td></tr>`;
-}
-}
-}
-
-document.querySelectorAll('.top-nav a').forEach(link => {
-link.addEventListener('click', (e) => {
-e.preventDefault();
-showSection(link.getAttribute('data-section'));
-});
-});
-
-// ✅ PODPIĘCIE ZDARZEŃ DO POLA W FORMULARZU MECZU I TABELI
-document.addEventListener('DOMContentLoaded', () => {
-const homeTeamInput = document.getElementById('modalHomeTeam');
-const awayTeamInput = document.getElementById('modalAwayTeam');
-const teamNameInput = document.getElementById('modalTeamName');
-if (homeTeamInput) homeTeamInput.addEventListener('input', updateHomeTeamLogo);
-if (awayTeamInput) awayTeamInput.addEventListener('input', updateAwayTeamLogo);
-if (teamNameInput) teamNameInput.addEventListener('input', updateTableTeamLogo);
+document.addEventListener('DOMContentLoaded',()=>{
+  const h=document.getElementById('modalHomeTeam'),a=document.getElementById('modalAwayTeam'),t=document.getElementById('modalTeamName');
+  if(h)h.addEventListener('input',updateHomeTeamLogo);
+  if(a)a.addEventListener('input',updateAwayTeamLogo);
+  if(t)t.addEventListener('input',updateTableTeamLogo);
+  populateAdminSelectors();
+  showSection('home');
+  Promise.allSettled(matchSections.flatMap(l=>[loadSection(l),loadSection(l+'_table')]));
+  articleSections.forEach(loadSection);
 });
 
 showSection('home');
+
 </script>
 </body>
 </html>
