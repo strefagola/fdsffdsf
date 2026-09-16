@@ -802,9 +802,7 @@ footer {
 <script src="firebase-config.js"></script>
 <script>
 
-const auth = window.auth;
-
-if (!db || !auth) console.error('Firebase nie zostało załadowane. Sprawdź firebase-config.js.');
+if (!window.db || !window.auth) console.error('Firebase nie zostało załadowane. Sprawdź firebase-config.js.');
 
 const teamLogoMap = {
 "Wisła Płock": "https://pliki.meczyki.pl/live-score/soccer/participant/1651/25w.webp",
@@ -938,7 +936,7 @@ const teamLogoMap = {
 let isAdmin = false;
 let currentDocId = null;
 let currentSection = null;
-let currentDb = db;
+let currentDb = window.db;
 
 const articleSections = ['news','results','analysis','media','history','schedule'];
 
@@ -1070,10 +1068,10 @@ function updateTableTeamLogo(){
 function getZones(league){ return zonesCache[league] || DEFAULT_ZONES[league] || {promo:[],playoff:[],releg:[]}; }
 
 async function loadZones(league, force=false){
-  if(!db) return (zonesCache[league]=DEFAULT_ZONES[league]||{promo:[],playoff:[],releg:[]});
+  if(!window.db) return (zonesCache[league]=DEFAULT_ZONES[league]||{promo:[],playoff:[],releg:[]});
   if(!force && zonesCache[league]) return zonesCache[league];
   try{
-    const snap=await db.collection('zones').doc(league).get();
+    const snap=await window.db.collection('zones').doc(league).get();
     zonesCache[league]=snap.exists ? {
       promo:Array.isArray(snap.data().promo)?snap.data().promo:[],
       playoff:Array.isArray(snap.data().playoff)?snap.data().playoff:(snap.data().barage||[]),
@@ -1120,7 +1118,7 @@ function showLiga(context, ligaId){
 
 function openAddForm(section){
   if(!isAdmin) return;
-  currentDocId=null; currentSection=section; currentDb=db;
+  currentDocId=null; currentSection=section; currentDb=window.db;
   resetModal();
   const select=document.getElementById('modalSection');
   if(select) select.value=section;
@@ -1131,7 +1129,7 @@ function openAddForm(section){
 
 function openAddMatchOrTable(type){
   if(!isAdmin) return;
-  currentDocId=null; currentSection=null; currentDb=db;
+  currentDocId=null; currentSection=null; currentDb=window.db;
   resetModal();
   const allowed=type==='match'?matchSections:tableSections;
   const select=document.getElementById('modalSection');
@@ -1169,7 +1167,7 @@ function resetModal(){
 
 function closeModal(){
   document.getElementById('modal').classList.add('hidden');
-  currentDocId=null; currentSection=null; currentDb=db;
+  currentDocId=null; currentSection=null; currentDb=window.db;
 }
 
 function handleSave(){
@@ -1181,7 +1179,7 @@ function handleSave(){
 
 function openEditForm(section,id,data){
   if(!isAdmin) return;
-  currentDocId=id; currentSection=section; currentDb=db;
+  currentDocId=id; currentSection=section; currentDb=window.db;
   resetModal();
   document.getElementById('modalSection').value=section;
   setModalType(section);
@@ -1222,8 +1220,8 @@ async function saveArticle(){
   };
   if(!data.title||!data.content){document.getElementById('modalErr').textContent='Tytuł i treść są wymagane.';return;}
   try{
-    if(currentDocId) await db.collection(section).doc(currentDocId).update(data);
-    else await db.collection(section).add({...data,createdAt:firebase.firestore.FieldValue.serverTimestamp()});
+    if(currentDocId) await window.db.collection(section).doc(currentDocId).update(data);
+    else await window.db.collection(section).add({...data,createdAt:firebase.firestore.FieldValue.serverTimestamp()});
     closeModal(); await loadSection(section);
   }catch(e){document.getElementById('modalErr').textContent='Błąd zapisu artykułu.';console.error(e);}
 }
@@ -1250,8 +1248,8 @@ async function saveMatch(){
     league:section
   };
   try{
-    if(currentDocId) await db.collection(section).doc(currentDocId).update(data);
-    else await db.collection(section).add({...data,createdAt:firebase.firestore.FieldValue.serverTimestamp()});
+    if(currentDocId) await window.db.collection(section).doc(currentDocId).update(data);
+    else await window.db.collection(section).add({...data,createdAt:firebase.firestore.FieldValue.serverTimestamp()});
     await recalculateStandings(section);
     closeModal();
     await loadSection(section);
@@ -1278,8 +1276,8 @@ async function saveTableEntry(){
     manual
   };
   try{
-    if(currentDocId) await db.collection(section).doc(currentDocId).update(data);
-    else await db.collection(section).add({...data,createdAt:firebase.firestore.FieldValue.serverTimestamp()});
+    if(currentDocId) await window.db.collection(section).doc(currentDocId).update(data);
+    else await window.db.collection(section).add({...data,createdAt:firebase.firestore.FieldValue.serverTimestamp()});
     await recalculateStandings(section.replace('_table',''));
     closeModal(); await loadSection(section); await loadAdminT();
   }catch(e){document.getElementById('modalErr').textContent='Błąd zapisu drużyny.';console.error(e);}
@@ -1290,7 +1288,7 @@ async function deleteContent(){
   if(!confirm('Na pewno chcesz usunąć?')) return;
   const section=document.getElementById('modalSection').value;
   try{
-    await db.collection(section).doc(currentDocId).delete();
+    await window.db.collection(section).doc(currentDocId).delete();
     closeModal();
     await loadSection(section);
     if(matchSections.includes(section)) await loadSection(section+'_table');
@@ -1307,8 +1305,8 @@ function embedVideo(url){
 }
 
 async function getDocs(section){
-  if(!db) throw new Error('Brak Firebase Firestore');
-  const snap=await db.collection(section).get();
+  if(!window.db) throw new Error('Brak Firebase Firestore');
+  const snap=await window.db.collection(section).get();
   return snap.docs.map(d=>({id:d.id,...d.data()}));
 }
 
@@ -1391,7 +1389,7 @@ async function loadSection(section){
 
       // Compatibility with old 24-style standings document, if present in the same Firebase project.
       if(!data.length){
-        const legacy=await db.collection('standings').doc(league).get();
+        const legacy=await window.db.collection('standings').doc(league).get();
         if(legacy.exists && Array.isArray(legacy.data().teams)){
           data=legacy.data().teams.map((t,i)=>({
             id:`legacy-${i}`,position:i+1,teamName:t.name,teamLogo:t.crest,
@@ -1435,7 +1433,7 @@ function renderLegend(league,table){
 async function recalculateStandings(league){
   if(!league||!matchSections.includes(league)) return;
   try{
-    const teamsSnap=await db.collection(league+'_table').get();
+    const teamsSnap=await window.db.collection(league+'_table').get();
     const teams=teamsSnap.docs.map(d=>({id:d.id,...d.data()}));
     if(!teams.length) return;
     const matches=(await getDocs(league)).filter(matchFinished);
@@ -1459,7 +1457,7 @@ async function recalculateStandings(league){
     for(const t of teams){
       if(t.manual===true) continue;
       const st=stats[t.teamName]||{m:0,pts:0,form:[]};
-      updates.push(db.collection(league+'_table').doc(t.id).update({
+      updates.push(window.db.collection(league+'_table').doc(t.id).update({
         matches:st.m,
         points:st.pts,
         form:st.form.slice(-5).join(''),
@@ -1468,13 +1466,13 @@ async function recalculateStandings(league){
     }
     if(updates.length) await Promise.all(updates);
 
-    const fresh=(await db.collection(league+'_table').get()).docs.map(d=>({id:d.id,...d.data()}));
+    const fresh=(await window.db.collection(league+'_table').get()).docs.map(d=>({id:d.id,...d.data()}));
     fresh.sort((a,b)=>{
       const pa=Number(a.points)||0,pb=Number(b.points)||0;
       if(pb!==pa) return pb-pa;
       return 0;
     });
-    await Promise.all(fresh.map((t,i)=>db.collection(league+'_table').doc(t.id).update({position:i+1})));
+    await Promise.all(fresh.map((t,i)=>window.db.collection(league+'_table').doc(t.id).update({position:i+1})));
   }catch(e){console.warn('recalculateStandings:',e);}
 }
 
@@ -1509,7 +1507,7 @@ async function saveMatchesBulk(){
     if(!p||!p.homeTeam||!p.awayTeam){errors.push(i+1);continue;}
     const s=parseScore(p.score);
     try{
-      await db.collection(league).add({
+      await window.db.collection(league).add({
         title:'Spotkania',
         homeTeam:p.homeTeam,awayTeam:p.awayTeam,
         date:bulkDate(p.date,p.time),
@@ -1547,7 +1545,7 @@ async function updateResultsBulkExisting(){
     if(!p||!s){skipped.push(i+1);continue;}
     const found=await findExistingMatch(league,p.homeTeam,p.awayTeam,p.date?timestampValue(bulkDate(p.date,p.time)):0);
     if(!found||matchFinished(found)){skipped.push(i+1);continue;}
-    await db.collection(league).doc(found.id).update({
+    await window.db.collection(league).doc(found.id).update({
       score:p.score,scoreHome:s.home,scoreAway:s.away,status:'finished',
       updatedAt:firebase.firestore.FieldValue.serverTimestamp()
     });
@@ -1567,7 +1565,7 @@ async function saveResultsBulk(){
   for(let i=0;i<lines.length;i++){
     const p=parseBulkMatchLine(lines[i]), s=parseScore(p?.score);
     if(!p||!s){errors.push(i+1);continue;}
-    await db.collection(league).add({
+    await window.db.collection(league).add({
       title:'Wyniki',
       homeTeam:p.homeTeam,awayTeam:p.awayTeam,
       date:bulkDate(p.date,p.time),
@@ -1603,7 +1601,7 @@ async function saveTeamsBulk(){
       points:manual?(parseInt(parts[4],10)||0):0,
       form:manual?(parts[5]||''):''
     };
-    await db.collection(league+'_table').add({...data,createdAt:firebase.firestore.FieldValue.serverTimestamp()});
+    await window.db.collection(league+'_table').add({...data,createdAt:firebase.firestore.FieldValue.serverTimestamp()});
     names.add(name.toLowerCase());added++;
   }
   await recalculateStandings(league);
@@ -1620,7 +1618,7 @@ async function saveZones(){
     playoff:parsePositions(document.getElementById('zonePlayoff').value),
     releg:parsePositions(document.getElementById('zoneReleg').value)
   };
-  await db.collection('zones').doc(league).set(data,{merge:true});
+  await window.db.collection('zones').doc(league).set(data,{merge:true});
   zonesCache[league]=data;
   await loadSection(league+'_table');
   alert('Strefy ligi zostały zapisane.');
@@ -1629,15 +1627,15 @@ async function saveZones(){
 function editM(id,d){ openEditForm(d.league||Object.keys(L)[0],id,d); }
 async function delM(id,league){
   if(!isAdmin||!confirm('Usunąć spotkanie?')) return;
-  const snap=await db.collection(league).doc(id).get();
-  await db.collection(league).doc(id).delete();
+  const snap=await window.db.collection(league).doc(id).get();
+  await window.db.collection(league).doc(id).delete();
   await recalculateStandings(league);
   await loadSection(league);await loadSection(league+'_table');await loadAdminM();await loadAdminT();
 }
 function editT(league,id,t){openEditForm(league+'_table',id,t);}
 async function delT(league,id){
   if(!isAdmin||!confirm('Na pewno usunąć tę drużynę?')) return;
-  await db.collection(league+'_table').doc(id).delete();
+  await window.db.collection(league+'_table').doc(id).delete();
   await loadSection(league+'_table');await loadAdminT();
 }
 
@@ -1710,14 +1708,14 @@ function focusAdminBlock(id){
 function loginAdmin(){
   const pass=document.getElementById('adminPass').value;
   document.getElementById('loginErr').textContent='';
-  if(!auth || typeof auth.signInWithEmailAndPassword!=='function'){
+  if(!window.auth || typeof window.auth.signInWithEmailAndPassword!=='function'){
     document.getElementById('loginErr').textContent='Brak połączenia z Firebase. Sprawdź firebase-config.js';
     return;
   }
-  auth.signInWithEmailAndPassword('admin@sgstrefagola.pl',pass)
+  window.auth.signInWithEmailAndPassword('admin@sgstrefagola.pl',pass)
     .catch(()=>document.getElementById('loginErr').textContent='Błędne hasło');
 }
-function logoutAdmin(){if(auth && typeof auth.signOut==='function') auth.signOut();}
+function logoutAdmin(){if(window.auth && typeof window.auth.signOut==='function') window.auth.signOut();}
 
 // Nawigacja strony musi działać niezależnie od stanu Firebase.
 document.querySelectorAll('.top-nav a[data-section]').forEach(link=>{
@@ -1728,8 +1726,8 @@ document.querySelectorAll('.top-nav a[data-section]').forEach(link=>{
 });
 
 // Jedyna baza danych używana przez stronę: window.db z firebase-config.js.
-if(auth && typeof auth.onAuthStateChanged === 'function'){
-  auth.onAuthStateChanged(async user=>{
+if(window.auth && typeof window.auth.onAuthStateChanged === 'function'){
+  window.auth.onAuthStateChanged(async user=>{
     isAdmin=!!user && user.email==='admin@sgstrefagola.pl';
     const loginForm=document.getElementById('loginForm');
     const adminTools=document.getElementById('adminTools');
@@ -1754,7 +1752,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   if(t)t.addEventListener('input',updateTableTeamLogo);
   populateAdminSelectors();
   showSection('home');
-  if(db){
+  if(window.db){
     Promise.allSettled(matchSections.flatMap(l=>[loadSection(l),loadSection(l+'_table')]));
     articleSections.forEach(loadSection);
   }
