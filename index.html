@@ -498,8 +498,24 @@ footer {
         }
         .table-crest{
             width:34px;height:34px;min-width:34px;min-height:34px;
-            padding:3px;border-radius:10px;
+            padding:3px;border-radius:10px;display:block;flex:0 0 34px;
         }
+        .table-list .team-cell{
+            justify-content:flex-start;text-align:left;min-width:220px;
+        }
+        .table-list .team-cell .team-name{
+            display:block;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+        }
+        .results-sections{display:grid;gap:22px;}
+        .competition-block{background:transparent;}
+        .competition-title{
+            display:flex;align-items:center;justify-content:space-between;gap:12px;
+            margin:4px 0 9px;padding:11px 14px;border:1px solid var(--border);
+            border-radius:12px;background:#0b0e15;font-weight:800;
+        }
+        .competition-title .competition-count{color:var(--muted);font-size:.72rem;font-weight:600;}
+        .competition-block .match-list{gap:7px;}
+        .empty-section{padding:12px 4px;color:var(--muted);font-size:.85rem;}
         .team-cell .team-name{cursor:pointer;transition:color .2s var(--ease);}
         .team-cell .team-name:hover{color:var(--green);}
         .club-profile-actions{
@@ -664,11 +680,11 @@ footer {
 </div>
 </section>
 <section id="news" class="page"><h2>Aktualności</h2><div id="news-list" class="content-grid">Ładowanie...</div></section>
-<section id="results" class="page"><h2>Wyniki</h2><div id="results-list" class="content-grid">Ładowanie...</div></section>
+<section id="results" class="page"><h2>Wyniki</h2><div id="results-list" class="results-sections">Ładowanie...</div></section>
 <section id="analysis" class="page"><h2>Analizy</h2><div id="analysis-list" class="content-grid">Ładowanie...</div></section>
 <section id="media" class="page"><h2>Multimedia</h2><div id="media-list" class="content-grid">Ładowanie...</div></section>
 <section id="history" class="page"><h2>Transfery</h2><div id="history-list" class="content-grid">Ładowanie...</div></section>
-<section id="schedule" class="page"><h2>Terminarz</h2><div id="schedule-list" class="content-grid">Ładowanie...</div></section>
+<section id="schedule" class="page"><h2>Terminarz</h2><div id="schedule-list" class="results-sections">Ładowanie...</div></section>
 <!-- POLSKIE LIGI -->
 <section id="polskie" class="page">
 <h2>Polskie ligi</h2>
@@ -687,8 +703,7 @@ footer {
 <thead><tr><th>#</th><th>Drużyna</th><th>Mecze</th><th>Punkty</th></tr></thead>
 <tbody><tr><td colspan="4">Ładowanie...</td></tr></tbody>
 </table>
-<h3>Mecze Ekstraklasy</h3>
-<div id="ekstraklasa-list" class="match-list">Ładowanie...</div>
+
 </div>
 <div id="pierwsza_liga-content" class="liga-subpage">
 <h3>Tabela 1. ligi</h3>
@@ -696,8 +711,7 @@ footer {
 <thead><tr><th>#</th><th>Drużyna</th><th>Mecze</th><th>Punkty</th></tr></thead>
 <tbody><tr><td colspan="4">Ładowanie...</td></tr></tbody>
 </table>
-<h3>Mecze 1. ligi</h3>
-<div id="pierwsza_liga-list" class="match-list">Ładowanie...</div>
+
 </div>
 <div id="druga_liga-content" class="liga-subpage">
 <h3>Tabela 2. ligi</h3>
@@ -705,8 +719,7 @@ footer {
 <thead><tr><th>#</th><th>Drużyna</th><th>Mecze</th><th>Punkty</th></tr></thead>
 <tbody><tr><td colspan="4">Ładowanie...</td></tr></tbody>
 </table>
-<h3>Mecze 2. ligi</h3>
-<div id="druga_liga-list" class="match-list">Ładowanie...</div>
+
 </div>
 <div id="trzecia_liga_gr1-content" class="liga-subpage">
 <h3>Tabela 3. ligi gr I</h3>
@@ -714,8 +727,7 @@ footer {
 <thead><tr><th>#</th><th>Drużyna</th><th>Mecze</th><th>Punkty</th></tr></thead>
 <tbody><tr><td colspan="4">Ładowanie...</td></tr></tbody>
 </table>
-<h3>Mecze 3. ligi gr I</h3>
-<div id="trzecia_liga_gr1-list" class="match-list">Ładowanie...</div>
+
 </div>
 <div id="trzecia_liga_gr2-content" class="liga-subpage">
 <h3>Tabela 3. ligi gr II</h3>
@@ -723,8 +735,7 @@ footer {
 <thead><tr><th>#</th><th>Drużyna</th><th>Mecze</th><th>Punkty</th></tr></thead>
 <tbody><tr><td colspan="4">Ładowanie...</td></tr></tbody>
 </table>
-<h3>Mecze 3. ligi gr II</h3>
-<div id="trzecia_liga_gr2-list" class="match-list">Ładowanie...</div>
+
 </div>
 <div id="trzecia_liga_gr3-content" class="liga-subpage">
 <h3>Tabela 3. ligi gr III</h3>
@@ -732,8 +743,7 @@ footer {
 <thead><tr><th>#</th><th>Drużyna</th><th>Mecze</th><th>Punkty</th></tr></thead>
 <tbody><tr><td colspan="4">Ładowanie...</td></tr></tbody>
 </table>
-<h3>Mecze 3. ligi gr III</h3>
-<div id="trzecia_liga_gr3-list" class="match-list">Ładowanie...</div>
+
 </div>
 <div id="trzecia_liga_gr4-content" class="liga-subpage">
 <h3>Tabela 3. ligi gr IV</h3>
@@ -741,8 +751,7 @@ footer {
 <thead><tr><th>#</th><th>Drużyna</th><th>Mecze</th><th>Punkty</th></tr></thead>
 <tbody><tr><td colspan="4">Ładowanie...</td></tr></tbody>
 </table>
-<h3>Mecze 3. ligi gr IV</h3>
-<div id="trzecia_liga_gr4-list" class="match-list">Ładowanie...</div>
+
 </div>
 </section>
 <!-- PUCHARY -->
@@ -1181,7 +1190,7 @@ function showLiga(context, ligaId){
   container.querySelectorAll('.liga-subpage').forEach(el=>el.classList.remove('active-liga'));
   const target=document.getElementById(ligaId+'-content');
   if(target) target.classList.add('active-liga');
-  loadSection(ligaId);
+  // W zakładce „Polskie ligi” pokazujemy wyłącznie tabelę danej ligi.
   loadSection(ligaId+'_table');
 }
 
@@ -1407,8 +1416,74 @@ function matchCard(d){
   </div>`;
 }
 
+async function loadAggregateMatches(targetId, mode){
+  const c=document.getElementById(targetId);
+  if(!c) return;
+  try{
+    const lists=await Promise.all(matchSections.map(async league=>{
+      try{return (await getDocs(league)).map(d=>({...d,league:league}));}
+      catch(e){return [];}
+    }));
+    const all=lists.flat();
+    const now=Date.now();
+    let data=mode==='results'
+      ? all.filter(d=>matchFinished(d)).sort((a,b)=>matchDateMs(b)-matchDateMs(a))
+      : all.filter(d=>!matchFinished(d) && matchDateMs(d)>=now).sort((a,b)=>matchDateMs(a)-matchDateMs(b));
+
+    const groups=new Map();
+    for(const d of data){
+      const league=d.league;
+      if(!groups.has(league)) groups.set(league,[]);
+      groups.get(league).push(d);
+    }
+
+    if(!groups.size){
+      c.innerHTML='<div class="empty-section">'+(mode==='results'?'Brak zakończonych meczów.':'Brak nadchodzących meczów.')+'</div>';
+      return;
+    }
+
+    let html='';
+    for(const league of matchSections){
+      const matches=groups.get(league);
+      if(!matches || !matches.length) continue;
+      html+=`<div class="competition-block">
+        <div class="competition-title"><span>${esc(L[league]||league)}</span><span class="competition-count">${matches.length} ${matches.length===1?'meczów':'mecze'}</span></div>
+        <div class="match-list">`;
+      let round='';
+      for(const d of matches){
+        const r=d.title||'';
+        if(r && r!==round){html+=`<div class="match-header"><span>${esc(r)}</span><span>${esc(L[league]||league)}</span></div>`;round=r;}
+        const actions=isAdmin?`<div style="position:absolute;right:10px;top:10px;display:flex;gap:4px;">
+          <button class="btn-sm" onclick='openEditForm("${league}","${d.id}",${JSON.stringify(d).replace(/'/g,"&#39;")})'>Edytuj</button>
+          <button class="btn-sm btn-del" onclick='openEditForm("${league}","${d.id}",${JSON.stringify(d).replace(/'/g,"&#39;")})'>Usuń</button>
+        </div>`:'';
+        const finished=matchFinished(d);
+        html+=`<div class="match-row" style="position:relative;padding-right:${isAdmin?'150px':'12px'};">
+          <div class="match-date ${finished?'':'up'}">${esc(formatDate(d.date)||d.date||'-')}</div>
+          <div class="team-name" onclick='openClubProfile(${JSON.stringify(String(d.homeTeam||''))})'>${crestFor(d.homeTeam,d.logoHome)}<span>${esc(d.homeTeam||'---')}</span></div>
+          <div class="score">${esc(finished?getScoreText(d):'vs')}</div>
+          <div class="team-name" onclick='openClubProfile(${JSON.stringify(String(d.awayTeam||''))})'><span>${esc(d.awayTeam||'---')}</span>${crestFor(d.awayTeam,d.logoAway)}</div>${actions}
+        </div>`;
+      }
+      html+='</div></div>';
+    }
+    c.innerHTML=html;
+  }catch(e){
+    console.error(e);
+    c.innerHTML='<div class="empty-section" style="color:#ff6b6b;">Błąd ładowania meczów.</div>';
+  }
+}
+
 async function loadSection(section){
-  if(articleSections.includes(section)){
+  if(section==='results'){
+    await loadAggregateMatches('results-list','results');
+    return;
+  }
+  if(section==='schedule'){
+    await loadAggregateMatches('schedule-list','schedule');
+    return;
+  }
+  if(articleSections.includes(section) && section!=='results' && section!=='schedule'){
     const c=document.getElementById(section+'-list'); if(!c) return;
     try{
       const data=(await getDocs(section)).sort((a,b)=>timestampValue(b.createdAt)-timestampValue(a.createdAt));
@@ -1926,8 +2001,8 @@ document.addEventListener('DOMContentLoaded',()=>{
   populateAdminSelectors();
   showSection('home');
   if(db){
-    Promise.allSettled(matchSections.flatMap(l=>[loadSection(l),loadSection(l+'_table')]));
-    articleSections.forEach(loadSection);
+    Promise.allSettled(matchSections.map(l=>loadSection(l+'_table')));
+    ['news','analysis','media','history'].forEach(loadSection);
   }
 });
 
