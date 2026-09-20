@@ -801,7 +801,20 @@ Klub B, https://example.com/herb-b.png, ręcznie, 5, 12, +4"></textarea>
  <input type="hidden" id="r-id"><input type="hidden" id="r-db">
  <div class="form-grid"><input id="r-team" placeholder="Nazwa klubu"><input id="r-player" placeholder="Imię i nazwisko"></div>
  <div class="form-grid-3"><input id="r-number" type="number" placeholder="Numer"><select id="r-position"><option>Bramkarz</option><option>Obrońca</option><option>Pomocnik</option><option>Napastnik</option></select><select id="r-status"><option value="available">Dostępny</option><option value="injured">Kontuzjowany</option><option value="suspended">Zawieszony</option></select></div>
- <input id="r-injury" placeholder="Opis kontuzji / zawieszenia (opcjonalnie)"><button class="btn" onclick="saveRosterPlayer()">Zapisz zawodnika</button><button class="btn-sm" onclick="clearRosterForm()" style="width:100%;margin-top:10px;border:1px solid var(--border);">Wyczyść</button></div>
+ <input id="r-injury" placeholder="Opis kontuzji / zawieszenia (opcjonalnie)">
+  <div style="margin-top:1rem;padding-top:1rem;border-top:1px solid var(--line);">
+    <h4 style="margin-bottom:.5rem;">Masowe dodawanie zawodników</h4>
+    <p style="font-size:.78rem;color:var(--muted);margin-bottom:.6rem;">
+      Wklej zawodników — jeden zawodnik w jednej linii. Format: <b>Imię i nazwisko | numer | pozycja | status | opis</b>.
+      Klub zostanie pobrany z pola „Nazwa klubu” powyżej.
+    </p>
+    <textarea id="r-bulk" rows="7" placeholder="Jan Kowalski | 10 | Napastnik | Dostępny |
+Piotr Nowak | 5 | Obrońca | Kontuzjowany | Uraz kolana
+Adam Wiśniewski | 1 | Bramkarz | Zawieszony | 2 mecze"></textarea>
+    <button class="btn" onclick="saveBulkRoster()">Dodaj wszystkich zawodników</button>
+    <button class="btn-sm" onclick="document.getElementById('r-bulk').value=''" style="margin-left:.35rem;">Wyczyść listę</button>
+    <div id="r-bulk-status" style="margin-top:.5rem;font-size:.78rem;color:var(--muted);"></div>
+  </div><button class="btn" onclick="saveRosterPlayer()">Zapisz zawodnika</button><button class="btn-sm" onclick="clearRosterForm()" style="width:100%;margin-top:10px;border:1px solid var(--border);">Wyczyść</button></div>
  <h3 style="font-size:.75rem;color:var(--muted);margin-bottom:1.1rem;text-transform:uppercase;letter-spacing:1.2px;">Kadry w bazie</h3><div id="admin-rolist" class="squad-grid"></div>
 </div>
 
@@ -2357,6 +2370,73 @@ async function saveRosterPlayer(){
  if(!user) return; const id=document.getElementById('r-id').value; const data={team:document.getElementById('r-team').value.trim(),player:document.getElementById('r-player').value.trim(),number:Number(document.getElementById('r-number').value)||'',position:document.getElementById('r-position').value,status:document.getElementById('r-status').value,injury:document.getElementById('r-injury').value.trim(),updatedAt:firebase.firestore.FieldValue.serverTimestamp()};
  if(!data.team||!data.player){alert('Podaj klub i zawodnika.');return;} try{const ref=window.db.collection('rosters'); if(id) await ref.doc(id).update(data); else await ref.add(data); clearRosterForm(); loadAdminRoster(); loadClubs();}catch(e){alert('Błąd zapisu kadry.');}
 }
+async function saveBulkRoster(){
+ if(!user) return;
+ const team=document.getElementById('r-team').value.trim();
+ const input=document.getElementById('r-bulk');
+ const statusEl=document.getElementById('r-bulk-status');
+ if(!team){alert('Najpierw podaj nazwę klubu.');return;}
+ const lines=input.value.split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
+ if(!lines.length){alert('Wklej przynajmniej jednego zawodnika.');return;}
+
+ const positionMap={
+   'bramkarz':'Bramkarz',
+   'obrońca':'Obrońca',
+   'obronca':'Obrońca',
+   'pomocnik':'Pomocnik',
+   'napastnik':'Napastnik'
+ };
+ const statusMap={
+   'dostępny':'available',
+   'dostepny':'available',
+   'available':'available',
+   'kontuzjowany':'injured',
+   'injured':'injured',
+   'zawieszony':'suspended',
+   'suspended':'suspended'
+ };
+
+ const players=[];
+ const errors=[];
+ lines.forEach((line,i)=>{
+   const parts=line.split('|').map(x=>x.trim());
+   const player=parts[0]||'';
+   if(!player){errors.push('Linia '+(i+1)+': brak nazwiska.');return;}
+   const number=parts[1] ? (Number(parts[1])||'') : '';
+   const position=positionMap[(parts[2]||'').toLowerCase()] || (parts[2] || 'Bramkarz');
+   const status=statusMap[(parts[3]||'').toLowerCase()] || 'available';
+   const injury=parts.slice(4).join(' | ');
+   players.push({team,player,number,position,status,injury});
+ });
+
+ if(!players.length){alert('Nie znaleziono poprawnych zawodników.');return;}
+
+ statusEl.textContent='Zapisywanie '+players.length+' zawodników...';
+ try{
+   const ref=window.db.collection('rosters');
+   const chunks=[];
+   for(let i=0;i<players.length;i+=400) chunks.push(players.slice(i,i+400));
+   let saved=0;
+   for(const chunk of chunks){
+     const batch=window.db.batch();
+     chunk.forEach(p=>{
+       const doc=ref.doc();
+       batch.set(doc,{...p,updatedAt:firebase.firestore.FieldValue.serverTimestamp()});
+     });
+     await batch.commit();
+     saved+=chunk.length;
+   }
+   input.value='';
+   statusEl.textContent='Dodano: '+saved+' zawodników.'+(errors.length?' Pominięto: '+errors.length+'.':'');
+   loadAdminRoster();
+   loadClubs();
+ }catch(e){
+   console.error(e);
+   statusEl.textContent='Błąd zapisu masowego dodawania.';
+   alert('Błąd zapisu zawodników.');
+ }
+}
+
 function clearRosterForm(){['r-id','r-db','r-team','r-player','r-number','r-injury'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});document.getElementById('r-position').value='Bramkarz';document.getElementById('r-status').value='available';}
 async function loadAdminRoster(){const el=document.getElementById('admin-rolist');if(!el||!window.db)return;try{const snap=await window.db.collection('rosters').orderBy('team').get();const all=snap.docs.map(d=>({id:d.id,...d.data()}));const groups={};all.forEach(p=>(groups[p.team]??=[]).push(p));el.innerHTML=Object.keys(groups).sort().map(team=>`<div class="card"><div class="league-label"><i class="fa-solid fa-shield"></i>${team}<span class="badge-up">${groups[team].length} zawod.</span></div>${groups[team].map(p=>`<div class="player-row"><div><b>${p.number?p.number+'. ':''}${p.player}</b><div style="font-size:.72rem;color:var(--muted)">${p.position}${p.injury?' • '+p.injury:''}</div></div><div><span class="${p.status==='available'?'available':'injury'}">${p.status==='available'?'DOSTĘPNY':p.status==='injured'?'KONTUZJA':'ZAWIESZONY'}</span><button class="btn-sm btn-del" onclick="deleteRoster('${p.id}')">×</button></div></div>`).join('')}</div>`).join('')||'<p style="color:var(--muted)">Brak zawodników.</p>';}catch(e){el.innerHTML='<p style="color:#dc2626">Nie udało się pobrać kadr.</p>';}}
 async function deleteRoster(id){if(confirm('Usunąć zawodnika?')){await window.db.collection('rosters').doc(id).delete();loadAdminRoster();loadClubs();}}
