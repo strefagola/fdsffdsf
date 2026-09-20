@@ -1,13 +1,22 @@
 const firebaseConfig = {
-  apiKey: "AIzaSyDYUu7tOwONLUuCWpI3LRPuzCVqSxuuZHU",
-  authDomain: "facebook-1b634.firebaseapp.com",
-  projectId: "facebook-1b634",
-  storageBucket: "facebook-1b634.firebasestorage.app",
-  messagingSenderId: "53424277943",
-  appId: "1:53424277943:web:5323c9a7f64e2f5f0a0032",
-  measurementId: "G-CNXLHRLY71"
+  apiKey: "AIzaSyAFd36LXlmO1vyS6ztRZcilPWNyEU6L8T8",
+  authDomain: "biuro-16f65.firebaseapp.com",
+  databaseURL: "https://biuro-16f65-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "biuro-16f65",
+  storageBucket: "biuro-16f65.firebasestorage.app",
+  messagingSenderId: "720364589922",
+  appId: "1:720364589922:web:97225720a4f608a14a123b",
+  measurementId: "G-Z4WH749S27"
 };
 
+// Inicjalizacja Firebase
 firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
-const auth = firebase.auth();
+
+// Udostępnienie Firestore i Auth globalnie
+window.db = firebase.firestore();
+window.auth = firebase.auth();
+
+// Kontrola w konsoli
+console.log("Firebase zostało poprawnie załadowane.");
+console.log("Firestore:", window.db);
+console.log("Auth:", window.auth);
