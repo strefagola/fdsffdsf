@@ -244,6 +244,17 @@ main{max-width:1320px;margin:96px auto 0;padding:0 22px 48px}.section{min-height
 .ph-metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:#e1e7ee;border:1px solid #e1e7ee;border-radius:12px;overflow:hidden;margin:16px 0}.ph-metrics>div{background:#fff;padding:17px 18px;display:grid;grid-template-columns:30px 1fr;grid-template-rows:1fr 1fr}.ph-metrics i{grid-row:1/3;align-self:center;color:#1478d4;font-size:1rem}.ph-metrics strong{font-family:Outfit;font-size:1rem}.ph-metrics small{font-size:.57rem;letter-spacing:1px;color:#8997a7;font-weight:800}.ph-home-grid{display:grid;grid-template-columns:minmax(0,1.65fr) minmax(310px,.75fr);gap:16px}.ph-main-column,.ph-side-column{display:flex;flex-direction:column;gap:16px}.ph-panel{background:#fff;border:1px solid #e1e7ee;border-radius:13px;padding:18px;box-shadow:0 3px 15px rgba(25,49,80,.035)}.ph-panel-title{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px}.ph-panel-title span{font-size:.58rem;letter-spacing:1.4px;color:#1478d4;font-weight:900}.ph-panel-title h2{font-size:1.15rem;margin-top:2px}.ph-panel-title button{font-size:.68rem;color:#77879a;font-weight:700}.ph-panel-title button:hover{color:#1478d4}.ph-panel .grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.ph-panel .card{box-shadow:none;padding:14px}.ph-table-panel .table-wrap{min-width:0;box-shadow:none;border-radius:8px}.ph-table-panel .table-container{overflow:hidden}.ph-table-panel th{padding:9px 8px}.ph-table-panel td{padding:9px 8px;font-size:.76rem}.ph-wide-btn{width:100%;margin-top:13px;padding:10px;border:1px solid #e0e7ee;border-radius:8px;background:#f8fafc;color:#587086;font-size:.7rem;font-weight:800}.ph-wide-btn:hover{background:#edf5fd;color:#1478d4}.ph-league-list{display:grid;gap:6px}.ph-league-list button{display:flex;align-items:center;justify-content:space-between;padding:10px 11px;border:1px solid #e6ebf1;border-radius:8px;background:#fafbfd;text-align:left;font-size:.72rem;font-weight:700;color:#40536a}.ph-league-list button:hover{border-color:#b9d4ec;background:#edf6fe;color:#1478d4}.ph-league-list button i{font-size:.62rem;color:#9aa8b6}.ph-table-panel .legend{padding:9px;margin-top:10px;box-shadow:none;border-radius:8px}.ph-table-panel .legend-item{font-size:.65rem}
 @media(max-width:900px){nav{padding:10px 14px}.tabs{max-width:100%;overflow:auto;justify-content:flex-start}.logo-wrap{min-width:auto}.ph-welcome{grid-template-columns:1fr;padding:24px}.ph-scoreboard{border-left:0;border-top:1px solid rgba(255,255,255,.2);padding:18px 0 0}.ph-welcome h1{font-size:2.1rem}.ph-metrics{grid-template-columns:1fr 1fr}.ph-home-grid{grid-template-columns:1fr}.ph-panel .grid{grid-template-columns:1fr}.ph-league-list{grid-template-columns:1fr 1fr}}
 @media(max-width:520px){main{margin-top:150px;padding:0 11px 35px}.ph-metrics{grid-template-columns:1fr}.ph-actions{flex-direction:column}.ph-actions button{width:100%}.ph-league-list{grid-template-columns:1fr}.ph-panel{padding:13px}}
+
+/* Admin dashboard tabs */
+#dash > div:first-child > div:last-child{align-items:center}
+#dash .btn-sm{border:1px solid transparent}
+#dash .btn-sm[style*="var(--green-glow)"]{font-weight:800}
+@media(max-width:700px){
+  #dash > div:first-child{align-items:flex-start!important}
+  #dash > div:first-child > div:last-child{width:100%;overflow-x:auto;padding-bottom:3px}
+  #dash > div:first-child > div:last-child .btn-sm{flex:0 0 auto}
+}
+
 </style>
 <style id="planethc-live-skin">
 :root{--fs-bg:#f2f5f8;--fs-panel:#fff;--fs-line:#e3e8ee;--fs-text:#16202a;--fs-muted:#7b8794;--fs-blue:#0878d1}
@@ -855,10 +866,10 @@ Klub B, https://example.com/herb-b.png, ręcznie, 5, 12, +4"></textarea>
         // PAMIĘTAJ: Aby dane A-klas i B-klas zapisywały się w drugiej bazie danych Firebase, 
         // musisz w pliku firebase-config.js zdefiniować zmienną window.db2!
         
-        const db = window.db || null;
-        const auth = window.auth || null;
+        const PH_DB = window.db || null;
+        const PH_AUTH = window.auth || null;
 
-        if(!db || !auth) {
+        if(!PH_DB || !PH_AUTH) {
             console.error("Firebase nie załadowało się poprawnie z pliku firebase-config.js");
         }
 
@@ -874,8 +885,7 @@ Klub B, https://example.com/herb-b.png, ręcznie, 5, 12, +4"></textarea>
             okr_zachodniopomorska:'Okręgowa Liga Zachodniopomorska', okr_kujawsko_pomorska:'Okręgowa Liga Kujawsko-Pomorska'
         };
         
-        const A_LEAGUES=[]; const B_LEAGUES=[]; const DB2_A_LEAGUES=[]; const NEW_LEAGUES=Object.keys(L);
-        function getDB(league){ return window.db || db; }
+        const A_LEAGUES=[]; const B_LEAGUES=[]; const DB2_A_LEAGUES=[]; const NEW_LEAGUES=Object.keys(L); function getDB(league){ return window.db || PH_DB; }
 
         const DEFAULT_ZONES = { promo:[1], barage:[2], releg:[14,15,16] };
 
@@ -912,26 +922,35 @@ Klub B, https://example.com/herb-b.png, ręcznie, 5, 12, +4"></textarea>
         };
 
         function go(id){
-            document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
-            document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+            const sections = document.querySelectorAll('.section');
+            const tabs = document.querySelectorAll('.tab');
+            const section = document.getElementById(id);
 
-            const section=document.getElementById(id);
-            if(!section) return;
+            if(!section){
+                console.warn('Nie znaleziono sekcji:', id);
+                return false;
+            }
+
+            sections.forEach(s => s.classList.remove('active'));
+            tabs.forEach(b => b.classList.remove('active'));
+
             section.classList.add('active');
 
-            const navTab = [...document.querySelectorAll('.tab')].find(b => {
-                const m = b.getAttribute('onclick') || '';
-                return m.includes(`go('${id}')`);
+            // Szukamy przycisku po jego onclick, a nie po pozycji w tablicy.
+            // Dzięki temu usunięcie/dodanie zakładki nie rozwala całej nawigacji.
+            const tab = Array.from(tabs).find(b => {
+                const onclick = b.getAttribute('onclick') || '';
+                return onclick.includes("go('" + id + "')");
             });
-            if(navTab) navTab.classList.add('active');
+            if(tab) tab.classList.add('active');
 
-            section.querySelectorAll('.anim').forEach(el=>{
-                el.style.animation='none';
-                el.offsetHeight;
-                el.style.animation=null;
+            section.querySelectorAll('.anim').forEach(el => {
+                el.style.animation = 'none';
+                void el.offsetHeight;
+                el.style.animation = '';
             });
 
-            window.scrollTo({top:0,behavior:'smooth'});
+            window.scrollTo({top:0, behavior:'smooth'});
 
             if(id==='home' && !sectionLoaded.home){
                 sectionLoaded.home=true;
@@ -958,7 +977,9 @@ Klub B, https://example.com/herb-b.png, ręcznie, 5, 12, +4"></textarea>
                 sectionLoaded.posts=true;
                 loadPosts();
             }
+            return true;
         }
+        window.go = go;
 
         let crestsCache={};
         let crestsLoadPromise=null;
@@ -1613,6 +1634,7 @@ Klub B, https://example.com/herb-b.png, ręcznie, 5, 12, +4"></textarea>
             const status=document.getElementById('c-status');
             if(!name||!email||!msg){status.style.color='#ff6b6b';status.innerText='Wypełnij wymagane pola.';return;}
             try{
+                if(!window.db){throw new Error('Brak Firebase');}
                 await window.db.collection('messages').add({name,email,subject,message:msg,date:firebase.firestore.FieldValue.serverTimestamp(),read:false});
                 status.style.color='var(--green)';status.innerText='✅ Wiadomość wysłana! Dziękujemy.';
                 ['c-name','c-email','c-subject','c-msg'].forEach(i=>document.getElementById(i).value='');
@@ -1620,56 +1642,62 @@ Klub B, https://example.com/herb-b.png, ręcznie, 5, 12, +4"></textarea>
         }
 
         let user=null;
-        if(auth && typeof auth.onAuthStateChanged === 'function'){
-            auth.onAuthStateChanged(async u=>{
+
+        if(PH_AUTH && typeof PH_AUTH.onAuthStateChanged === 'function'){
+            PH_AUTH.onAuthStateChanged(async u=>{
                 if(u){
                     user=u;
-                    const lp=document.getElementById('login-panel'), dash=document.getElementById('dash');
-                    if(lp) lp.style.display='none';
-                    if(dash) dash.style.display='block';
+                    document.getElementById('login-panel').style.display='none';
+                    document.getElementById('dash').style.display='block';
                     populateBulkLeagueSelectors();
                     loadAdminM(); loadAdminT(); loadAdminZ(); loadAdminP(); loadAdminTr(); loadAdminS(); loadAdminRoster(); loadClubs(); loadMatchEventOptions();
+                    showAT('ma');
                 }else{
                     user=null;
-                    const lp=document.getElementById('login-panel'), dash=document.getElementById('dash');
-                    if(lp) lp.style.display='block';
-                    if(dash) dash.style.display='none';
+                    document.getElementById('login-panel').style.display='block';
+                    document.getElementById('dash').style.display='none';
                 }
             });
         }else{
-            // Firebase is unavailable: keep the portal usable and explain the admin state.
-            const lp=document.getElementById('login-panel'), dash=document.getElementById('dash');
-            if(lp) lp.style.display='block';
-            if(dash) dash.style.display='none';
+            user=null;
             const msg=document.getElementById('l-msg');
-            if(msg) msg.textContent='Panel admina wymaga poprawnie podłączonego Firebase.';
+            if(msg) msg.innerText='Brak połączenia z Firebase. Sprawdź firebase-config.js.';
         }
+
         async function login(){
-            if(!auth || typeof auth.signInWithEmailAndPassword !== 'function'){
-                const msg=document.getElementById('l-msg');
-                if(msg) msg.textContent='Firebase nie jest dostępne. Sprawdź plik firebase-config.js.';
+            const msg=document.getElementById('l-msg');
+            if(!PH_AUTH || typeof PH_AUTH.signInWithEmailAndPassword !== 'function'){
+                if(msg) msg.innerText='Firebase nie jest dostępne. Sprawdź firebase-config.js.';
                 return;
             }
             try{
-                await auth.signInWithEmailAndPassword(
+                await PH_AUTH.signInWithEmailAndPassword(
                     document.getElementById('l-email').value,
                     document.getElementById('l-pass').value
                 );
             }catch(e){
-                document.getElementById('l-msg').innerText='Błędne dane logowania';
+                if(msg) msg.innerText='Błędne dane logowania';
+                console.error(e);
             }
         }
+
         function logout(){
-            if(auth && typeof auth.signOut === 'function') auth.signOut();
+            if(PH_AUTH && typeof PH_AUTH.signOut === 'function'){
+                PH_AUTH.signOut().catch(()=>{});
+            }
             go('home');
         }
 
         function showAT(tab){
-            ['ma','ta','st','ro','za','po','tr'].forEach(t=>{
-                document.getElementById(t).style.display=(t===tab)?'block':'none';
-                const b=document.getElementById('at-'+t);
-                b.style.background=(t===tab)?'var(--green-glow)':'transparent';
-                b.style.color=(t===tab)?'var(--green)':'var(--muted)';
+            const adminTabs=['ma','ta','st','ro','za','po','tr'];
+            adminTabs.forEach(t=>{
+                const panel=document.getElementById(t);
+                const button=document.getElementById('at-'+t);
+                if(panel) panel.style.display=(t===tab)?'block':'none';
+                if(button){
+                    button.style.background=(t===tab)?'var(--green-glow)':'transparent';
+                    button.style.color=(t===tab)?'var(--green)':'var(--muted)';
+                }
             });
         }
 
@@ -2439,7 +2467,6 @@ const PLANET_LEAGUES=[('liga1', 'Liga 1'), ('liga2', '2 liga'), ('okr_podkarpack
 function planetLeagueSelect(key){
  document.querySelectorAll('.planet-league-pill,.side-league').forEach(b=>b.classList.toggle('active',b.dataset.league===key));
  document.querySelectorAll('select[id$="-league"]').forEach(s=>s.value=key);
- if(!window.db && !db) return;
  try{loadTable(key)}catch(e){} try{loadStats(key)}catch(e){} try{loadZones(false,key)}catch(e){} try{if(typeof filterTransfers==="function")filterTransfers(key)}catch(e){}
 }
 document.addEventListener('DOMContentLoaded',()=>{
@@ -2481,7 +2508,7 @@ main{max-width:1280px!important;margin:0 auto!important;padding:18px 18px 48px!i
    const home=document.getElementById('home'); if(home){const n=home.querySelector('.stats-row .stat-item:first-child .stat-num');if(n)n.textContent='18';const l=home.querySelector('.stats-row .stat-item:first-child .stat-label');if(l)l.textContent='Rozgrywek';}
    document.querySelectorAll('.grp-tab').forEach(b=>{if(/A Klasy|B Klasy/.test(b.textContent))b.style.display='none';});
    document.querySelectorAll('.sub-nav').forEach(n=>{n.querySelectorAll('.sub-tab').forEach(b=>{if(/A Klasa|B Klasa|Okr\. Jarosław|Okr\. Krosno|Okr\. Rzeszów|Okr\. Dębica|Okr\. Stalowa/.test(b.textContent))b.remove();});});
-   if(typeof buildPlanetLeagues==='function') buildPlanetLeagues();
+   if(typeof buildPlanetLeagues==='function')buildPlanetLeagues();
  }
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',clean);else clean();
  setTimeout(clean,600);setTimeout(clean,1800);
