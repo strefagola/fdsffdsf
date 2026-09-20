@@ -855,8 +855,8 @@ Klub B, https://example.com/herb-b.png, ręcznie, 5, 12, +4"></textarea>
         // PAMIĘTAJ: Aby dane A-klas i B-klas zapisywały się w drugiej bazie danych Firebase, 
         // musisz w pliku firebase-config.js zdefiniować zmienną window.db2!
         
-        const db = window.db;
-        const auth = window.auth;
+        const db = window.db || null;
+        const auth = window.auth || null;
 
         if(!db || !auth) {
             console.error("Firebase nie załadowało się poprawnie z pliku firebase-config.js");
@@ -874,7 +874,8 @@ Klub B, https://example.com/herb-b.png, ręcznie, 5, 12, +4"></textarea>
             okr_zachodniopomorska:'Okręgowa Liga Zachodniopomorska', okr_kujawsko_pomorska:'Okręgowa Liga Kujawsko-Pomorska'
         };
         
-        const A_LEAGUES=[]; const B_LEAGUES=[]; const DB2_A_LEAGUES=[]; const NEW_LEAGUES=Object.keys(L); function getDB(league){ return window.db; }
+        const A_LEAGUES=[]; const B_LEAGUES=[]; const DB2_A_LEAGUES=[]; const NEW_LEAGUES=Object.keys(L);
+        function getDB(league){ return window.db || db; }
 
         const DEFAULT_ZONES = { promo:[1], barage:[2], releg:[14,15,16] };
 
@@ -918,9 +919,11 @@ Klub B, https://example.com/herb-b.png, ręcznie, 5, 12, +4"></textarea>
             if(!section) return;
             section.classList.add('active');
 
-            const map=['home','matches','table','stats','clubs','transfers','streams','posts','contact','admin'];
-            const idx=map.indexOf(id);
-            if(idx>=0&&idx<9) document.querySelectorAll('.tab')[idx].classList.add('active');
+            const navTab = [...document.querySelectorAll('.tab')].find(b => {
+                const m = b.getAttribute('onclick') || '';
+                return m.includes(`go('${id}')`);
+            });
+            if(navTab) navTab.classList.add('active');
 
             section.querySelectorAll('.anim').forEach(el=>{
                 el.style.animation='none';
@@ -1617,24 +1620,49 @@ Klub B, https://example.com/herb-b.png, ręcznie, 5, 12, +4"></textarea>
         }
 
         let user=null;
-        auth.onAuthStateChanged(async u=>{
-            if(u){
-                user=u;
-                document.getElementById('login-panel').style.display='none';
-                document.getElementById('dash').style.display='block';
-                populateBulkLeagueSelectors();
-                loadAdminM(); loadAdminT(); loadAdminZ(); loadAdminP(); loadAdminTr(); loadAdminS(); loadAdminRoster(); loadClubs(); loadMatchEventOptions();
-            }else{
-                user=null;
-                document.getElementById('login-panel').style.display='block';
-                document.getElementById('dash').style.display='none';
-            }
-        });
-        async function login(){
-            try{await auth.signInWithEmailAndPassword(document.getElementById('l-email').value,document.getElementById('l-pass').value);}
-            catch(e){document.getElementById('l-msg').innerText='Błędne dane logowania';}
+        if(auth && typeof auth.onAuthStateChanged === 'function'){
+            auth.onAuthStateChanged(async u=>{
+                if(u){
+                    user=u;
+                    const lp=document.getElementById('login-panel'), dash=document.getElementById('dash');
+                    if(lp) lp.style.display='none';
+                    if(dash) dash.style.display='block';
+                    populateBulkLeagueSelectors();
+                    loadAdminM(); loadAdminT(); loadAdminZ(); loadAdminP(); loadAdminTr(); loadAdminS(); loadAdminRoster(); loadClubs(); loadMatchEventOptions();
+                }else{
+                    user=null;
+                    const lp=document.getElementById('login-panel'), dash=document.getElementById('dash');
+                    if(lp) lp.style.display='block';
+                    if(dash) dash.style.display='none';
+                }
+            });
+        }else{
+            // Firebase is unavailable: keep the portal usable and explain the admin state.
+            const lp=document.getElementById('login-panel'), dash=document.getElementById('dash');
+            if(lp) lp.style.display='block';
+            if(dash) dash.style.display='none';
+            const msg=document.getElementById('l-msg');
+            if(msg) msg.textContent='Panel admina wymaga poprawnie podłączonego Firebase.';
         }
-        function logout(){auth.signOut();go('home');}
+        async function login(){
+            if(!auth || typeof auth.signInWithEmailAndPassword !== 'function'){
+                const msg=document.getElementById('l-msg');
+                if(msg) msg.textContent='Firebase nie jest dostępne. Sprawdź plik firebase-config.js.';
+                return;
+            }
+            try{
+                await auth.signInWithEmailAndPassword(
+                    document.getElementById('l-email').value,
+                    document.getElementById('l-pass').value
+                );
+            }catch(e){
+                document.getElementById('l-msg').innerText='Błędne dane logowania';
+            }
+        }
+        function logout(){
+            if(auth && typeof auth.signOut === 'function') auth.signOut();
+            go('home');
+        }
 
         function showAT(tab){
             ['ma','ta','st','ro','za','po','tr'].forEach(t=>{
@@ -2411,6 +2439,7 @@ const PLANET_LEAGUES=[('liga1', 'Liga 1'), ('liga2', '2 liga'), ('okr_podkarpack
 function planetLeagueSelect(key){
  document.querySelectorAll('.planet-league-pill,.side-league').forEach(b=>b.classList.toggle('active',b.dataset.league===key));
  document.querySelectorAll('select[id$="-league"]').forEach(s=>s.value=key);
+ if(!window.db && !db) return;
  try{loadTable(key)}catch(e){} try{loadStats(key)}catch(e){} try{loadZones(false,key)}catch(e){} try{if(typeof filterTransfers==="function")filterTransfers(key)}catch(e){}
 }
 document.addEventListener('DOMContentLoaded',()=>{
@@ -2452,7 +2481,7 @@ main{max-width:1280px!important;margin:0 auto!important;padding:18px 18px 48px!i
    const home=document.getElementById('home'); if(home){const n=home.querySelector('.stats-row .stat-item:first-child .stat-num');if(n)n.textContent='18';const l=home.querySelector('.stats-row .stat-item:first-child .stat-label');if(l)l.textContent='Rozgrywek';}
    document.querySelectorAll('.grp-tab').forEach(b=>{if(/A Klasy|B Klasy/.test(b.textContent))b.style.display='none';});
    document.querySelectorAll('.sub-nav').forEach(n=>{n.querySelectorAll('.sub-tab').forEach(b=>{if(/A Klasa|B Klasa|Okr\. Jarosław|Okr\. Krosno|Okr\. Rzeszów|Okr\. Dębica|Okr\. Stalowa/.test(b.textContent))b.remove();});});
-   if(typeof buildPlanetLeagues==='function')buildPlanetLeagues();
+   if(typeof buildPlanetLeagues==='function') buildPlanetLeagues();
  }
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',clean);else clean();
  setTimeout(clean,600);setTimeout(clean,1800);
