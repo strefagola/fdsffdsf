@@ -294,23 +294,47 @@ input,select,textarea{background:#fff!important;color:#16202a!important;border-c
 
     <div class="secret-trigger" id="mobile-admin-trigger"></div>
 
-    <!-- MODAL PROFILU KLUBU -->
-    <div id="club-modal" class="modal-overlay" onclick="if(event.target===this) closeClubProfile()">
-        <div class="modal-content anim">
-            <button class="modal-close" onclick="closeClubProfile()"><i class="fa-solid fa-xmark"></i></button>
-            <div class="modal-header">
-                <div id="modal-crest-container"></div>
-                <h2 class="modal-title" id="modal-team-name">Nazwa Klubu</h2>
-            </div>
-
-            <div style="display:flex; gap:8px; margin-bottom:1.2rem; border-bottom:1px solid var(--border); padding-bottom:10px;">
-                <button class="btn-sm" id="modal-tab-up" onclick="switchModalMatches('up')" style="background:var(--green); color:var(--navy); font-weight:700;"><i class="fa-solid fa-calendar-days"></i> Nadchodzące</button>
-                <button class="btn-sm" id="modal-tab-res" onclick="switchModalMatches('res')" style="background:rgba(255,255,255,0.05); color:var(--muted); font-weight:700;"><i class="fa-solid fa-flag-checkered"></i> Ostatnie Wyniki</button>
-            </div>
-
-            <div id="modal-upcoming" class="grid" style="grid-template-columns:1fr; gap:0.8rem;"></div>
-            <div id="modal-results" class="grid" style="grid-template-columns:1fr; gap:0.8rem; display:none;"></div>
+    <!-- PROFIL KLUBU -->
+    <div id="club-modal" class="modal-overlay club-profile-overlay" onclick="if(event.target===this) closeClubProfile()">
+      <div class="modal-content club-profile-modal anim">
+        <button class="modal-close" onclick="closeClubProfile()" aria-label="Zamknij"><i class="fa-solid fa-xmark"></i></button>
+        <div class="club-profile-head">
+          <div id="modal-crest-container" class="club-profile-crest"></div>
+          <div class="club-profile-title">
+            <div class="club-profile-kicker"><i class="fa-solid fa-shield-halved"></i> PROFIL KLUBU</div>
+            <h2 id="modal-team-name">Nazwa Klubu</h2>
+            <div id="modal-team-meta" class="club-profile-meta">Polska • Piłka nożna</div>
+          </div>
         </div>
+        <div class="club-profile-tabs">
+          <button class="club-profile-tab active" id="club-tab-overview" onclick="switchClubProfileTab('overview')"><i class="fa-solid fa-house"></i> Informacje</button>
+          <button class="club-profile-tab" id="club-tab-squad" onclick="switchClubProfileTab('squad')"><i class="fa-solid fa-people-group"></i> Kadra</button>
+          <button class="club-profile-tab" id="club-tab-up" onclick="switchClubProfileTab('up')"><i class="fa-solid fa-calendar-days"></i> Mecze</button>
+          <button class="club-profile-tab" id="club-tab-res" onclick="switchClubProfileTab('res')"><i class="fa-solid fa-flag-checkered"></i> Wyniki</button>
+        </div>
+        <div id="club-panel-overview" class="club-profile-panel">
+          <div class="club-profile-summary">
+            <div class="club-summary-card"><span><i class="fa-solid fa-users"></i> ZAWODNICY</span><strong id="club-summary-players">—</strong></div>
+            <div class="club-summary-card"><span><i class="fa-solid fa-calendar-days"></i> MECZE</span><strong id="club-summary-matches">—</strong></div>
+            <div class="club-summary-card"><span><i class="fa-solid fa-shield-halved"></i> STATUS</span><strong>AKTYWNY</strong></div>
+          </div>
+          <div class="club-profile-section-title"><span>INFORMACJE</span><h3>O klubie</h3></div>
+          <div id="club-overview-content" class="club-info-box">Ładowanie informacji o klubie...</div>
+        </div>
+        <div id="club-panel-squad" class="club-profile-panel" style="display:none;">
+          <div class="club-profile-section-title"><span>KADRA ZESPOŁU</span><h3>Lista zawodników</h3></div>
+          <div id="club-squad-loading" class="club-loading"><i class="fa-solid fa-spinner fa-spin"></i> Ładowanie kadry...</div>
+          <div id="club-squad-content"></div>
+        </div>
+        <div id="club-panel-up" class="club-profile-panel" style="display:none;">
+          <div class="club-profile-section-title"><span>TERMINARZ</span><h3>Nadchodzące mecze</h3></div>
+          <div id="modal-upcoming" class="grid club-matches-grid" style="grid-template-columns:1fr;gap:.8rem"></div>
+        </div>
+        <div id="club-panel-res" class="club-profile-panel" style="display:none;">
+          <div class="club-profile-section-title"><span>HISTORIA</span><h3>Ostatnie wyniki</h3></div>
+          <div id="modal-results" class="grid club-matches-grid" style="grid-template-columns:1fr;gap:.8rem"></div>
+        </div>
+      </div>
     </div>
 
     <!-- MODAL POSTA -->
@@ -540,8 +564,15 @@ input,select,textarea{background:#fff!important;color:#16202a!important;border-c
         </section>
 
         <section id="clubs" class="section">
-  <div class="hero anim" style="padding:2.5rem 0 1.8rem;"><h1 style="font-size:2.2rem;">Baza <span>Klubów</span></h1><p>Profile klubów, kadry zawodników, status zdrowotny i historia meczów.</p></div>
-  <div id="clubs-grid" class="squad-grid anim d1"></div>
+  <div class="official-page-head anim">
+    <div><div class="official-kicker"><i class="fa-solid fa-building-columns"></i> BAZA KLUBÓW</div>
+      <h1>Kluby <span>piłkarskie</span></h1>
+      <p>Oficjalnie uporządkowana baza klubów, kadr zawodników i historii spotkań.</p>
+    </div>
+    <div class="official-page-badge"><i class="fa-solid fa-shield-halved"></i><span>PLANETHC<br><small>BAZA KLUBÓW</small></span></div>
+  </div>
+  <div class="club-directory-bar anim d1"><div><i class="fa-solid fa-list"></i><span>KLUBY W BAZIE</span></div><small>Kliknij klub, aby otworzyć pełny profil i kadrę</small></div>
+  <div id="clubs-grid" class="squad-grid club-directory-grid anim d2"></div>
 </section>
 
 <section id="transfers" class="section">
@@ -1586,61 +1617,48 @@ Adam Wiśniewski | 1 | Bramkarz | Zawieszony | 2 mecze"></textarea>
             document.getElementById('post-modal').classList.remove('active');
         }
 
-        function openClubProfile(teamName) {
-            if(!teamName) return;
-            const modal = document.getElementById('club-modal');
-            const c = crestsCache[teamName.trim()];
-            
-            document.getElementById('modal-crest-container').innerHTML = c 
-                ? `<img src="${c}" class="modal-crest" alt="">` 
-                : `<div class="modal-crest" style="display:flex;align-items:center;justify-content:center;font-size:2rem;color:var(--muted);"><i class="fa-solid fa-shield"></i></div>`;
-            
-            document.getElementById('modal-team-name').innerText = teamName;
+        async function openClubProfile(teamName){
+  if(!teamName)return;
+  const modal=document.getElementById('club-modal');
+  const cleanName=String(teamName).trim(), targetName=cleanName.toLowerCase(), c=crestsCache[cleanName];
+  document.getElementById('modal-crest-container').innerHTML=c?`<img src="${c}" class="modal-crest" alt="">`:`<div class="modal-crest club-card-crest-fallback"><i class="fa-solid fa-shield-halved"></i></div>`;
+  document.getElementById('modal-team-name').textContent=cleanName;
+  document.getElementById('modal-team-meta').textContent='Polska • Klub piłkarski';
+  document.getElementById('club-overview-content').innerHTML='<div class="club-loading"><i class="fa-solid fa-spinner fa-spin"></i> Ładowanie danych klubu...</div>';
+  document.getElementById('club-squad-loading').style.display='block';
+  document.getElementById('club-squad-content').innerHTML='';
+  document.getElementById('club-summary-players').textContent='—';
+  const teamMatches=mc.filter(m=>(m.homeTeam&&m.homeTeam.trim().toLowerCase()===targetName)||(m.awayTeam&&m.awayTeam.trim().toLowerCase()===targetName));
+  renderGrid(upcomingList(teamMatches),'modal-upcoming'); renderGrid(finishedList(teamMatches),'modal-results');
+  document.getElementById('club-summary-matches').textContent=teamMatches.length;
+  switchClubProfileTab('overview'); modal.classList.add('active');
+  try{await loadClubRoster(cleanName)}catch(e){console.error(e);document.getElementById('club-squad-loading').style.display='none';document.getElementById('club-squad-content').innerHTML='<div class="club-empty">Nie udało się pobrać kadry klubu.</div>';}
+  document.getElementById('club-overview-content').innerHTML=`<strong>${cleanName}</strong> to klub znajdujący się w bazie PlanetHC.<div style="margin-top:6px;color:#7b8894">W profilu możesz sprawdzić listę zawodników, status kadry oraz terminarz i wyniki spotkań.</div>`;
+}
+async function loadClubRoster(teamName){
+  if(!window.db)return;
+  const cleanName=String(teamName).trim();
+  const snap=await window.db.collection('rosters').where('team','==',cleanName).get();
+  let players=snap.docs.map(d=>({id:d.id,...d.data()}));
+  if(!players.length){const all=await window.db.collection('rosters').get();players=all.docs.map(d=>({id:d.id,...d.data()})).filter(p=>String(p.team||'').trim().toLowerCase()===cleanName.toLowerCase());}
+  players.sort((a,b)=>(Number(a.number)||999)-(Number(b.number)||999)||String(a.player||'').localeCompare(String(b.player||''),'pl'));
+  document.getElementById('club-summary-players').textContent=players.length;
+  document.getElementById('club-squad-loading').style.display='none';
+  if(!players.length){document.getElementById('club-squad-content').innerHTML='<div class="club-empty"><i class="fa-solid fa-users" style="margin-bottom:8px;display:block"></i>Brak dodanych zawodników dla tego klubu.</div>';return;}
+  const order=['Bramkarz','Obrońca','Pomocnik','Napastnik'],groups={};
+  players.forEach(p=>{const pos=p.position||'Pozostali';(groups[pos]??=[]).push(p)});
+  const groupNames=[...order,...Object.keys(groups).filter(x=>!order.includes(x))].filter(x=>groups[x]?.length);
+  const statusLabel=s=>s==='injured'?'KONTUZJOWANY':s==='suspended'?'ZAWIESZONY':'DOSTĘPNY';
+  document.getElementById('club-squad-content').innerHTML=groupNames.map(pos=>`<div class="club-squad-group"><div class="club-squad-heading"><i class="fa-solid fa-user"></i>${pos}<span style="margin-left:auto;color:#8a98a5">${groups[pos].length}</span></div><div class="club-squad-table">${groups[pos].map(p=>`<div class="club-player"><div class="club-player-number">${p.number||'—'}</div><div class="club-player-name">${p.player||'—'}${p.injury?`<div style="font-weight:500;color:#8a98a5;font-size:.62rem;margin-top:2px">${p.injury}</div>`:''}</div><div class="club-player-position">${p.position||'—'}</div><div class="club-player-status ${p.status==='injured'?'injured':p.status==='suspended'?'suspended':'available'}">${statusLabel(p.status)}</div></div>`).join('')}</div></div>`).join('');
+}
+function switchClubProfileTab(type){
+  const map={overview:'club-panel-overview',squad:'club-panel-squad',up:'club-panel-up',res:'club-panel-res'};
+  Object.keys(map).forEach(k=>{const el=document.getElementById(map[k]);if(el)el.style.display=k===type?'block':'none';const btn=document.getElementById('club-tab-'+k);if(btn)btn.classList.toggle('active',k===type);});
+}
+function switchModalMatches(type){switchClubProfileTab(type==='up'?'up':'res')}
+function closeClubProfile(){document.getElementById('club-modal').classList.remove('active')}
 
-            const targetName = teamName.trim().toLowerCase();
-            let teamMatches = mc.filter(m => 
-                (m.homeTeam && m.homeTeam.trim().toLowerCase() === targetName) || 
-                (m.awayTeam && m.awayTeam.trim().toLowerCase() === targetName)
-            );
-
-            let upList = upcomingList(teamMatches);
-            let finList = finishedList(teamMatches);
-
-            renderGrid(upList, 'modal-upcoming');
-            renderGrid(finList, 'modal-results');
-
-            switchModalMatches('up');
-            modal.classList.add('active');
-        }
-
-        function switchModalMatches(type) {
-            const upEl = document.getElementById('modal-upcoming');
-            const resEl = document.getElementById('modal-results');
-            const tabUp = document.getElementById('modal-tab-up');
-            const tabRes = document.getElementById('modal-tab-res');
-
-            if(type === 'up') {
-                upEl.style.display = 'grid';
-                resEl.style.display = 'none';
-                tabUp.style.background = 'var(--green)';
-                tabUp.style.color = 'var(--navy)';
-                tabRes.style.background = 'rgba(255,255,255,0.05)';
-                tabRes.style.color = 'var(--muted)';
-            } else {
-                upEl.style.display = 'none';
-                resEl.style.display = 'grid';
-                tabRes.style.background = 'var(--green)';
-                tabRes.style.color = 'var(--navy)';
-                tabUp.style.background = 'rgba(255,255,255,0.05)';
-                tabUp.style.color = 'var(--muted)';
-            }
-        }
-
-        function closeClubProfile() {
-            document.getElementById('club-modal').classList.remove('active');
-        }
-
-        async function sendContact(){
+async function sendContact(){
             const name=document.getElementById('c-name').value, email=document.getElementById('c-email').value;
             const subject=document.getElementById('c-subject').value, msg=document.getElementById('c-msg').value;
             const status=document.getElementById('c-status');
@@ -2440,7 +2458,25 @@ async function saveBulkRoster(){
 function clearRosterForm(){['r-id','r-db','r-team','r-player','r-number','r-injury'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});document.getElementById('r-position').value='Bramkarz';document.getElementById('r-status').value='available';}
 async function loadAdminRoster(){const el=document.getElementById('admin-rolist');if(!el||!window.db)return;try{const snap=await window.db.collection('rosters').orderBy('team').get();const all=snap.docs.map(d=>({id:d.id,...d.data()}));const groups={};all.forEach(p=>(groups[p.team]??=[]).push(p));el.innerHTML=Object.keys(groups).sort().map(team=>`<div class="card"><div class="league-label"><i class="fa-solid fa-shield"></i>${team}<span class="badge-up">${groups[team].length} zawod.</span></div>${groups[team].map(p=>`<div class="player-row"><div><b>${p.number?p.number+'. ':''}${p.player}</b><div style="font-size:.72rem;color:var(--muted)">${p.position}${p.injury?' • '+p.injury:''}</div></div><div><span class="${p.status==='available'?'available':'injury'}">${p.status==='available'?'DOSTĘPNY':p.status==='injured'?'KONTUZJA':'ZAWIESZONY'}</span><button class="btn-sm btn-del" onclick="deleteRoster('${p.id}')">×</button></div></div>`).join('')}</div>`).join('')||'<p style="color:var(--muted)">Brak zawodników.</p>';}catch(e){el.innerHTML='<p style="color:#dc2626">Nie udało się pobrać kadr.</p>';}}
 async function deleteRoster(id){if(confirm('Usunąć zawodnika?')){await window.db.collection('rosters').doc(id).delete();loadAdminRoster();loadClubs();}}
-async function loadClubs(){const el=document.getElementById('clubs-grid');if(!el||!window.db)return;try{const snap=await window.db.collection('rosters').get();const groups={};snap.docs.forEach(d=>{const p=d.data();if(p.team)(groups[p.team]??=[]).push(p)});el.innerHTML=Object.keys(groups).sort().map(team=>`<div class="card light-panel"><div class="league-label"><i class="fa-solid fa-shield"></i>KLUB</div><h3 style="margin-bottom:10px">${team}</h3>${groups[team].map(p=>`<div class="player-row"><div><b>${p.number?p.number+'. ':''}${p.player}</b><div style="font-size:.72rem;color:var(--muted)">${p.position}</div></div><span class="${p.status==='available'?'available':'injury'}">${p.status==='available'?'Dostępny':p.status==='injured'?'Kontuzjowany':'Zawieszony'}</span></div>`).join('')}</div>`).join('')||'<p style="color:var(--muted)">Kadra klubów pojawi się tutaj po dodaniu zawodników.</p>';}catch(e){el.innerHTML='<p style="color:#dc2626">Błąd ładowania klubów.</p>';}}
+async function loadClubs(){
+  const el=document.getElementById('clubs-grid');
+  if(!el||!window.db)return;
+  try{
+    await loadCrests();
+    const snap=await window.db.collection('rosters').get();
+    const groups={};
+    snap.docs.forEach(d=>{const p=d.data();if(p.team)(groups[p.team]??=[]).push(p)});
+    const teams=Object.keys(groups).sort((a,b)=>a.localeCompare(b,'pl'));
+    el.innerHTML=teams.map(team=>{
+      const crest=crestsCache[team.trim()];
+      const crestHtml=crest?`<img src="${crest}" class="club-card-crest" alt="">`:`<div class="club-card-crest club-card-crest-fallback"><i class="fa-solid fa-shield-halved"></i></div>`;
+      return `<button class="club-directory-card" type="button" onclick="openClubProfile(${JSON.stringify(team)})">
+        <div class="club-card-top">${crestHtml}<div style="min-width:0;flex:1"><div class="club-card-kicker">KLUB PIŁKARSKI</div><div class="club-card-name">${team}</div></div><i class="fa-solid fa-chevron-right club-card-arrow"></i></div>
+        <div class="club-card-bottom"><span><i class="fa-solid fa-people-group"></i> KADRA</span><strong>${groups[team].length} zawodników</strong></div>
+      </button>`;
+    }).join('')||'<div class="club-empty" style="grid-column:1/-1">Baza klubów pojawi się tutaj po dodaniu zawodników.</div>';
+  }catch(e){console.error(e);el.innerHTML='<div class="club-empty" style="grid-column:1/-1;color:#c23f3f">Błąd ładowania klubów.</div>';}
+}
 function buildPlanetLeagues(){const keys=Object.keys(L);document.querySelectorAll('.sub-nav.grp-okr').forEach(nav=>{nav.classList.add('dynamic-leagues');nav.innerHTML=keys.map((k,i)=>`<button class="sub-tab ${i===0?'active':''}" onclick="planetFilter('${k}',this)">${L[k]}</button>`).join('')});document.querySelectorAll('.sub-nav.grp-a,.sub-nav.grp-b').forEach(n=>n.style.display='none');}
 function planetFilter(league,btn){curFilter=league;document.querySelectorAll('.sub-nav .sub-tab').forEach(b=>b.classList.remove('active'));if(btn)btn.classList.add('active');if(typeof applyFilter==='function')applyFilter();if(document.getElementById('tb')&&document.getElementById('table').classList.contains('active'))loadTable(league);if(document.getElementById('stats-tb')&&document.getElementById('stats').classList.contains('active'))loadStats(league);}
 async function openMatchDetails(id,dbName){const db=dbName==='db2'&&window.db2?window.db2:window.db;try{const d=await db.collection('matches').doc(id).get();if(!d.exists)return;const m={id:d.id,...d.data()};const snap=await db.collection('matchEvents').where('matchId','==',id).get();const ev=snap.docs.map(x=>x.data()).sort((a,b)=>(a.minute||0)-(b.minute||0));document.getElementById('match-detail-body').innerHTML=`<div class="modal-header"><div><div class="league-label">${L[m.league]||m.league}</div><h2>${m.homeTeam} <span style="color:var(--green)">${m.scoreHome??'vs'}:${m.scoreAway??''}</span> ${m.awayTeam}</h2><div style="color:var(--muted);font-size:.8rem">${m.date?fmtFinished(m.date):''}</div></div></div><h3 style="margin:18px 0 8px">Przebieg meczu</h3><div>${ev.length?ev.map(e=>`<div class="event-row"><b>${e.minute||''}'${e.penalty?' ⚽ KARNY':''}</b><span>${e.type==='goal'?'Gol':e.type==='sub'?'Zmiana':e.type==='card'?'Kartka':'Wydarzenie'} — ${e.player||''}${e.assist?' (asysta: '+e.assist+')':''}</span><span>${e.team||''}</span></div>`).join(''):'<p style="color:var(--muted)">Brak szczegółowych wydarzeń.</p>'}</div><div style="margin-top:18px" id="detail-rosters"></div>`;document.getElementById('match-detail-modal').classList.add('active');}catch(e){alert('Nie udało się otworzyć szczegółów meczu.');}}
@@ -2542,7 +2578,7 @@ function closeMatchDetails(){document.getElementById('match-detail-modal').class
 
     </script>
 <script>
-const PLANET_LEAGUES=[('liga1', 'Liga 1'), ('liga2', '2 liga'), ('okr_podkarpacka', 'Okręgowa Liga Podkarpacka'), ('okr_pomorska', 'Okręgowa Liga Pomorska'), ('okr_warminsko_mazurska', 'Okręgowa Liga Warmińsko-Mazurska'), ('okr_slaska', 'Okręgowa Liga Śląska'), ('okr_dolnoslaska', 'Okręgowa Liga Dolnośląska'), ('okr_malopolska', 'Okręgowa Liga Małopolska'), ('okr_mazowiecka', 'Okręgowa Liga Mazowiecka'), ('okr_lubelska', 'Okręgowa Liga Lubelska'), ('okr_lubuska', 'Okręgowa Liga Lubuska'), ('okr_lodzkie', 'Okręgowa Liga Łódzka'), ('okr_opolska', 'Okręgowa Liga Opolska'), ('okr_podlaska', 'Okręgowa Liga Podlaska'), ('okr_swietokrzyska', 'Okręgowa Liga Świętokrzyska'), ('okr_wielkopolska', 'Okręgowa Liga Wielkopolska'), ('okr_zachodniopomorska', 'Okręgowa Liga Zachodniopomorska'), ('okr_kujawsko_pomorska', 'Okręgowa Liga Kujawsko-Pomorska')];
+const PLANET_LEAGUES=[['liga1','Liga 1'], ['liga2','2 liga'], ['okr_podkarpacka','Okręgowa Liga Podkarpacka'], ['okr_pomorska','Okręgowa Liga Pomorska'], ['okr_warminsko_mazurska','Okręgowa Liga Warmińsko-Mazurska'], ['okr_slaska','Okręgowa Liga Śląska'], ['okr_dolnoslaska','Okręgowa Liga Dolnośląska'], ['okr_malopolska','Okręgowa Liga Małopolska'], ['okr_mazowiecka','Okręgowa Liga Mazowiecka'], ['okr_lubelska','Okręgowa Liga Lubelska'], ['okr_lubuska','Okręgowa Liga Lubuska'], ['okr_lodzkie','Okręgowa Liga Łódzka'], ['okr_opolska','Okręgowa Liga Opolska'], ['okr_podlaska','Okręgowa Liga Podlaska'], ['okr_swietokrzyska','Okręgowa Liga Świętokrzyska'], ['okr_wielkopolska','Okręgowa Liga Wielkopolska'], ['okr_zachodniopomorska','Okręgowa Liga Zachodniopomorska'], ['okr_kujawsko_pomorska','Okręgowa Liga Kujawsko-Pomorska']]];
 function planetLeagueSelect(key){
  document.querySelectorAll('.planet-league-pill,.side-league').forEach(b=>b.classList.toggle('active',b.dataset.league===key));
  document.querySelectorAll('select[id$="-league"]').forEach(s=>s.value=key);
@@ -2593,3 +2629,381 @@ main{max-width:1280px!important;margin:0 auto!important;padding:18px 18px 48px!i
  setTimeout(clean,600);setTimeout(clean,1800);
 })();
 </script>
+
+<style id="planethc-club-profile-overhaul">
+:root{--club-blue:#075fa9;--club-line:#dfe6ed;--club-text:#17222d;--club-muted:#73808d}
+.official-page-head{display:flex;align-items:center;justify-content:space-between;gap:24px;background:linear-gradient(120deg,#075a9d,#0b79d0 65%,#2a97dc);color:#fff;border-radius:8px;padding:30px 34px;margin-bottom:14px;box-shadow:0 6px 20px rgba(7,90,157,.16)}
+.official-kicker{font-size:.64rem;letter-spacing:1.5px;font-weight:900;opacity:.85;margin-bottom:7px}.official-page-head h1{margin:0 0 5px;font-size:2rem;line-height:1.08;color:#fff}.official-page-head h1 span{color:#dff2ff}.official-page-head p{margin:0;max-width:720px;color:rgba(255,255,255,.86);font-size:.86rem}
+.official-page-badge{min-width:150px;display:flex;align-items:center;justify-content:center;gap:10px;padding:14px 16px;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.1);border-radius:6px;font-size:.78rem;font-weight:900;text-align:left}.official-page-badge i{font-size:1.25rem}.official-page-badge small{font-size:.53rem;letter-spacing:1px;opacity:.7}
+.club-directory-bar{display:flex;align-items:center;justify-content:space-between;gap:15px;padding:11px 14px;margin-bottom:10px;background:#fff;border:1px solid var(--club-line);border-radius:5px;box-shadow:0 1px 3px rgba(20,40,60,.04)}.club-directory-bar div{display:flex;align-items:center;gap:8px;color:var(--club-blue);font-size:.67rem;letter-spacing:1.2px;font-weight:900}.club-directory-bar small{color:var(--club-muted);font-size:.68rem}
+.club-directory-grid{grid-template-columns:repeat(auto-fill,minmax(300px,1fr))!important;gap:10px!important}.club-directory-card{display:block;width:100%;text-align:left;background:#fff!important;border:1px solid var(--club-line)!important;border-radius:6px!important;box-shadow:0 1px 4px rgba(20,40,60,.05)!important;padding:0!important;overflow:hidden;cursor:pointer;transition:border-color .18s,box-shadow .18s,transform .18s!important}.club-directory-card:hover{transform:translateY(-2px)!important;border-color:#b9d4e8!important;box-shadow:0 7px 20px rgba(20,40,60,.09)!important}
+.club-card-top{display:flex;align-items:center;gap:13px;padding:15px;border-bottom:1px solid #edf1f4}.club-card-crest{width:58px;height:58px;flex:0 0 58px;object-fit:contain;border:1px solid #e0e6ec;border-radius:5px;background:#fafbfd;padding:5px}.club-card-crest-fallback{display:flex;align-items:center;justify-content:center;color:#8b98a5;font-size:1.35rem}.club-card-kicker{color:var(--club-blue);font-size:.55rem;letter-spacing:1.1px;font-weight:900;margin-bottom:4px}.club-card-name{color:var(--club-text);font-size:1rem;font-weight:800;line-height:1.2}.club-card-arrow{margin-left:auto;color:#9aa6b2;font-size:.72rem}.club-card-bottom{display:flex;align-items:center;justify-content:space-between;padding:9px 15px;background:#fafbfd;color:var(--club-muted);font-size:.66rem}.club-card-bottom strong{color:var(--club-blue);font-weight:800}
+.club-profile-overlay{background:rgba(13,28,42,.56)!important;backdrop-filter:blur(4px)!important}.club-profile-modal{max-width:900px!important;padding:0!important;border:1px solid #d8e1e9!important;border-radius:7px!important;overflow:hidden!important;color:var(--club-text)!important}.club-profile-modal .modal-close{z-index:5;color:#72808c!important;background:#fff;width:34px;height:34px;border-radius:50%;top:14px;right:14px}
+.club-profile-head{display:flex;align-items:center;gap:18px;padding:25px 58px 22px 24px;background:linear-gradient(135deg,#f8fbfd,#fff);border-bottom:1px solid var(--club-line)}.club-profile-crest{width:88px;height:88px;display:flex;align-items:center;justify-content:center;flex:0 0 88px}.club-profile-crest .modal-crest{width:88px!important;height:88px!important;border-radius:5px!important;border:1px solid #dce5ec!important;padding:7px;background:#fff}.club-profile-title h2{color:var(--club-text)!important;font-size:1.75rem!important;line-height:1.1;margin:3px 0 5px}.club-profile-kicker{color:var(--club-blue);font-size:.58rem;font-weight:900;letter-spacing:1.4px}.club-profile-meta{color:var(--club-muted);font-size:.72rem}
+.club-profile-tabs{display:flex;gap:0;padding:0 14px;background:#fff;border-bottom:1px solid var(--club-line);overflow-x:auto;scrollbar-width:none}.club-profile-tabs::-webkit-scrollbar{display:none}.club-profile-tab{position:relative;padding:12px 14px;color:#687684;font-size:.72rem;font-weight:800;white-space:nowrap;border-bottom:2px solid transparent}.club-profile-tab:hover{color:var(--club-blue);background:#f8fafc}.club-profile-tab.active{color:var(--club-blue);border-bottom-color:var(--club-blue);background:#f8fbfd}
+.club-profile-panel{padding:20px 22px 24px}.club-profile-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:22px}.club-summary-card{background:#f8fafc;border:1px solid #e5ebf0;border-radius:5px;padding:12px 14px}.club-summary-card span{display:block;color:#82909c;font-size:.55rem;letter-spacing:1px;font-weight:900}.club-summary-card span i{color:var(--club-blue);margin-right:5px}.club-summary-card strong{display:block;color:var(--club-text);font-family:Outfit,Inter,sans-serif;font-size:1.1rem;margin-top:4px}.club-profile-section-title{margin-bottom:11px}.club-profile-section-title span{color:var(--club-blue);font-size:.56rem;letter-spacing:1.4px;font-weight:900}.club-profile-section-title h3{margin-top:2px;color:var(--club-text);font-size:1.05rem}.club-info-box{border:1px solid #e4eaf0;border-radius:5px;background:#fbfcfd;padding:14px;color:#596876;font-size:.8rem;line-height:1.65}.club-loading{padding:30px 10px;text-align:center;color:var(--club-muted);font-size:.78rem}
+.club-squad-group{margin-bottom:18px}.club-squad-heading{display:flex;align-items:center;gap:8px;padding:8px 10px;background:#f6f9fb;border:1px solid #e2e8ee;border-bottom:0;border-radius:5px 5px 0 0;color:#556575;font-size:.62rem;letter-spacing:1px;font-weight:900}.club-squad-heading i{color:var(--club-blue)}.club-squad-table{border:1px solid #e2e8ee;border-radius:0 0 5px 5px;overflow:hidden}.club-player{display:grid;grid-template-columns:44px minmax(0,1fr) 125px 90px;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid #edf1f4;background:#fff}.club-player:last-child{border-bottom:0}.club-player:hover{background:#f9fbfd}.club-player-number{color:#8a98a5;font-family:Outfit,Inter,sans-serif;font-weight:800;font-size:.92rem;text-align:center}.club-player-name{color:var(--club-text);font-size:.78rem;font-weight:800}.club-player-position{color:#7b8894;font-size:.68rem}.club-player-status{text-align:right;font-size:.61rem;font-weight:900}.club-player-status.available{color:#16865b}.club-player-status.injured{color:#c23f3f}.club-player-status.suspended{color:#b17800}.club-empty{border:1px dashed #d9e1e8;border-radius:5px;padding:25px;text-align:center;color:#82909c;font-size:.76rem;background:#fbfcfd}
+@media(max-width:700px){.official-page-head{padding:22px 18px}.official-page-badge{display:none}.official-page-head h1{font-size:1.65rem}.club-directory-bar{align-items:flex-start;flex-direction:column;gap:5px}.club-profile-head{padding:20px 48px 18px 16px}.club-profile-crest,.club-profile-crest .modal-crest{width:68px!important;height:68px!important;flex-basis:68px}.club-profile-title h2{font-size:1.35rem!important}.club-profile-panel{padding:16px 12px 20px}.club-profile-summary{grid-template-columns:1fr 1fr}.club-summary-card:last-child{grid-column:1/-1}.club-player{grid-template-columns:34px minmax(0,1fr) 90px}.club-player-position{display:none}}
+</style>
+
+<style id="planethc-club-profile-overhaul">
+/* --- Klub / profil: styl oficjalnego portalu związkowego --- */
+:root{
+  --club-blue:#075fa9;
+  --club-blue-2:#0b79d0;
+  --club-blue-soft:#edf6fc;
+  --club-line:#dfe6ed;
+  --club-text:#17222d;
+  --club-muted:#73808d;
+}
+.official-page-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:24px;
+  background:linear-gradient(120deg,#075a9d 0%,#0b79d0 65%,#2a97dc 100%);
+  color:#fff;
+  border-radius:8px;
+  padding:30px 34px;
+  margin-bottom:14px;
+  box-shadow:0 6px 20px rgba(7,90,157,.16);
+}
+.official-kicker{
+  font-size:.64rem;
+  letter-spacing:1.5px;
+  font-weight:900;
+  opacity:.85;
+  margin-bottom:7px;
+}
+.official-page-head h1{
+  margin:0 0 5px;
+  font-size:2rem;
+  line-height:1.08;
+  color:#fff;
+}
+.official-page-head h1 span{color:#dff2ff}
+.official-page-head p{
+  margin:0;
+  max-width:720px;
+  color:rgba(255,255,255,.86);
+  font-size:.86rem;
+}
+.official-page-badge{
+  min-width:150px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  padding:14px 16px;
+  border:1px solid rgba(255,255,255,.25);
+  background:rgba(255,255,255,.10);
+  border-radius:6px;
+  font-size:.78rem;
+  font-weight:900;
+  letter-spacing:.5px;
+  text-align:left;
+}
+.official-page-badge i{font-size:1.25rem}
+.official-page-badge small{
+  font-size:.53rem;
+  letter-spacing:1px;
+  opacity:.7;
+}
+.club-directory-bar{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:15px;
+  padding:11px 14px;
+  margin-bottom:10px;
+  background:#fff;
+  border:1px solid var(--club-line);
+  border-radius:5px;
+  box-shadow:0 1px 3px rgba(20,40,60,.04);
+}
+.club-directory-bar div{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  color:var(--club-blue);
+  font-size:.67rem;
+  letter-spacing:1.2px;
+  font-weight:900;
+}
+.club-directory-bar small{color:var(--club-muted);font-size:.68rem}
+.club-directory-grid{
+  grid-template-columns:repeat(auto-fill,minmax(300px,1fr))!important;
+  gap:10px!important;
+}
+.club-directory-card{
+  background:#fff!important;
+  border:1px solid var(--club-line)!important;
+  border-radius:6px!important;
+  box-shadow:0 1px 4px rgba(20,40,60,.05)!important;
+  padding:0!important;
+  overflow:hidden;
+  cursor:pointer;
+  transition:border-color .18s ease,box-shadow .18s ease,transform .18s ease!important;
+}
+.club-directory-card:hover{
+  transform:translateY(-2px)!important;
+  border-color:#b9d4e8!important;
+  box-shadow:0 7px 20px rgba(20,40,60,.09)!important;
+}
+.club-card-top{
+  display:flex;
+  align-items:center;
+  gap:13px;
+  padding:15px;
+  border-bottom:1px solid #edf1f4;
+}
+.club-card-crest{
+  width:58px;height:58px;
+  flex:0 0 58px;
+  object-fit:contain;
+  border:1px solid #e0e6ec;
+  border-radius:5px;
+  background:#fafbfd;
+  padding:5px;
+}
+.club-card-crest-fallback{
+  display:flex;align-items:center;justify-content:center;
+  color:#8b98a5;font-size:1.35rem;
+}
+.club-card-kicker{
+  color:var(--club-blue);
+  font-size:.55rem;
+  letter-spacing:1.1px;
+  font-weight:900;
+  margin-bottom:4px;
+}
+.club-card-name{
+  color:var(--club-text);
+  font-size:1rem;
+  font-weight:800;
+  line-height:1.2;
+}
+.club-card-arrow{
+  margin-left:auto;
+  color:#9aa6b2;
+  font-size:.72rem;
+}
+.club-card-bottom{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:9px 15px;
+  background:#fafbfd;
+  color:var(--club-muted);
+  font-size:.66rem;
+}
+.club-card-bottom strong{color:var(--club-blue);font-weight:800}
+.club-profile-overlay{background:rgba(13,28,42,.56)!important;backdrop-filter:blur(4px)!important}
+.club-profile-modal{
+  max-width:900px!important;
+  padding:0!important;
+  border:1px solid #d8e1e9!important;
+  border-radius:7px!important;
+  overflow:hidden!important;
+  color:var(--club-text)!important;
+}
+.club-profile-modal .modal-close{
+  z-index:5;
+  color:#72808c!important;
+  background:#fff;
+  width:34px;height:34px;
+  border-radius:50%;
+  top:14px;right:14px;
+}
+.club-profile-head{
+  display:flex;
+  align-items:center;
+  gap:18px;
+  padding:25px 58px 22px 24px;
+  background:linear-gradient(135deg,#f8fbfd,#fff);
+  border-bottom:1px solid var(--club-line);
+}
+.club-profile-crest{
+  width:88px;height:88px;
+  display:flex;align-items:center;justify-content:center;
+  flex:0 0 88px;
+}
+.club-profile-crest .modal-crest{
+  width:88px!important;height:88px!important;
+  border-radius:5px!important;
+  border:1px solid #dce5ec!important;
+  padding:7px;
+  background:#fff;
+}
+.club-profile-title h2{
+  color:var(--club-text)!important;
+  font-size:1.75rem!important;
+  line-height:1.1;
+  margin:3px 0 5px;
+}
+.club-profile-kicker{
+  color:var(--club-blue);
+  font-size:.58rem;
+  font-weight:900;
+  letter-spacing:1.4px;
+}
+.club-profile-meta{color:var(--club-muted);font-size:.72rem}
+.club-profile-tabs{
+  display:flex;
+  gap:0;
+  padding:0 14px;
+  background:#fff;
+  border-bottom:1px solid var(--club-line);
+  overflow-x:auto;
+  scrollbar-width:none;
+}
+.club-profile-tabs::-webkit-scrollbar{display:none}
+.club-profile-tab{
+  position:relative;
+  padding:12px 14px;
+  color:#687684;
+  font-size:.72rem;
+  font-weight:800;
+  white-space:nowrap;
+  border-bottom:2px solid transparent;
+}
+.club-profile-tab:hover{color:var(--club-blue);background:#f8fafc}
+.club-profile-tab.active{
+  color:var(--club-blue);
+  border-bottom-color:var(--club-blue);
+  background:#f8fbfd;
+}
+.club-profile-panel{padding:20px 22px 24px}
+.club-profile-summary{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:8px;
+  margin-bottom:22px;
+}
+.club-summary-card{
+  background:#f8fafc;
+  border:1px solid #e5ebf0;
+  border-radius:5px;
+  padding:12px 14px;
+}
+.club-summary-card span{
+  display:block;
+  color:#82909c;
+  font-size:.55rem;
+  letter-spacing:1px;
+  font-weight:900;
+}
+.club-summary-card span i{color:var(--club-blue);margin-right:5px}
+.club-summary-card strong{
+  display:block;
+  color:var(--club-text);
+  font-family:Outfit,Inter,sans-serif;
+  font-size:1.1rem;
+  margin-top:4px;
+}
+.club-profile-section-title{
+  margin-bottom:11px;
+}
+.club-profile-section-title span{
+  color:var(--club-blue);
+  font-size:.56rem;
+  letter-spacing:1.4px;
+  font-weight:900;
+}
+.club-profile-section-title h3{
+  margin-top:2px;
+  color:var(--club-text);
+  font-size:1.05rem;
+}
+.club-info-box{
+  border:1px solid #e4eaf0;
+  border-radius:5px;
+  background:#fbfcfd;
+  padding:14px;
+  color:#596876;
+  font-size:.8rem;
+  line-height:1.65;
+}
+.club-loading{
+  padding:30px 10px;
+  text-align:center;
+  color:var(--club-muted);
+  font-size:.78rem;
+}
+.club-squad-group{
+  margin-bottom:18px;
+}
+.club-squad-group:last-child{margin-bottom:0}
+.club-squad-heading{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:8px 10px;
+  background:#f6f9fb;
+  border:1px solid #e2e8ee;
+  border-bottom:0;
+  border-radius:5px 5px 0 0;
+  color:#556575;
+  font-size:.62rem;
+  letter-spacing:1px;
+  font-weight:900;
+}
+.club-squad-heading i{color:var(--club-blue)}
+.club-squad-table{
+  border:1px solid #e2e8ee;
+  border-radius:0 0 5px 5px;
+  overflow:hidden;
+}
+.club-player{
+  display:grid;
+  grid-template-columns:44px minmax(0,1fr) 125px 90px;
+  align-items:center;
+  gap:8px;
+  padding:10px 12px;
+  border-bottom:1px solid #edf1f4;
+  background:#fff;
+}
+.club-player:last-child{border-bottom:0}
+.club-player:hover{background:#f9fbfd}
+.club-player-number{
+  color:#8a98a5;
+  font-family:Outfit,Inter,sans-serif;
+  font-weight:800;
+  font-size:.92rem;
+  text-align:center;
+}
+.club-player-name{
+  color:var(--club-text);
+  font-size:.78rem;
+  font-weight:800;
+}
+.club-player-position{color:#7b8894;font-size:.68rem}
+.club-player-status{text-align:right;font-size:.61rem;font-weight:900}
+.club-player-status.available{color:#16865b}
+.club-player-status.injured{color:#c23f3f}
+.club-player-status.suspended{color:#b17800}
+.club-empty{
+  border:1px dashed #d9e1e8;
+  border-radius:5px;
+  padding:25px;
+  text-align:center;
+  color:#82909c;
+  font-size:.76rem;
+  background:#fbfcfd;
+}
+.club-matches-grid .card{border-radius:5px!important}
+@media(max-width:700px){
+  .official-page-head{padding:22px 18px}
+  .official-page-badge{display:none}
+  .official-page-head h1{font-size:1.65rem}
+  .club-directory-bar{align-items:flex-start;flex-direction:column;gap:5px}
+  .club-profile-head{padding:20px 48px 18px 16px}
+  .club-profile-crest,.club-profile-crest .modal-crest{width:68px!important;height:68px!important;flex-basis:68px}
+  .club-profile-title h2{font-size:1.35rem!important}
+  .club-profile-panel{padding:16px 12px 20px}
+  .club-profile-summary{grid-template-columns:1fr 1fr}
+  .club-summary-card:last-child{grid-column:1/-1}
+  .club-player{grid-template-columns:34px minmax(0,1fr) 90px}
+  .club-player-position{display:none}
+}
+</style>
