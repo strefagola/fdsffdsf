@@ -2565,7 +2565,150 @@ document.addEventListener('DOMContentLoaded',()=>{
  document.querySelectorAll('select[id$="-league"]').forEach(sel=>{sel.innerHTML=PLANET_LEAGUES.map(x=>`<option value="${x[0]}">${x[1]}</option>`).join('');sel.value='liga1'});
  planetLeagueSelect('liga1');
 });
-</script></body>
+</script>
+<style id="custom-table-league-ui">
+/* TYLKO ZMIANA WYGLĄDU — funkcje, nazwy lig i dane pozostają bez zmian */
+nav{height:56px!important;padding:0 18px!important}
+nav .tabs{display:none!important}
+.logo-wrap{min-width:auto!important}
+main{margin-top:0!important;padding-top:16px!important}
+
+/* Przyciski przechodzenia między ligami */
+#planet-league-strip{
+  display:flex!important;
+  gap:10px!important;
+  overflow-x:auto!important;
+  padding:4px 2px 12px!important;
+  margin-bottom:18px!important;
+  background:transparent!important;
+  border:0!important;
+  border-radius:0!important;
+  scrollbar-width:thin;
+}
+#planet-league-strip::-webkit-scrollbar{height:6px}
+#planet-league-strip::-webkit-scrollbar-track{background:#edf2f7;border-radius:10px}
+#planet-league-strip::-webkit-scrollbar-thumb{background:#b8c7d6;border-radius:10px}
+.planet-league-pill{
+  position:relative!important;
+  flex:0 0 auto!important;
+  min-height:48px!important;
+  padding:0 18px!important;
+  border:1px solid #d8e2ec!important;
+  border-radius:10px!important;
+  background:#fff!important;
+  color:#34495e!important;
+  font-size:.76rem!important;
+  font-weight:800!important;
+  box-shadow:0 2px 7px rgba(20,45,70,.06)!important;
+  transition:all .18s ease!important;
+  cursor:pointer!important;
+}
+.planet-league-pill:hover{
+  transform:translateY(-2px)!important;
+  border-color:#9fc7e8!important;
+  color:#0875c1!important;
+  box-shadow:0 6px 15px rgba(20,70,110,.10)!important;
+}
+.planet-league-pill.active{
+  color:#fff!important;
+  background:linear-gradient(135deg,#086bb5,#1494df)!important;
+  border-color:#086bb5!important;
+  box-shadow:0 5px 14px rgba(8,107,181,.22)!important;
+}
+
+/* Tabela */
+.table-container{
+  border:0!important;
+  border-radius:14px!important;
+  background:transparent!important;
+  overflow-x:auto!important;
+}
+.table-wrap{
+  min-width:700px!important;
+  border:1px solid #dce5ed!important;
+  border-radius:14px!important;
+  background:#fff!important;
+  box-shadow:0 5px 22px rgba(24,51,77,.07)!important;
+  overflow:hidden!important;
+}
+.table-wrap table{
+  width:100%!important;
+  border-collapse:separate!important;
+  border-spacing:0!important;
+  background:#fff!important;
+}
+.table-wrap thead th,
+.table-wrap th{
+  padding:13px 14px!important;
+  background:#f3f7fa!important;
+  color:#65788b!important;
+  border-bottom:1px solid #dce5ed!important;
+  font-size:.66rem!important;
+  font-weight:900!important;
+  letter-spacing:.45px!important;
+  text-transform:uppercase!important;
+}
+.table-wrap tbody td,
+.table-wrap td{
+  padding:13px 14px!important;
+  background:#fff!important;
+  color:#243746!important;
+  border-bottom:1px solid #edf1f5!important;
+  font-size:.82rem!important;
+  vertical-align:middle!important;
+}
+.table-wrap tbody tr:last-child td{border-bottom:0!important}
+.table-wrap tbody tr:hover td{background:#f7fbfe!important}
+.table-wrap tbody tr:nth-child(even) td{background:#fbfcfd!important}
+.table-wrap tbody tr:nth-child(even):hover td{background:#f7fbfe!important}
+.table-wrap td:first-child{
+  width:52px!important;
+  color:#718294!important;
+  font-weight:900!important;
+  text-align:center!important;
+}
+.table-wrap td:nth-child(2){font-weight:800!important;color:#1e3548!important}
+.table-wrap .table-crest{
+  width:32px!important;
+  height:32px!important;
+  border-radius:8px!important;
+  padding:3px!important;
+  background:#f7f9fb!important;
+  border:1px solid #e0e7ee!important;
+}
+.table-wrap .row-promo td:first-child{border-left:4px solid #20a56a!important}
+.table-wrap .row-barage td:first-child{border-left:4px solid #e0a323!important}
+.table-wrap .row-releg td:first-child{border-left:4px solid #d95353!important}
+
+/* Boczne przyciski lig również dostają nowy wygląd, bez zmiany ich działania */
+.side-league{
+  padding:10px 13px!important;
+  margin:2px 7px!important;
+  width:calc(100% - 14px)!important;
+  border-radius:8px!important;
+  color:#43576a!important;
+  font-weight:750!important;
+  background:#fff!important;
+  transition:all .16s ease!important;
+}
+.side-league:hover{background:#f1f7fc!important;color:#0875c1!important}
+.side-league.active{
+  background:#eaf5fd!important;
+  color:#0875c1!important;
+  border-left:3px solid #0875c1!important;
+}
+
+@media(max-width:700px){
+  nav{height:52px!important;padding:0 10px!important}
+  main{padding-top:10px!important}
+  #planet-league-strip{gap:7px!important;margin-bottom:12px!important}
+  .planet-league-pill{min-height:42px!important;padding:0 14px!important;font-size:.7rem!important}
+  .table-wrap{min-width:640px!important;border-radius:10px!important}
+  .table-wrap th,.table-wrap td{padding:10px 9px!important}
+}
+</style>
+
+</body>
 </html>
 <style id="planethc-pro-overhaul">
 :root{--fs-blue:#0b79d0;--fs-blue-dark:#075a9d;--fs-bg:#f3f6f9;--fs-card:#fff;--fs-line:#e3e8ee;--fs-text:#17212b;--fs-muted:#758291;--fs-green:#18a56b}
