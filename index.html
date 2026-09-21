@@ -288,7 +288,6 @@ input,select,textarea{background:#fff!important;color:#16202a!important;border-c
             <button class="tab" onclick="go('clubs')">Kluby</button>
             <button class="tab" onclick="go('transfers')">Transfery</button>
             <button class="tab" onclick="go('streams')">Transmisje</button>
-            <button class="tab" onclick="go('contact')">Kontakt</button>
         </div>
     </nav>
 
@@ -366,11 +365,11 @@ input,select,textarea{background:#fff!important;color:#16202a!important;border-c
     </div>
     <div class="ph-home-grid anim d2">
       <div class="ph-main-column">
-        <div class="ph-panel"><div class="ph-panel-title"><div><span>NAJBLIŻSZE</span><h2>Nadchodzące mecze</h2></div><button onclick="go('matches')">Wszystkie <i class="fa-solid fa-arrow-right"></i></button></div><div id="home-upcoming" class="grid"></div></div>
-        <div class="ph-panel"><div class="ph-panel-title"><div><span>OSTATNIE WYNIKI</span><h2>Zakończone spotkania</h2></div><button onclick="go('matches')">Pełna lista <i class="fa-solid fa-arrow-right"></i></button></div><div id="home-grid" class="grid"></div></div>
+        <div class="ph-panel"><div class="ph-panel-title"><div><h2>Nadchodzące mecze</h2></div><button onclick="go('matches')">Wszystkie <i class="fa-solid fa-arrow-right"></i></button></div><div id="home-upcoming" class="grid"></div></div>
+        <div class="ph-panel"><div class="ph-panel-title"><div><h2>Zakończone spotkania</h2></div><button onclick="go('matches')">Pełna lista <i class="fa-solid fa-arrow-right"></i></button></div><div id="home-grid" class="grid"></div></div>
       </div>
       <aside class="ph-side-column">
-        <div class="ph-panel ph-table-panel"><div class="ph-panel-title"><div><span>KLASYFIKACJA</span><h2>Top tabeli</h2></div><button onclick="go('table')"><i class="fa-solid fa-arrow-right"></i></button></div><div class="table-container"><div class="table-wrap"><table><thead><tr><th>#</th><th>Drużyna</th><th>M</th><th>Pkt</th><th>+/-</th></tr></thead><tbody id="home-tb"></tbody></table></div></div><div class="legend" id="home-legend"></div><button class="ph-wide-btn" onclick="go('table')">Otwórz pełną tabelę <i class="fa-solid fa-chevron-right"></i></button></div>
+        <div class="ph-panel ph-table-panel"><div class="ph-panel-title"><div><h2>Top tabeli</h2></div><button onclick="go('table')"><i class="fa-solid fa-arrow-right"></i></button></div><div class="table-container"><div class="table-wrap"><table><thead><tr><th>#</th><th>Drużyna</th><th>M</th><th>Pkt</th><th>+/-</th></tr></thead><tbody id="home-tb"></tbody></table></div></div><div class="legend" id="home-legend"></div><button class="ph-wide-btn" onclick="go('table')">Otwórz pełną tabelę <i class="fa-solid fa-chevron-right"></i></button></div>
         <div class="ph-panel ph-league-panel"><div class="ph-panel-title"><div><span>ROZGRYWKI</span><h2>Wybierz ligę</h2></div></div><div id="ph-league-shortcuts" class="ph-league-list"></div></div>
       </aside>
     </div>
@@ -646,28 +645,7 @@ input,select,textarea{background:#fff!important;color:#16202a!important;border-c
             <div id="posts-grid" class="grid anim d1"></div>
         </section>
 
-        <section id="contact" class="section">
-            <div class="hero anim" style="padding:2.5rem 0 1.8rem;">
-                <h1 style="font-size:2.2rem;">Kontakt</h1>
-                <p>Masz pytania, propozycje lub chcesz zgłosić błąd? Napisz do nas.</p>
-            </div>
-            <div class="contact-grid anim d1">
-                <div class="card">
-                    <h3 style="font-size:0.95rem;text-transform:uppercase;letter-spacing:1px;margin-bottom:1.4rem;color:var(--green);">Wyślij wiadomość</h3>
-                    <input type="text" id="c-name" placeholder="Imię i nazwisko">
-                    <input type="email" id="c-email" placeholder="Adres email">
-                    <input type="text" id="c-subject" placeholder="Temat">
-                    <textarea id="c-msg" placeholder="Treść wiadomości..."></textarea>
-                    <button class="btn" onclick="sendContact()">Wyślij wiadomość</button>
-                    <p id="c-status" style="margin-top:1rem;font-size:0.85rem;text-align:center;"></p>
-                </div>
-                <div class="contact-info">
-                    <div class="card contact-item"><i class="fa-solid fa-envelope"></i><div><h4>Email</h4><p>kontakt@planethc.pl</p></div></div>
-                    <div class="card contact-item"><i class="fa-solid fa-location-dot"></i><div><h4>Region</h4><p>Województwo Podkarpackie<br>Jarosław, Krosno, Rzeszów, Dębica, Stalowa Wola, Przeworsk</p></div></div>
-                    <div class="card contact-item"><i class="fa-solid fa-clock"></i><div><h4>Aktualizacje</h4><p>Wyniki aktualizowane niezwłocznie po zakończeniu spotkań.<br>Tabele weryfikowane codziennie.</p></div></div>
-                </div>
-            </div>
-        </section>
+
 
         <section id="admin" class="section">
             <div class="admin-box anim">
@@ -895,7 +873,6 @@ Adam Wiśniewski | 1 | Bramkarz | Zawieszony | 2 mecze"></textarea>
     <div class="footer-col"><h4>PlanetHC</h4><a>Polski portal piłkarski</a><a>Wyniki • Tabele • Składy</a></div>
     <div class="footer-col"><h4>Rozgrywki</h4><a onclick="go('matches')">Mecze</a><a onclick="go('table')">Tabele</a><a onclick="go('stats')">Statystyki</a></div>
     <div class="footer-col"><h4>Kluby</h4><a onclick="go('clubs')">Baza klubów</a><a onclick="go('transfers')">Transfery</a></div>
-    <div class="footer-col"><h4>Kontakt</h4><a onclick="go('contact')">Skontaktuj się</a><a>kontakt@planethc.pl</a></div>
   </div>
   <div class="footer-bottom">© 2026 PlanetHC. Polski portal piłkarski.</div>
 </footer>
@@ -2606,17 +2583,15 @@ main{max-width:1280px!important;margin:0 auto!important;padding:18px 18px 48px!i
 #matches-sub .grp-tab:not(:first-child),#table-sub .grp-tab:not(:first-child),#stats-sub .grp-tab:not(:first-child){display:none!important}
 #matches-sub .group-toggle,#table-sub .group-toggle,#stats-sub .group-toggle{display:block!important}
 #matches-sub .sub-nav,#table-sub .sub-nav,#stats-sub .sub-nav{max-height:190px!important;overflow:auto!important}
-#transfers,#posts,#contact,#clubs{margin-top:4px!important}.section>h2,.section>div>h2{color:#263746!important}
+#transfers,#posts,#clubs{margin-top:4px!important}.section>h2,.section>div>h2{color:#263746!important}
 /* profesjonalny nagłówek sekcji */
-#matches::before,#table::before,#stats::before,#clubs::before,#transfers::before,#posts::before,#contact::before{display:block;font-size:1.35rem;font-weight:850;color:#1d2b36;margin:2px 0 13px;padding-bottom:12px;border-bottom:1px solid var(--fs-line)}
-#matches::before{content:'Wyniki i mecze'}#table::before{content:'Tabele ligowe'}#stats::before{content:'Klasyfikacje i statystyki'}#clubs::before{content:'Kluby i składy'}#transfers::before{content:'Transfery'}#posts::before{content:'Aktualności'}#contact::before{content:'Kontakt'}
 #streams{display:none!important}
 @media(max-width:999px){nav{position:sticky!important}.logo-wrap{min-width:150px!important}.tabs{overflow-x:auto!important}.tab{padding:0 11px!important;font-size:.68rem!important}main{padding:10px 8px 35px!important}#home .stats-row{grid-template-columns:repeat(2,1fr)!important}.stat-item:nth-child(2){border-right:0}.stat-item:nth-child(-n+2){border-bottom:1px solid var(--fs-line)}}
 @media(max-width:600px){.logo-wrap{min-width:115px!important}.logo-text{font-size:1.05rem!important}.tabs{max-width:calc(100vw - 125px)!important}.tab{padding:0 10px!important}.hero{padding:22px!important}.hero h1{font-size:1.55rem!important}.home-section h2{font-size:.9rem!important}}
 </style>
 <script id="planethc-final-ui">
 (function(){
- const navLabels={home:'Przegląd',matches:'Wyniki',table:'Tabele',stats:'Statystyki',clubs:'Kluby',transfers:'Transfery',posts:'Aktualności',contact:'Kontakt'};
+ const navLabels={home:'Przegląd',matches:'Wyniki',table:'Tabele',stats:'Statystyki',clubs:'Kluby',transfers:'Transfery',posts:'Aktualności'};
  function clean(){
    document.querySelectorAll('nav .tab').forEach(b=>{const m=b.getAttribute('onclick')||'';const x=m.match(/go\('([^']+)'\)/);if(!x)return;const id=x[1];if(id==='streams'){b.remove();return} if(navLabels[id])b.textContent=navLabels[id];});
    const s=document.getElementById('streams');if(s)s.remove();
