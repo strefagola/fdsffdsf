@@ -3139,6 +3139,87 @@ main{max-width:1280px!important;margin:0 auto!important;padding:18px 18px 48px!i
 </style>
 
 <style id="remove-top-league-buttons">
-/* Ukryte tylko górne przyciski wyboru lig — logika wyboru lig pozostaje bez zmian. */
+/* Zastępujemy stare przyciski lig nowym, własnym przełącznikiem rozgrywek. */
 #planet-league-strip{display:none!important;}
+
+#custom-league-switcher{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:18px;
+  width:100%;
+  margin:4px 0 18px;
+  padding:12px 14px;
+  box-sizing:border-box;
+  background:linear-gradient(135deg,#0d2f4f 0%,#124d78 58%,#0b79d0 100%);
+  border:1px solid rgba(255,255,255,.14);
+  border-radius:14px;
+  box-shadow:0 8px 24px rgba(13,47,79,.16);
+}
+.custom-league-caption{
+  display:flex;align-items:center;gap:10px;min-width:0;color:#fff;
+}
+.custom-league-caption .league-switch-icon{
+  width:38px;height:38px;display:flex;align-items:center;justify-content:center;
+  border-radius:10px;background:rgba(255,255,255,.12);
+  color:#fff;font-size:16px;flex:0 0 38px;
+}
+.custom-league-caption strong{display:block;font-size:.78rem;line-height:1.1;letter-spacing:.3px}
+.custom-league-caption small{display:block;margin-top:4px;color:rgba(255,255,255,.67);font-size:.62rem}
+.custom-league-select-wrap{position:relative;min-width:290px}
+#custom-league-select{
+  width:100%;height:44px;padding:0 42px 0 14px;appearance:none;
+  border:1px solid rgba(255,255,255,.22);border-radius:10px;
+  background:rgba(255,255,255,.1);color:#fff;outline:none;
+  font:800 .76rem Inter,system-ui,sans-serif;cursor:pointer;
+  backdrop-filter:blur(8px);
+}
+#custom-league-select:hover{background:rgba(255,255,255,.16);border-color:rgba(255,255,255,.35)}
+#custom-league-select option{background:#fff;color:#17344e;font-weight:700}
+.custom-league-select-wrap::after{
+  content:'\f078';font-family:'Font Awesome 6 Free';font-weight:900;
+  position:absolute;right:15px;top:50%;transform:translateY(-50%);
+  color:#fff;font-size:.68rem;pointer-events:none;
+}
+
+@media(max-width:700px){
+  #custom-league-switcher{align-items:stretch;flex-direction:column;gap:10px;padding:11px}
+  .custom-league-select-wrap{min-width:0;width:100%}
+  #custom-league-select{height:42px}
+}
 </style>
+<script id="custom-league-switcher-script">
+(function(){
+  function buildLeagueSwitcher(){
+    if(document.getElementById('custom-league-switcher')) return;
+    if(typeof PLANET_LEAGUES==='undefined') return;
+    const main=document.querySelector('main');
+    if(!main) return;
+
+    const box=document.createElement('div');
+    box.id='custom-league-switcher';
+    box.innerHTML=`
+      <div class="custom-league-caption">
+        <div class="league-switch-icon"><i class="fa-solid fa-trophy"></i></div>
+        <div><strong>Wybierz rozgrywki</strong><small>Szybkie przejście do wybranej ligi</small></div>
+      </div>
+      <div class="custom-league-select-wrap">
+        <select id="custom-league-select" aria-label="Wybierz ligę">
+          ${PLANET_LEAGUES.map(x=>`<option value="${x[0]}">${x[1]}</option>`).join('')}
+        </select>
+      </div>`;
+
+    const first=main.firstElementChild;
+    main.insertBefore(box,first);
+
+    const select=document.getElementById('custom-league-select');
+    select.value='liga1';
+    select.addEventListener('change',function(){
+      if(typeof planetLeagueSelect==='function') planetLeagueSelect(this.value);
+    });
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',buildLeagueSwitcher);
+  else buildLeagueSwitcher();
+  setTimeout(buildLeagueSwitcher,250);
+})();
+</script>
