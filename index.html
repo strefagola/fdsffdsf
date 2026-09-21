@@ -775,6 +775,268 @@ footer{
 }
 </style>
 
+
+<style id="complete-visual-redesign">
+/* =========================================================
+   PLANETHC — CAŁKOWICIE NOWY INTERFEJS WIZUALNY
+   TYLKO CSS — logika, funkcje, nazwy lig i dane pozostają bez zmian
+   ========================================================= */
+:root{
+  --navy:#f4f7fb!important;--white:#142033!important;--muted:#6c788b!important;
+  --green:#1769e0!important;--green-glow:rgba(23,105,224,.18)!important;
+  --gold:#f0a51a!important;--border:#dfe5ee!important;--glass:#fff!important;
+  --radius:12px!important;--ease:cubic-bezier(.2,.8,.2,1)!important;
+  --promo:#e8f5e9!important;--promo-border:#20a04b!important;
+  --releg:#ffeded!important;--releg-border:#df3f3f!important;
+  --barage:#fff5df!important;--barage-border:#e19a12!important;
+}
+html{background:#f4f7fb!important}
+body{
+ background:#f4f7fb!important;color:#142033!important;font-family:Inter,Arial,sans-serif!important;
+}
+body:before{content:'';position:fixed;inset:0;pointer-events:none;z-index:-1;background:linear-gradient(135deg,rgba(23,105,224,.035),transparent 35%),linear-gradient(315deg,rgba(240,165,26,.035),transparent 30%)}
+/* LEWY PANEL / NOWA NAWIGACJA */
+nav{
+ position:fixed!important;left:0!important;top:0!important;bottom:0!important;right:auto!important;
+ width:248px!important;height:100vh!important;padding:24px 15px!important;
+ display:flex!important;flex-direction:column!important;align-items:stretch!important;justify-content:flex-start!important;
+ background:#111c2e!important;border:0!important;border-right:1px solid #22314a!important;
+ box-shadow:12px 0 35px rgba(10,25,48,.10)!important;backdrop-filter:none!important;z-index:1000!important;
+}
+.logo-wrap{display:flex!important;align-items:center!important;gap:11px!important;padding:5px 9px 24px!important;margin-bottom:14px!important;border-bottom:1px solid rgba(255,255,255,.09)!important}
+.logo-img{height:43px!important;filter:none!important}
+.logo-text{color:#fff!important;font-size:1.02rem!important;letter-spacing:.03em!important}
+.logo-text span{color:#5ea0ff!important}
+.logo-sub{color:#8795aa!important;font-size:.52rem!important;letter-spacing:1.5px!important}
+.tabs{max-width:none!important;width:100%!important;display:flex!important;flex-direction:column!important;gap:5px!important;overflow:visible!important;padding:0!important;justify-content:flex-start!important}
+.tab{
+ width:100%!important;padding:12px 13px!important;border-radius:9px!important;text-align:left!important;
+ color:#9aa8bb!important;font-size:.78rem!important;font-weight:650!important;
+ border-left:3px solid transparent!important;transition:.2s!important;
+}
+.tab:hover{color:#fff!important;background:#1b2940!important}
+.tab.active{color:#fff!important;background:#1c3968!important;box-shadow:none!important;border-left-color:#5ea0ff!important}
+/* GŁÓWNA ZAWARTOŚĆ */
+main{max-width:none!important;margin:0 0 0 248px!important;padding:38px 46px 70px!important;min-height:100vh!important}
+.section{max-width:1280px!important;margin:0 auto!important}
+/* GÓRNY KONTEKST SEKCJI */
+.sub-nav-container{margin-bottom:24px!important;background:#fff!important;border:1px solid #e1e7ef!important;border-radius:12px!important;padding:15px!important;box-shadow:0 4px 16px rgba(21,42,74,.05)!important}
+.group-toggle{background:#f0f3f8!important;border:1px solid #e0e6ef!important;border-radius:8px!important;box-shadow:none!important;padding:4px!important;margin-bottom:12px!important}
+.grp-tab{color:#657287!important;border-radius:6px!important;padding:9px 14px!important}
+.grp-tab:hover{background:#e5ebf4!important;color:#1c2c43!important;transform:none!important}
+.grp-tab.active{background:#1769e0!important;color:#fff!important;border:0!important;box-shadow:0 4px 10px rgba(23,105,224,.2)!important}
+.sub-nav{border-bottom:1px solid #e0e6ee!important;gap:3px!important}
+.sub-tab{color:#657287!important;border-radius:7px 7px 0 0!important;padding:10px 14px!important}
+.sub-tab:hover{background:#f1f4f8!important;color:#17263b!important}
+.sub-tab.active{color:#1769e0!important;background:#edf4ff!important}
+.sub-tab::after{background:#1769e0!important;box-shadow:none!important;height:2px!important}
+/* KARTY */
+.card,.table-wrap,.legend{
+ background:#fff!important;border:1px solid #e0e6ee!important;border-radius:12px!important;
+ box-shadow:0 4px 16px rgba(26,47,78,.055)!important;backdrop-filter:none!important
+}
+.card{padding:20px!important}
+.card:before{height:0!important}
+.card:hover{border-color:#c9d5e5!important;transform:translateY(-2px)!important;box-shadow:0 9px 24px rgba(26,47,78,.09)!important}
+.league-label{color:#1769e0!important;letter-spacing:1.2px!important}
+.badge-up{color:#d18b08!important}
+/* MECZE — BARDZIEJ SPORTOWA TABLICA */
+.match-row{padding:12px 0!important;margin-bottom:0!important;border-bottom:1px solid #edf0f4!important}
+.match-row:last-of-type{border-bottom:0!important}
+.team-wrap{width:41%!important}
+.team-crest,.table-crest{border-radius:7px!important;background:#f5f7fa!important;border:1px solid #dce3ec!important}
+.team-name{color:#1d2b3f!important;font-weight:650!important}
+.team-name:hover{color:#1769e0!important}
+.score-box{width:17%!important;background:#f2f5f9!important;border:1px solid #dde4ed!important;border-radius:7px!important;color:#142033!important;padding:7px 0!important}
+.score-box.vs{color:#7b8798!important;background:#f7f8fa!important}
+.match-date{margin-top:10px!important;color:#7a8799!important}
+.match-date.up{color:#1769e0!important}
+.group-title{color:#18273b!important;font-size:1rem!important;margin:28px 0 13px!important;padding-bottom:9px!important;border-bottom:2px solid #e2e7ee!important}
+.group-title i{color:#1769e0!important}
+/* TABELE */
+.table-container{border-radius:12px!important}
+.table-wrap{min-width:540px!important;overflow:hidden!important}
+table{background:#fff!important}
+th{padding:12px 13px!important;background:#f3f6fa!important;color:#69778a!important;border-bottom:1px solid #dfe5ed!important;font-size:.59rem!important}
+td{padding:11px 13px!important;border-bottom:1px solid #edf0f4!important;color:#26354a!important}
+tr:hover td{background:#f7faff!important}
+td:first-child{color:#758196!important}
+.top-pos{color:#d18b08!important;text-shadow:none!important}
+tr.row-promo td{background:#eef9f1!important}
+tr.row-promo:hover td{background:#e5f6e9!important}
+tr.row-barage td{background:#fff8e9!important}
+tr.row-barage:hover td{background:#fff1cf!important}
+tr.row-releg td{background:#fff0f0!important}
+tr.row-releg:hover td{background:#ffe7e7!important}
+.legend{padding:12px 15px!important;box-shadow:none!important}
+/* FORMULARZE / ADMIN */
+.admin-box{max-width:860px!important}
+input,select,textarea{background:#fff!important;color:#17263b!important;border:1px solid #d7dfe9!important;border-radius:8px!important;box-shadow:none!important;padding:11px 13px!important}
+input:focus,select:focus,textarea:focus{outline:none!important;border-color:#1769e0!important;box-shadow:0 0 0 3px rgba(23,105,224,.10)!important}
+button.btn,button.btn-sm,.btn,.btn-sm{border-radius:7px!important}
+.btn{background:#1769e0!important;color:#fff!important;border:0!important;box-shadow:0 3px 8px rgba(23,105,224,.16)!important}
+.btn:hover{background:#0f5ac7!important;transform:translateY(-1px)!important}
+.btn-sm{background:#eef3fa!important;color:#36506f!important;border:1px solid #d8e0eb!important}
+.btn-sm:hover{background:#dfe9f7!important;color:#1769e0!important}
+.btn-del{color:#c73a3a!important}
+/* MODALE */
+.modal-overlay{background:rgba(15,28,47,.66)!important;backdrop-filter:blur(7px)!important}
+.modal-content{background:#fff!important;color:#142033!important;border:1px solid #dce4ee!important;box-shadow:0 25px 80px rgba(7,22,43,.25)!important;border-radius:14px!important}
+.modal-title{color:#142033!important}
+.modal-header{border-bottom:1px solid #e3e8ef!important}
+.modal-crest{border-color:#dbe3ec!important;background:#f6f8fb!important}
+.modal-close{color:#738096!important}
+.modal-close:hover{color:#1769e0!important}
+/* KLUBY */
+.club-directory-card{background:#fff!important;border:1px solid #dfe5ee!important;border-radius:12px!important;box-shadow:0 4px 14px rgba(25,46,75,.05)!important;transition:.22s!important}
+.club-directory-card:hover{transform:translateY(-3px)!important;border-color:#b9cbe3!important;box-shadow:0 12px 28px rgba(25,46,75,.10)!important}
+.club-card-top{padding:17px!important}
+.club-card-crest{border-radius:9px!important;background:#f3f6fa!important;border:1px solid #dce4ee!important}
+.club-card-kicker{color:#1769e0!important}
+.club-card-name{color:#18273b!important}
+.club-card-bottom{background:#f5f7fa!important;border-top:1px solid #e3e8ef!important;color:#69778a!important}
+.club-card-arrow{color:#1769e0!important}
+/* PROFILE KLUBU */
+.club-profile-modal{background:#fff!important;border-color:#dce4ee!important;color:#17263b!important}
+.club-profile-panel{background:#fff!important}
+.club-profile-title h2{color:#17263b!important}
+.club-summary-card,.club-player{background:#f8fafc!important;border-color:#e0e6ee!important}
+/* NAGŁÓWKI I OZNACZENIA */
+.section h1,.section h2,.section h3{color:#15253a!important}
+.section h1{font-size:1.8rem!important;font-weight:800!important}
+/* SCROLLBARY */
+*{scrollbar-width:thin;scrollbar-color:#c6d0de transparent}
+::-webkit-scrollbar{width:7px;height:7px}
+::-webkit-scrollbar-thumb{background:#c6d0de;border-radius:10px}
+::-webkit-scrollbar-track{background:transparent}
+/* RESPONSYWNOŚĆ */
+@media(max-width:900px){
+ nav{width:190px!important;padding:18px 10px!important}
+ main{margin-left:190px!important;padding:28px 22px 55px!important}
+ .tab{font-size:.72rem!important;padding:10px!important}
+ .logo-text{font-size:.9rem!important}.logo-sub{display:none!important}
+}
+@media(max-width:650px){
+ nav{position:sticky!important;top:0!important;left:0!important;bottom:auto!important;width:100%!important;height:auto!important;
+   padding:9px 10px!important;display:block!important;box-shadow:0 3px 15px rgba(10,25,48,.15)!important}
+ .logo-wrap{padding:3px 5px 8px!important;margin-bottom:7px!important;border-bottom:1px solid rgba(255,255,255,.08)!important}
+ .logo-img{height:34px!important}.logo-text{font-size:.84rem!important}
+ .tabs{display:grid!important;grid-template-columns:repeat(3,1fr)!important;gap:4px!important;overflow-x:auto!important;max-height:82px!important}
+ .tab{text-align:center!important;border-left:0!important;border-bottom:2px solid transparent!important;padding:8px 4px!important;font-size:.64rem!important}
+ .tab.active{border-left:0!important;border-bottom-color:#5ea0ff!important}
+ main{margin:0!important;padding:18px 10px 40px!important}
+ .sub-nav-container{padding:10px!important;margin-bottom:15px!important}
+ .group-toggle{width:100%!important}
+ .grid{grid-template-columns:1fr!important;gap:10px!important}
+ .card{padding:14px!important}
+ .team-wrap{width:38%!important}.team-name{font-size:.78rem!important}.score-box{font-size:1.05rem!important;width:20%!important}
+ .table-wrap{min-width:500px!important}
+}
+</style>
+
+
+<style id="final-clean-redesign">
+/* FINAL CLEAN REDESIGN — WYŁĄCZNIE WARSTWA WIZUALNA */
+:root{--ui-bg:#0b1220;--ui-panel:#111a2b;--ui-panel2:#172338;--ui-line:#263550;--ui-text:#eef4ff;--ui-muted:#8fa0ba;--ui-blue:#39a7ff;--ui-blue2:#1677d2;--ui-green:#31d49a;--ui-gold:#ffc857}
+html,body{background:#0b1220!important;color:var(--ui-text)!important}
+body{font-family:Inter,Arial,sans-serif!important;background:radial-gradient(circle at 70% -10%,#17355a 0,transparent 34%),#0b1220!important}
+/* NOWY HEADER */
+nav{position:sticky!important;top:0!important;left:0!important;right:0!important;width:100%!important;height:76px!important;padding:0 34px!important;display:flex!important;flex-direction:row!important;align-items:center!important;gap:34px!important;background:rgba(11,18,32,.96)!important;border:0!important;border-bottom:1px solid #263550!important;box-shadow:0 8px 30px rgba(0,0,0,.22)!important;z-index:1000!important;backdrop-filter:blur(16px)!important}
+.logo-wrap{height:100%!important;display:flex!important;align-items:center!important;gap:12px!important;padding:0!important;margin:0!important;border:0!important;flex-shrink:0!important}
+.logo-img{height:42px!important;width:42px!important;object-fit:contain!important}
+.logo-text{font-family:Outfit,Inter,sans-serif!important;font-size:1.35rem!important;font-weight:900!important;letter-spacing:-.04em!important;color:#fff!important;text-shadow:none!important}
+.logo-text span{color:#39a7ff!important}
+.logo-sub{color:#8294ad!important;font-size:.54rem!important;text-transform:uppercase!important;letter-spacing:2px!important}
+.tabs{display:flex!important;align-items:center!important;gap:5px!important;width:auto!important;max-width:none!important;overflow:visible!important;margin-left:auto!important}
+.tab{position:relative!important;width:auto!important;padding:10px 13px!important;border-radius:9px!important;border:1px solid transparent!important;color:#8fa0ba!important;background:transparent!important;font-size:.76rem!important;font-weight:700!important;white-space:nowrap!important;text-align:center!important;transition:.18s!important}
+.tab:hover{color:#fff!important;background:#172338!important;border-color:#263550!important}
+.tab.active{color:#fff!important;background:linear-gradient(135deg,#1677d2,#2196f3)!important;border-color:#39a7ff!important;box-shadow:0 5px 18px rgba(25,145,235,.28)!important}
+/* mniej potrzebnych pozycji — funkcje JS nadal istnieją */
+.tab[onclick="go('contact')"]{display:none!important}
+/* GŁÓWNY OBSZAR */
+main{margin:0!important;max-width:1400px!important;padding:32px 38px 70px!important;min-height:calc(100vh - 76px)!important}
+.section{max-width:1320px!important;margin:0 auto!important}
+.section h1,.section h2,.section h3{color:#f3f7ff!important}
+/* NAWIGACJA WEWNĘTRZNA */
+.sub-nav-container{background:#111a2b!important;border:1px solid #263550!important;border-radius:14px!important;padding:13px!important;margin-bottom:22px!important;box-shadow:0 10px 28px rgba(0,0,0,.16)!important}
+.group-toggle{background:#0c1525!important;border:1px solid #263550!important;border-radius:10px!important;padding:4px!important;margin-bottom:10px!important}
+.grp-tab{color:#8fa0ba!important;border-radius:7px!important;padding:9px 15px!important;font-weight:750!important}
+.grp-tab:hover{color:#fff!important;background:#172338!important}
+.grp-tab.active{color:#fff!important;background:#1677d2!important;box-shadow:0 4px 14px rgba(22,119,210,.3)!important}
+.sub-nav{border-bottom:1px solid #263550!important;gap:4px!important}
+.sub-tab{color:#8fa0ba!important;background:transparent!important;border-radius:8px 8px 0 0!important;padding:10px 14px!important;font-weight:700!important}
+.sub-tab:hover{color:#fff!important;background:#172338!important}
+.sub-tab.active{color:#fff!important;background:#18395e!important}
+.sub-tab::after{background:#39a7ff!important;height:3px!important;box-shadow:0 0 12px rgba(57,167,255,.45)!important}
+/* PLANET / DYNAMICZNE NAZWY — ZAWSZE KONTRASTOWE */
+.dynamic-leagues .sub-tab,.grp-okr .sub-tab,.grp-a .sub-tab,.grp-b .sub-tab{color:#dce8f8!important;background:#111a2b!important}
+.dynamic-leagues .sub-tab:hover,.grp-okr .sub-tab:hover,.grp-a .sub-tab:hover,.grp-b .sub-tab:hover{color:#fff!important;background:#1b2b43!important}
+.dynamic-leagues .sub-tab.active,.grp-okr .sub-tab.active,.grp-a .sub-tab.active,.grp-b .sub-tab.active{color:#fff!important;background:linear-gradient(135deg,#1677d2,#2196f3)!important}
+/* KARTY */
+.card,.table-wrap,.legend{background:#111a2b!important;color:#eef4ff!important;border:1px solid #263550!important;border-radius:14px!important;box-shadow:0 10px 28px rgba(0,0,0,.16)!important}
+.card{padding:20px!important}
+.card:hover{border-color:#365174!important;transform:translateY(-2px)!important}
+.card *{color:inherit}
+.league-label{color:#4db1ff!important}
+.badge-up{color:#31d49a!important}
+/* MECZE */
+.match-row{border-bottom:1px solid #263550!important;padding:14px 4px!important}
+.team-name{color:#f3f7ff!important;font-weight:750!important}
+.team-name:hover{color:#39a7ff!important}
+.team-crest,.table-crest{background:#0b1525!important;border:1px solid #2b3d59!important}
+.score-box{background:#0b1525!important;border:1px solid #2b3d59!important;color:#fff!important;border-radius:9px!important}
+.score-box.vs{background:#172338!important;color:#9eb0c8!important}
+.match-date{color:#8fa0ba!important}
+.match-date.up{color:#39a7ff!important}
+.group-title{color:#f2f6fd!important;border-bottom:1px solid #263550!important}
+.group-title i{color:#39a7ff!important}
+/* TABELE */
+.table-wrap{overflow:auto!important}
+table{background:#111a2b!important;color:#eef4ff!important}
+th{background:#172338!important;color:#91a3bc!important;border-bottom:1px solid #2a3b56!important}
+td{color:#e6edf7!important;border-bottom:1px solid #202e45!important}
+tr:hover td{background:#18273d!important}
+td:first-child{color:#9eafc6!important}
+tr.row-promo td{background:rgba(49,212,154,.10)!important}
+tr.row-barage td{background:rgba(255,200,87,.10)!important}
+tr.row-releg td{background:rgba(255,82,82,.10)!important}
+/* PRZYCISKI */
+.btn,.btn-sm,button.btn,button.btn-sm{font-weight:750!important;border-radius:8px!important}
+.btn{background:linear-gradient(135deg,#1677d2,#2196f3)!important;color:#fff!important;border:1px solid #39a7ff!important;box-shadow:0 5px 16px rgba(22,119,210,.22)!important}
+.btn:hover{filter:brightness(1.08)!important;transform:translateY(-1px)!important}
+.btn-sm{background:#172338!important;color:#dce8f8!important;border:1px solid #2c405e!important}
+.btn-sm:hover{background:#21324b!important;color:#fff!important}
+.btn-del{color:#ff8585!important}
+/* FORMULARZE */
+input,select,textarea{background:#0d1727!important;color:#eef4ff!important;border:1px solid #2a3b56!important;border-radius:9px!important}
+input::placeholder,textarea::placeholder{color:#687b96!important}
+input:focus,select:focus,textarea:focus{outline:none!important;border-color:#39a7ff!important;box-shadow:0 0 0 3px rgba(57,167,255,.12)!important}
+select option{background:#111a2b!important;color:#fff!important}
+/* MODALE */
+.modal-overlay{background:rgba(2,7,15,.78)!important;backdrop-filter:blur(9px)!important}
+.modal-content,.club-profile-modal{background:#111a2b!important;color:#eef4ff!important;border:1px solid #2b3d59!important;border-radius:16px!important;box-shadow:0 30px 90px rgba(0,0,0,.45)!important}
+.modal-title,.club-profile-title h2{color:#fff!important}
+.modal-header{border-bottom:1px solid #263550!important}
+.modal-close{color:#91a3bc!important}
+.modal-close:hover{color:#fff!important;background:#1c2d45!important}
+.modal-crest,.club-profile-crest{background:#0b1525!important;border-color:#2b3d59!important}
+/* KLUBY */
+.club-directory-card{background:#111a2b!important;color:#fff!important;border:1px solid #263550!important;border-radius:14px!important;box-shadow:0 10px 26px rgba(0,0,0,.16)!important}
+.club-directory-card:hover{border-color:#3c608b!important;transform:translateY(-3px)!important}
+.club-card-top{padding:18px!important}
+.club-card-crest{background:#0b1525!important;border-color:#2b3d59!important}
+.club-card-kicker{color:#39a7ff!important}
+.club-card-name{color:#fff!important}
+.club-card-bottom{background:#0d1727!important;border-top:1px solid #263550!important;color:#91a3bc!important}
+.club-card-arrow{color:#39a7ff!important}
+.club-summary-card,.club-player{background:#0d1727!important;color:#eef4ff!important;border-color:#263550!important}
+/* WSZELKIE POMOCNICZE TEKSTY */
+.muted,.text-muted,.small-muted{color:#91a3bc!important}
+/* MOBILE */
+@media(max-width:1050px){nav{padding:0 18px!important;gap:18px!important}.tabs{gap:2px!important}.tab{padding:9px 9px!important;font-size:.69rem!important}main{padding:25px 20px 60px!important}}
+@media(max-width:760px){nav{height:auto!important;min-height:70px!important;display:block!important;padding:10px!important}.logo-wrap{height:42px!important;justify-content:center!important}.tabs{display:grid!important;grid-template-columns:repeat(3,1fr)!important;margin-top:8px!important;gap:5px!important}.tab{padding:8px 5px!important;font-size:.65rem!important}.tab[onclick="go('contact')"]{display:none!important}main{padding:16px 10px 45px!important}.sub-nav-container{padding:9px!important}.sub-nav{overflow-x:auto!important}.sub-tab{font-size:.68rem!important;padding:9px 11px!important}.card{padding:14px!important}.table-wrap{min-width:0!important}}
+</style>
+
 </head>
 <body>
 
@@ -794,7 +1056,6 @@ footer{
             <button class="tab" onclick="go('clubs')">Kluby</button>
             <button class="tab" onclick="go('transfers')">Transfery</button>
             <button class="tab" onclick="go('streams')">Transmisje</button>
-            <button class="tab" onclick="go('contact')">Kontakt</button>
         </div>
     </nav>
 
@@ -3114,8 +3375,6 @@ main{max-width:1280px!important;margin:0 auto!important;padding:18px 18px 48px!i
 #matches-sub .sub-nav,#table-sub .sub-nav,#stats-sub .sub-nav{max-height:190px!important;overflow:auto!important}
 #transfers,#posts,#contact,#clubs{margin-top:4px!important}.section>h2,.section>div>h2{color:#263746!important}
 /* profesjonalny nagłówek sekcji */
-#matches::before,#table::before,#stats::before,#clubs::before,#transfers::before,#posts::before,#contact::before{display:block;font-size:1.35rem;font-weight:850;color:#1d2b36;margin:2px 0 13px;padding-bottom:12px;border-bottom:1px solid var(--fs-line)}
-#matches::before{content:'Wyniki i mecze'}#table::before{content:'Tabele ligowe'}#stats::before{content:'Klasyfikacje i statystyki'}#clubs::before{content:'Kluby i składy'}#transfers::before{content:'Transfery'}#posts::before{content:'Aktualności'}#contact::before{content:'Kontakt'}
 #streams{display:none!important}
 @media(max-width:999px){nav{position:sticky!important}.logo-wrap{min-width:150px!important}.tabs{overflow-x:auto!important}.tab{padding:0 11px!important;font-size:.68rem!important}main{padding:10px 8px 35px!important}#home .stats-row{grid-template-columns:repeat(2,1fr)!important}.stat-item:nth-child(2){border-right:0}.stat-item:nth-child(-n+2){border-bottom:1px solid var(--fs-line)}}
 @media(max-width:600px){.logo-wrap{min-width:115px!important}.logo-text{font-size:1.05rem!important}.tabs{max-width:calc(100vw - 125px)!important}.tab{padding:0 10px!important}.hero{padding:22px!important}.hero h1{font-size:1.55rem!important}.home-section h2{font-size:.9rem!important}}
@@ -3518,4 +3777,54 @@ main{max-width:1280px!important;margin:0 auto!important;padding:18px 18px 48px!i
 .club-profile-modal{max-height:90vh!important;overflow-y:auto!important}
 .club-profile-modal .club-profile-panel{overflow:visible!important}
 .club-squad-table{max-height:none!important;overflow:visible!important}
+</style>
+
+
+<style id="contrast-and-cleanup-final">
+/* FINAL CONTRAST + CLEANUP */
+html,body{background:#eef2f6!important;color:#182434!important}
+body,body *{text-rendering:optimizeLegibility}
+nav{background:#101b2d!important;border-color:#25344c!important;color:#eef4fb!important}
+nav .logo-text,nav .logo-text span{color:#fff!important}
+nav .logo-text span{color:#69a8ff!important}
+nav .logo-sub{color:#93a2b5!important}
+nav .tab{color:#aeb9c8!important;background:transparent!important}
+nav .tab:hover{color:#fff!important;background:#1b2a40!important}
+nav .tab.active{color:#fff!important;background:#24518c!important;border-left-color:#69a8ff!important}
+.section h1,.section h2,.section h3,.section h4{color:#182434!important}
+.card,.table-wrap,.legend,.ph-panel,.sub-nav-container,.club-directory-card,.club-profile-modal,.modal-content{color:#182434!important}
+.card p,.card small,.legend-item,.match-date,.stat-label,.club-card-bottom,.club-profile-meta{color:#68778a!important}
+.team-name,.club-card-name,.player-row,.club-player-name,.ph-panel-title h2{color:#1b2a3d!important}
+.ph-score-big{color:#ffffff!important}
+.ph-score-big span{color:#bfe7ff!important}
+.official-page-badge{color:#fff!important;background:rgba(9,44,82,.36)!important}
+.official-page-badge span,.official-page-badge small{color:#fff!important}
+.official-page-head h1,.official-page-head p,.official-kicker{color:#fff!important}
+.official-page-head h1 span{color:#dff2ff!important}
+.ph-welcome,.ph-welcome *{color:#fff!important}
+.ph-welcome h1 span{color:#bfe7ff!important}
+.ph-primary{color:#0e4f8d!important;background:#fff!important}
+.ph-secondary{color:#fff!important;background:rgba(8,45,84,.20)!important}
+.grp-tab{color:#415267!important}
+.grp-tab:hover{color:#17365d!important;background:#e9eef5!important}
+.grp-tab.active{color:#fff!important;background:#1769e0!important}
+.sub-tab{color:#526278!important}
+.sub-tab:hover{color:#174f8f!important;background:#eef3f8!important}
+.sub-tab.active{color:#1769e0!important;background:#eaf3fe!important}
+.btn-sm{color:#40536b!important;background:#edf2f7!important}
+.btn-sm:hover{color:#1769e0!important;background:#e1ebf7!important}
+th{color:#68778a!important;background:#f2f5f8!important}
+td{color:#26374c!important}
+td .team-name{color:#26374c!important}
+input,select,textarea{color:#182434!important;background:#fff!important}
+input::placeholder,textarea::placeholder{color:#8794a5!important}
+select option{color:#182434!important;background:#fff!important}
+#home .ph-panel-title>div>span{display:none!important}
+#matches::before,#table::before,#stats::before,#clubs::before,#transfers::before,#posts::before,#contact::before{display:none!important;content:none!important}
+nav .tab[onclick="go('contact')"]{display:none!important}
+@media(max-width:999px){
+  nav{position:sticky!important;background:#101b2d!important}
+  nav .tab{background:transparent!important}
+  nav .tab.active{background:#24518c!important}
+}
 </style>
