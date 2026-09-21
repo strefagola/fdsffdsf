@@ -269,7 +269,513 @@ main{max-width:1280px!important;margin:84px auto 0!important;padding:0 14px 50px
 input,select,textarea{background:#fff!important;color:#16202a!important;border-color:#d9e0e7!important;border-radius:4px!important;padding:10px 11px!important}.modal-overlay{background:rgba(12,23,35,.55)!important}.modal-content{background:#fff!important;border:1px solid var(--fs-line)!important;box-shadow:0 8px 35px rgba(0,0,0,.18)!important;border-radius:6px!important;color:var(--fs-text)!important}footer{background:#fff!important;border-top:1px solid var(--fs-line)!important;color:#65717d!important}
 #planet-league-strip{display:flex;gap:6px;overflow-x:auto;padding:8px 10px;background:#fff;border:1px solid var(--fs-line);border-radius:5px;margin-bottom:12px;scrollbar-width:none}#planet-league-strip::-webkit-scrollbar{display:none}.planet-league-pill{flex:0 0 auto;padding:7px 12px;border:1px solid var(--fs-line);border-radius:4px;background:#fff;color:#65717d;font-size:.72rem;font-weight:700}.planet-league-pill.active{background:#eaf5fd;color:var(--fs-blue);border-color:#b9dbf2}
 @media(min-width:1000px){#planet-layout{display:grid;grid-template-columns:190px minmax(0,1fr);gap:12px;align-items:start}#planet-sidebar{display:block;position:sticky;top:76px}#planet-sidebar .side-box{background:#fff;border:1px solid var(--fs-line);border-radius:5px;overflow:hidden;margin-bottom:10px}#planet-sidebar h4{font-size:.67rem;text-transform:uppercase;letter-spacing:.8px;color:#89939d;padding:10px 12px;border-bottom:1px solid var(--fs-line)}.side-league{display:block;width:100%;padding:9px 12px;text-align:left;font-size:.74rem;color:#5d6873;background:#fff}.side-league:hover{background:#f4f8fb;color:var(--fs-blue)}.side-league.active{background:#eaf5fd;color:var(--fs-blue);font-weight:700;border-left:3px solid var(--fs-blue)}}@media(max-width:999px){#planet-sidebar{display:none}}@media(max-width:700px){nav{height:56px!important;padding:0 10px!important}.logo-sub{display:none}.logo-text{font-size:1rem!important}.tabs{overflow-x:auto}.tab{height:56px;padding:0 9px!important;font-size:.68rem!important}main{margin-top:70px!important;padding:0 8px 35px!important}}
-</style></head>
+</style>
+<style id="podkarpackielive-inspired-skin">
+/* ===== Portalowy wygląd inspirowany układem serwisów sportowych Podkarpacia =====
+   Tylko warstwa wizualna — funkcje, Firebase, identyfikatory i nazwy lig pozostają bez zmian. */
+:root{
+  --fs-blue:#0877c9;
+  --fs-blue-dark:#075d9f;
+  --fs-navy:#102d49;
+  --fs-text:#172532;
+  --fs-muted:#71808d;
+  --fs-bg:#f1f4f7;
+  --fs-panel:#fff;
+  --fs-line:#dfe5ea;
+  --fs-soft:#f7f9fb;
+  --fs-green:#159447;
+  --fs-red:#d83b3b;
+  --fs-shadow:0 2px 10px rgba(22,45,66,.07);
+}
+
+/* strona */
+html,body{background:var(--fs-bg)!important;color:var(--fs-text)!important}
+body{
+  font-family:Arial,Helvetica,sans-serif!important;
+  background-image:none!important;
+  line-height:1.45!important;
+}
+h1,h2,h3,.logo-text{font-family:Arial,Helvetica,sans-serif!important;letter-spacing:0!important}
+
+/* górny pasek — prosty, informacyjny portal sportowy */
+nav{
+  position:fixed!important;
+  height:70px!important;
+  padding:0 max(16px,calc((100vw - 1260px)/2))!important;
+  background:#fff!important;
+  border-bottom:1px solid #dfe5ea!important;
+  box-shadow:0 2px 8px rgba(15,42,65,.08)!important;
+  backdrop-filter:none!important;
+  -webkit-backdrop-filter:none!important;
+}
+.logo-wrap{gap:10px!important}
+.logo-img{height:42px!important;filter:none!important}
+.logo-text{
+  font-size:20px!important;
+  font-weight:800!important;
+  color:var(--fs-navy)!important;
+}
+.logo-text span{color:var(--fs-blue)!important}
+.logo-sub{
+  font-size:9px!important;
+  letter-spacing:1.2px!important;
+  color:#8a969f!important;
+}
+.tabs{
+  height:70px!important;
+  gap:0!important;
+  max-width:none!important;
+  justify-content:flex-end!important;
+  padding:0!important;
+}
+.tab{
+  height:70px!important;
+  display:flex!important;
+  align-items:center!important;
+  padding:0 14px!important;
+  border-radius:0!important;
+  border-bottom:3px solid transparent!important;
+  color:#5f6c77!important;
+  font-size:13px!important;
+  font-weight:700!important;
+}
+.tab:hover{
+  background:#f4f7fa!important;
+  color:var(--fs-blue)!important;
+}
+.tab.active{
+  color:var(--fs-blue)!important;
+  background:#fff!important;
+  border-bottom-color:var(--fs-blue)!important;
+  box-shadow:none!important;
+}
+
+/* główny kontener */
+main{
+  max-width:1260px!important;
+  margin:88px auto 0!important;
+  padding:0 14px 45px!important;
+}
+#planet-layout{
+  gap:14px!important;
+}
+#planet-content{min-width:0}
+
+/* pasek lig */
+#planet-league-strip{
+  background:#fff!important;
+  border:1px solid var(--fs-line)!important;
+  border-radius:4px!important;
+  box-shadow:var(--fs-shadow)!important;
+  padding:7px 8px!important;
+  margin-bottom:12px!important;
+}
+.planet-league-pill{
+  border:1px solid #dce3e8!important;
+  border-radius:3px!important;
+  background:#fff!important;
+  color:#5c6872!important;
+  padding:7px 11px!important;
+  font-size:12px!important;
+}
+.planet-league-pill:hover{
+  border-color:#b8d2e5!important;
+  color:var(--fs-blue)!important;
+  background:#f4f9fd!important;
+}
+.planet-league-pill.active{
+  background:#e9f4fb!important;
+  border-color:#b8d8ed!important;
+  color:var(--fs-blue)!important;
+}
+
+/* lewy panel lig */
+@media(min-width:1000px){
+  #planet-layout{grid-template-columns:205px minmax(0,1fr)!important}
+  #planet-sidebar{top:82px!important}
+}
+#planet-sidebar .side-box{
+  background:#fff!important;
+  border:1px solid var(--fs-line)!important;
+  border-radius:4px!important;
+  box-shadow:var(--fs-shadow)!important;
+}
+#planet-sidebar h4{
+  background:#f5f7f9!important;
+  color:#7b8790!important;
+  font-size:11px!important;
+  padding:11px 12px!important;
+}
+.side-league{
+  padding:9px 12px!important;
+  font-size:12px!important;
+  border-bottom:1px solid #eef1f3!important;
+}
+.side-league:last-child{border-bottom:0!important}
+.side-league:hover{
+  background:#f1f7fb!important;
+  color:var(--fs-blue)!important;
+}
+.side-league.active{
+  background:#e9f4fb!important;
+  color:var(--fs-blue)!important;
+  border-left:3px solid var(--fs-blue)!important;
+}
+
+/* sekcje i nawigacja lig */
+.sub-nav-container{
+  background:#fff!important;
+  border:1px solid var(--fs-line)!important;
+  border-radius:4px!important;
+  box-shadow:var(--fs-shadow)!important;
+  padding:0!important;
+  margin-bottom:13px!important;
+}
+.group-toggle{
+  width:100%!important;
+  margin:0!important;
+  padding:5px!important;
+  background:#f5f7f9!important;
+  border:0!important;
+  border-bottom:1px solid var(--fs-line)!important;
+  border-radius:4px 4px 0 0!important;
+  box-shadow:none!important;
+}
+.grp-tab{
+  padding:8px 12px!important;
+  border-radius:3px!important;
+  color:#66737e!important;
+  font-size:12px!important;
+}
+.grp-tab.active{
+  background:#e8f3fb!important;
+  color:var(--fs-blue)!important;
+  box-shadow:none!important;
+}
+.sub-nav{
+  border:0!important;
+  padding:2px 5px!important;
+}
+.sub-tab{
+  padding:9px 11px!important;
+  border-radius:3px!important;
+  font-size:12px!important;
+  color:#63717c!important;
+}
+.sub-tab:hover{
+  background:#f4f8fb!important;
+  color:var(--fs-blue)!important;
+}
+.sub-tab.active{
+  background:#edf6fc!important;
+  color:var(--fs-blue)!important;
+}
+.sub-tab::after{
+  background:var(--fs-blue)!important;
+  height:2px!important;
+  box-shadow:none!important;
+}
+
+/* karty meczowe — bardziej jak portal wyników */
+.grid{
+  gap:10px!important;
+}
+.card{
+  background:#fff!important;
+  border:1px solid var(--fs-line)!important;
+  border-radius:4px!important;
+  box-shadow:var(--fs-shadow)!important;
+  backdrop-filter:none!important;
+  -webkit-backdrop-filter:none!important;
+}
+.card:hover{
+  transform:none!important;
+  border-color:#c9d8e3!important;
+  box-shadow:0 4px 14px rgba(22,45,66,.09)!important;
+}
+.card::before{display:none!important}
+.card .league-label{
+  padding:9px 12px!important;
+  margin:0!important;
+  background:#f6f8fa!important;
+  border-bottom:1px solid var(--fs-line)!important;
+  color:var(--fs-blue)!important;
+  font-size:10px!important;
+  letter-spacing:.7px!important;
+}
+.match-row{
+  padding:12px!important;
+  margin:0!important;
+}
+.team-name{
+  font-size:13px!important;
+  font-weight:700!important;
+  color:#263746!important;
+}
+.team-name:hover{color:var(--fs-blue)!important}
+.team-crest{
+  width:29px!important;
+  height:29px!important;
+  border-radius:50%!important;
+  border:1px solid #e0e6eb!important;
+  background:#fff!important;
+}
+.score-box{
+  width:20%!important;
+  padding:4px 0!important;
+  border:0!important;
+  border-radius:3px!important;
+  background:transparent!important;
+  color:#172532!important;
+  font-size:17px!important;
+}
+.score-box.vs{
+  font-size:12px!important;
+  color:#89949d!important;
+}
+.match-date{
+  padding:7px 12px!important;
+  margin:0!important;
+  text-align:left!important;
+  background:#fbfcfd!important;
+  border-top:1px solid #edf0f2!important;
+  font-size:10px!important;
+}
+.match-date.up{color:var(--fs-blue)!important}
+.match-action{
+  margin:0 12px 12px!important;
+  width:calc(100% - 24px)!important;
+  border:1px solid #dfe5ea!important;
+  border-radius:3px!important;
+  background:#fff!important;
+  color:#66747f!important;
+  font-size:11px!important;
+}
+.match-action:hover{
+  background:#f2f8fc!important;
+  color:var(--fs-blue)!important;
+}
+
+/* nagłówki sekcji */
+.group-title{
+  margin:18px 0 8px!important;
+  font-size:14px!important;
+  font-weight:800!important;
+  color:#3f4d58!important;
+  text-transform:none!important;
+  letter-spacing:0!important;
+}
+.group-title i{color:var(--fs-blue)!important}
+
+/* tabela */
+.table-container{
+  background:#fff!important;
+  border:1px solid var(--fs-line)!important;
+  border-radius:4px!important;
+  box-shadow:var(--fs-shadow)!important;
+}
+.table-wrap{
+  border:0!important;
+  border-radius:0!important;
+  box-shadow:none!important;
+  min-width:620px!important;
+  background:#fff!important;
+}
+th{
+  padding:9px 10px!important;
+  background:#f5f7f9!important;
+  color:#788590!important;
+  border-bottom:1px solid var(--fs-line)!important;
+  font-size:10px!important;
+}
+td{
+  padding:9px 10px!important;
+  border-bottom:1px solid #edf0f2!important;
+  font-size:12px!important;
+}
+tr:hover td{background:#f7fafc!important}
+td:first-child{
+  width:40px!important;
+  color:#8a969f!important;
+}
+.table-crest{width:28px!important;height:28px!important}
+.team-cell{gap:9px!important}
+
+/* legenda */
+.legend{
+  margin-top:10px!important;
+  padding:9px 11px!important;
+  background:#fff!important;
+  border:1px solid var(--fs-line)!important;
+  border-radius:4px!important;
+  box-shadow:none!important;
+}
+.legend-item{font-size:11px!important}
+
+/* Start — bardziej redakcyjny panel */
+.ph-dashboard{max-width:none!important}
+.ph-welcome{
+  border-radius:4px!important;
+  padding:27px 30px!important;
+  background:linear-gradient(120deg,#0b4f83 0%,#0877c9 62%,#168ed4 100%)!important;
+  box-shadow:0 4px 18px rgba(13,70,110,.15)!important;
+}
+.ph-welcome h1{
+  font-size:31px!important;
+  font-weight:800!important;
+}
+.ph-welcome h1 span{color:#bfe4fb!important}
+.ph-welcome p{
+  color:rgba(255,255,255,.86)!important;
+  font-size:13px!important;
+}
+.ph-primary,.ph-secondary{
+  border-radius:3px!important;
+  font-size:12px!important;
+}
+.ph-metrics{
+  border-radius:4px!important;
+  margin:12px 0!important;
+}
+.ph-metrics>div{padding:14px 16px!important}
+.ph-home-grid{
+  gap:12px!important;
+}
+.ph-panel{
+  background:#fff!important;
+  border:1px solid var(--fs-line)!important;
+  border-radius:4px!important;
+  box-shadow:var(--fs-shadow)!important;
+  padding:15px!important;
+}
+.ph-panel-title{
+  border-bottom:1px solid #edf0f2!important;
+  padding-bottom:10px!important;
+  margin-bottom:11px!important;
+}
+.ph-panel-title span{color:var(--fs-blue)!important;font-size:9px!important}
+.ph-panel-title h2{font-size:16px!important;color:#253744!important}
+.ph-panel-title button{color:#6e7b85!important}
+.ph-panel-title button:hover{color:var(--fs-blue)!important}
+.ph-panel .card{
+  border-radius:4px!important;
+}
+.ph-league-list button{
+  border-radius:3px!important;
+  background:#fafbfd!important;
+  border-color:#e2e7eb!important;
+  font-size:11px!important;
+}
+.ph-league-list button:hover{
+  background:#eef7fc!important;
+  color:var(--fs-blue)!important;
+}
+
+/* kluby */
+.club-directory-bar{
+  background:#fff!important;
+  border:1px solid var(--fs-line)!important;
+  border-radius:4px!important;
+  box-shadow:var(--fs-shadow)!important;
+}
+.club-directory-card{
+  background:#fff!important;
+  border:1px solid var(--fs-line)!important;
+  border-radius:4px!important;
+  box-shadow:var(--fs-shadow)!important;
+}
+.club-directory-card:hover{
+  border-color:#bcd4e5!important;
+  box-shadow:0 4px 14px rgba(22,45,66,.09)!important;
+}
+
+/* modale — biały, czysty profil */
+.modal-overlay{
+  background:rgba(10,25,38,.58)!important;
+  backdrop-filter:blur(2px)!important;
+}
+.modal-content{
+  background:#fff!important;
+  color:var(--fs-text)!important;
+  border:1px solid #dce4ea!important;
+  border-radius:5px!important;
+  box-shadow:0 12px 40px rgba(10,30,48,.24)!important;
+}
+.modal-close{color:#7b8790!important}
+.modal-close:hover{color:var(--fs-blue)!important}
+
+/* formularze / panel admina */
+input,select,textarea{
+  background:#fff!important;
+  color:#1c2b36!important;
+  border:1px solid #d7e0e6!important;
+  border-radius:3px!important;
+}
+input:focus,select:focus,textarea:focus{
+  border-color:#8bbbdc!important;
+  background:#fff!important;
+  box-shadow:0 0 0 3px rgba(8,119,201,.10)!important;
+}
+.btn{
+  background:var(--fs-blue)!important;
+  border-radius:3px!important;
+  box-shadow:none!important;
+}
+.btn:hover{
+  background:var(--fs-blue-dark)!important;
+  transform:none!important;
+  box-shadow:none!important;
+}
+.btn-sm{
+  border-radius:3px!important;
+}
+
+/* stopka */
+footer{
+  background:#fff!important;
+  border-top:1px solid var(--fs-line)!important;
+}
+.footer-col h4{color:var(--fs-blue)!important}
+.footer-col a:hover{color:var(--fs-blue)!important}
+
+/* mobile */
+@media(max-width:999px){
+  nav{
+    height:60px!important;
+    padding:0 10px!important;
+  }
+  .logo-img{height:36px!important}
+  .logo-text{font-size:17px!important}
+  .tabs{height:60px!important;overflow-x:auto!important}
+  .tab{height:60px!important;padding:0 10px!important;font-size:11px!important}
+  main{
+    margin-top:72px!important;
+    padding:0 8px 35px!important;
+  }
+  #planet-league-strip{
+    margin-left:0!important;
+    margin-right:0!important;
+  }
+  .ph-welcome{
+    padding:22px!important;
+  }
+  .ph-welcome h1{font-size:25px!important}
+  .ph-home-grid{grid-template-columns:1fr!important}
+}
+@media(max-width:520px){
+  .logo-sub{display:none!important}
+  .logo-text{font-size:16px!important}
+  .tab{padding:0 8px!important;font-size:10px!important}
+  .ph-welcome{padding:18px!important}
+  .ph-welcome h1{font-size:22px!important}
+  .ph-metrics{grid-template-columns:1fr!important}
+  .ph-panel{padding:11px!important}
+  .team-name{font-size:12px!important}
+  .score-box{font-size:15px!important}
+}
+</style>
+
+</head>
 <body>
 
     <nav>
