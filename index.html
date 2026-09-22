@@ -1798,7 +1798,7 @@ async function sendContact(){
             ids.forEach(id=>{
                 const el=document.getElementById(id);
                 if(!el) return;
-                el.innerHTML=Object.keys(L).map(k=>`<option value="${k}">${L[k]}</option>`).join('');
+                el.innerHTML=Object.keys(L).map(k=>`<option value="${k}">${L[k]}</option>`).join('') + (['mb-league','mbr-league','mbru-league'].includes(id) ? '<option value="friendly">Mecz towarzyski</option>' : '');
             });
         }
 
