@@ -296,6 +296,11 @@ nav .tab{height:42px!important;margin:auto 2px!important;padding:0 14px!importan
 @media(max-width:760px){.mp-lineup-grid,.detail-lineups{grid-template-columns:1fr}.mp-event-form{grid-template-columns:1fr 1fr}.mp-event-form #mp-event-note{grid-column:1/2}.mp-event-form .btn{grid-column:1/-1}.mp-event-row{grid-template-columns:46px minmax(0,1fr) 34px}.mp-event-team{display:none}.detail-event{grid-template-columns:46px 1fr}.detail-event small{display:none}.detail-teams{gap:8px}.detail-teams>div{font-size:.76rem}.detail-teams .team-crest{width:30px!important;height:30px!important}}
 </style>
 
+
+<style id="admin-match-filters-fix">
+.admin-match-filter{transition:.18s ease;}
+.admin-match-filter.active{background:var(--green-glow)!important;color:var(--green)!important;border-color:var(--green)!important;}
+</style>
 </head>
 <body>
 
@@ -800,6 +805,12 @@ Orzeł vs Wisłoka, 2026-09-21, 17:00, 0:0"></textarea>
                             </div>
                         </div>
                         <h3 style="font-size:0.75rem;color:var(--muted);margin-bottom:1.1rem;text-transform:uppercase;letter-spacing:1.2px;">Baza Spotkań</h3>
+                        <div class="admin-match-filters" style="display:flex;gap:8px;flex-wrap:wrap;margin:0 0 1rem;">
+                            <button type="button" class="btn-sm admin-match-filter active" data-filter="upcoming" onclick="filterAdminMatches('upcoming',this)">Nadchodzące</button>
+                            <button type="button" class="btn-sm admin-match-filter" data-filter="finished" onclick="filterAdminMatches('finished',this)">Wyniki</button>
+                            <button type="button" class="btn-sm admin-match-filter" data-filter="friendly" onclick="filterAdminMatches('friendly',this)">Mecze towarzyskie</button>
+                            <button type="button" class="btn-sm admin-match-filter" data-filter="all" onclick="filterAdminMatches('all',this)">Wszystkie</button>
+                        </div>
                         <div id="admin-mlist" class="grid"></div>
                     </div>
 
@@ -981,7 +992,8 @@ Adam Wiśniewski | 1 | Bramkarz | Zawieszony | 2 mecze"></textarea>
             okr_lubuska:'Okręgowa Liga Lubuska', okr_lodzkie:'Okręgowa Liga Łódzka',
             okr_opolska:'Okręgowa Liga Opolska', okr_podlaska:'Okręgowa Liga Podlaska',
             okr_swietokrzyska:'Okręgowa Liga Świętokrzyska', okr_wielkopolska:'Okręgowa Liga Wielkopolska',
-            okr_zachodniopomorska:'Okręgowa Liga Zachodniopomorska', okr_kujawsko_pomorska:'Okręgowa Liga Kujawsko-Pomorska'
+            okr_zachodniopomorska:'Okręgowa Liga Zachodniopomorska', okr_kujawsko_pomorska:'Okręgowa Liga Kujawsko-Pomorska',
+            friendly:'Mecz towarzyski'
         };
         
         const MATCH_TYPE_LABELS = { friendly: 'Mecz towarzyski' };
@@ -2100,6 +2112,29 @@ async function sendContact(){
             }catch(e){console.error(e);alert('Błąd zapisu spotkania');}
         }
         
+        let adminMatchesCache = [];
+        let adminMatchFilter = 'upcoming';
+        function filterAdminMatches(filter, btn){
+            adminMatchFilter = filter || 'upcoming';
+            document.querySelectorAll('.admin-match-filter').forEach(b=>b.classList.remove('active'));
+            if(btn) btn.classList.add('active');
+            renderAdminMatches();
+        }
+        function renderAdminMatches(){
+            const list = adminMatchesCache.filter(m=>{
+                if(adminMatchFilter==='friendly') return m.league==='friendly';
+                if(adminMatchFilter==='upcoming') return matchIsUpcoming(m) && m.league!=='friendly';
+                if(adminMatchFilter==='finished') return !matchIsUpcoming(m) && m.league!=='friendly';
+                return true;
+            });
+            const sorted = adminMatchFilter==='upcoming' ? upcomingList(list) : adminMatchFilter==='finished' ? finishedList(list) : [...list].sort((a,b)=>new Date(a.date?.toDate?a.date.toDate():a.date)-new Date(b.date?.toDate?b.date.toDate():b.date));
+            document.getElementById('admin-mlist').innerHTML=sorted.map(m=>`
+                <div class="card" style="padding:0.9rem;display:flex;justify-content:space-between;align-items:center;">
+                    <div><div style="font-weight:600;font-size:0.9rem;">${m.homeTeam} <span style="color:var(--green);">vs</span> ${m.awayTeam}</div>
+                    <div style="font-size:0.72rem;color:var(--muted);">${L[m.league]||m.league||'Mecz'} • ${matchIsUpcoming(m)?'Nadchodzący':`Wynik ${m.scoreHome}:${m.scoreAway}`}</div></div>
+                    <div style="display:flex;gap:4px;"><button class="btn-sm" onclick='editM("${m.id}",${JSON.stringify(m).replace(/'/g,"&#39;")})'><i class="fa-solid fa-pen"></i></button><button class="btn-sm btn-del" onclick="delM('${m.id}', '${m._db}')"><i class="fa-solid fa-trash"></i></button></div>
+                </div>`).join('')||'<p style="color:var(--muted);">Brak spotkań w tej kategorii.</p>';
+        }
         async function loadAdminM(){
             const s1=await window.db.collection('matches').orderBy('date','asc').limit(3300).get();
             let all=s1.docs.map(d=>({id:d.id, _db:'db1', ...d.data()}));
@@ -2109,25 +2144,8 @@ async function sendContact(){
                     all=all.concat(s2.docs.map(d=>({id:d.id, _db:'db2', ...d.data()})));
                 } catch(e) {}
             }
-            const sorted=[...upcomingList(all),...finishedList(all)];
-            window.adminMatchesCache=sorted;
-            // Automatyczne składy są tworzone dla nadchodzących meczów do 48 h przed startem.
-            // Istniejące składy pozostają bez zmian, dzięki czemu można je później ręcznie skorygować.
-            const autoTargets=sorted.filter(m=>matchIsUpcoming(m)&&(()=>{const d=protocolMatchDate(m);return d&&((d-new Date())/3600000>=0)&&((d-new Date())/3600000<=48);})());
-            await Promise.all(autoTargets.map(async m=>{
-                const db=(m._db==='db2'&&window.db2)?window.db:window.db;
-                const sourceDb=(m._db==='db2'&&window.db2)?window.db2:window.db;
-                const [hr,ar]=await Promise.all([getRosterForProtocol(m.homeTeam,sourceDb),getRosterForProtocol(m.awayTeam,sourceDb)]);
-                const [lh,la]=await ensureAutomaticLineup(sourceDb,m,hr,ar);
-                m.lineupHome=lh;m.lineupAway=la;
-            }));
-            syncMatchProtocolOptions(sorted);
-            document.getElementById('admin-mlist').innerHTML=sorted.map(m=>`
-                <div class="card" style="padding:0.9rem;display:flex;justify-content:space-between;align-items:center;">
-                    <div><div style="font-weight:600;font-size:0.9rem;">${m.homeTeam} vs ${m.awayTeam}</div>
-                    <div style="font-size:0.72rem;color:var(--muted);">${matchCompetitionLabel(m)} • ${matchIsUpcoming(m)?'Nadchodzący':`Wynik ${m.scoreHome}:${m.scoreAway}`}</div></div>
-                    <div style="display:flex;gap:4px;"><button class="btn-sm" onclick='editM("${m.id}",${JSON.stringify(m).replace(/'/g,"&#39;")})'><i class="fa-solid fa-pen"></i></button><button class="btn-sm btn-del" onclick="delM('${m.id}', '${m._db}')"><i class="fa-solid fa-trash"></i></button></div>
-                </div>`).join('')||'<p style="color:var(--muted);">Brak spotkań.</p>';
+            adminMatchesCache=all;
+            renderAdminMatches();
         }
         function editM(id,d){
             document.getElementById('m-id').value=id; document.getElementById('m-db').value=d._db||'db1';
@@ -2795,7 +2813,7 @@ function closeMatchDetails(){document.getElementById('match-detail-modal').class
 
     </script>
 <script>
-const PLANET_LEAGUES=[['liga1','Liga 1'], ['liga2','2 liga'], ['okr_podkarpacka','Okręgowa Liga Podkarpacka'], ['okr_pomorska','Okręgowa Liga Pomorska'], ['okr_warminsko_mazurska','Okręgowa Liga Warmińsko-Mazurska'], ['okr_slaska','Okręgowa Liga Śląska'], ['okr_dolnoslaska','Okręgowa Liga Dolnośląska'], ['okr_malopolska','Okręgowa Liga Małopolska'], ['okr_mazowiecka','Okręgowa Liga Mazowiecka'], ['okr_lubelska','Okręgowa Liga Lubelska'], ['okr_lubuska','Okręgowa Liga Lubuska'], ['okr_lodzkie','Okręgowa Liga Łódzka'], ['okr_opolska','Okręgowa Liga Opolska'], ['okr_podlaska','Okręgowa Liga Podlaska'], ['okr_swietokrzyska','Okręgowa Liga Świętokrzyska'], ['okr_wielkopolska','Okręgowa Liga Wielkopolska'], ['okr_zachodniopomorska','Okręgowa Liga Zachodniopomorska'], ['okr_kujawsko_pomorska','Okręgowa Liga Kujawsko-Pomorska']];
+const PLANET_LEAGUES=[['liga1','Liga 1'], ['liga2','2 liga'], ['okr_podkarpacka','Okręgowa Liga Podkarpacka'], ['okr_pomorska','Okręgowa Liga Pomorska'], ['okr_warminsko_mazurska','Okręgowa Liga Warmińsko-Mazurska'], ['okr_slaska','Okręgowa Liga Śląska'], ['okr_dolnoslaska','Okręgowa Liga Dolnośląska'], ['okr_malopolska','Okręgowa Liga Małopolska'], ['okr_mazowiecka','Okręgowa Liga Mazowiecka'], ['okr_lubelska','Okręgowa Liga Lubelska'], ['okr_lubuska','Okręgowa Liga Lubuska'], ['okr_lodzkie','Okręgowa Liga Łódzka'], ['okr_opolska','Okręgowa Liga Opolska'], ['okr_podlaska','Okręgowa Liga Podlaska'], ['okr_swietokrzyska','Okręgowa Liga Świętokrzyska'], ['okr_wielkopolska','Okręgowa Liga Wielkopolska'], ['okr_zachodniopomorska','Okręgowa Liga Zachodniopomorska'], ['okr_kujawsko_pomorska','Okręgowa Liga Kujawsko-Pomorska'], ['friendly','Mecz towarzyski']];
 function planetLeagueSelect(key){
  document.querySelectorAll('.planet-league-pill,.side-league').forEach(b=>b.classList.toggle('active',b.dataset.league===key));
  document.querySelectorAll('select[id$="-league"]').forEach(s=>s.value=key);
