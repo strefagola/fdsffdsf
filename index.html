@@ -2095,6 +2095,16 @@ async function sendContact(){
             }
             const sorted=[...upcomingList(all),...finishedList(all)];
             window.adminMatchesCache=sorted;
+            // Automatyczne składy są tworzone dla nadchodzących meczów do 48 h przed startem.
+            // Istniejące składy pozostają bez zmian, dzięki czemu można je później ręcznie skorygować.
+            const autoTargets=sorted.filter(m=>matchIsUpcoming(m)&&(()=>{const d=protocolMatchDate(m);return d&&((d-new Date())/3600000>=0)&&((d-new Date())/3600000<=48);})());
+            await Promise.all(autoTargets.map(async m=>{
+                const db=(m._db==='db2'&&window.db2)?window.db:window.db;
+                const sourceDb=(m._db==='db2'&&window.db2)?window.db2:window.db;
+                const [hr,ar]=await Promise.all([getRosterForProtocol(m.homeTeam,sourceDb),getRosterForProtocol(m.awayTeam,sourceDb)]);
+                const [lh,la]=await ensureAutomaticLineup(sourceDb,m,hr,ar);
+                m.lineupHome=lh;m.lineupAway=la;
+            }));
             syncMatchProtocolOptions(sorted);
             document.getElementById('admin-mlist').innerHTML=sorted.map(m=>`
                 <div class="card" style="padding:0.9rem;display:flex;justify-content:space-between;align-items:center;">
@@ -2548,12 +2558,13 @@ function syncMatchProtocolOptions(matches){
  el.innerHTML='<option value="">Wybierz mecz z bazy...</option>'+matches.map(m=>`<option value="${phEsc((m._db||'db1')+'::'+m.id)}">${phEsc(m.homeTeam)} vs ${phEsc(m.awayTeam)} — ${phEsc(L[m.league]||m.league)} — ${phEsc(m.date?fmtFinished(m.date):'')}</option>`).join('');
  if([...el.options].some(o=>o.value===current))el.value=current;
 }
-async function getRosterForProtocol(team){
- if(!window.db||!team)return[];
+async function getRosterForProtocol(team,sourceDb){
+ const source=sourceDb||window.db;
+ if(!source||!team)return[];
  try{
-   let snap=await window.db.collection('rosters').where('team','==',team).get();
+   let snap=await source.collection('rosters').where('team','==',team).get();
    let rows=snap.docs.map(d=>({id:d.id,...d.data()}));
-   if(!rows.length){const all=await window.db.collection('rosters').get();rows=all.docs.map(d=>({id:d.id,...d.data()})).filter(p=>String(p.team||'').trim().toLowerCase()===String(team).trim().toLowerCase());}
+   if(!rows.length){const all=await source.collection('rosters').get();rows=all.docs.map(d=>({id:d.id,...d.data()})).filter(p=>String(p.team||'').trim().toLowerCase()===String(team).trim().toLowerCase());}
    return rows.sort((a,b)=>(Number(a.number)||999)-(Number(b.number)||999)||String(a.player||'').localeCompare(String(b.player||''),'pl'));
  }catch(e){console.error(e);return[];}
 }
@@ -2562,6 +2573,59 @@ function renderProtocolPlayers(targetId,roster,lineup){
  const el=document.getElementById(targetId); if(!el)return;
  if(!roster.length){el.innerHTML='<div class="mp-empty">Brak zawodników w kadrze tego klubu. Dodaj ich wcześniej w zakładce „Składy”.</div>';return;}
  el.innerHTML=roster.map(p=>{const role=protocolRoleFor(lineup,p);return `<div class="mp-player-row"><div class="mp-player-meta"><span class="mp-number">${phEsc(p.number||'—')}</span><div><b>${phEsc(p.player)}</b><small>${phEsc(p.position||'')}</small></div></div><select class="mp-role" data-player="${phEsc(p.player)}" data-number="${phEsc(p.number||'')}" data-position="${phEsc(p.position||'')}"><option value="" ${!role?'selected':''}>Poza kadrą</option><option value="starter" ${role==='starter'?'selected':''}>Wyjściowy skład</option><option value="bench" ${role==='bench'?'selected':''}>Rezerwowy</option></select></div>`}).join('');
+}
+function protocolMatchDate(m){
+ if(!m||!m.date)return null;
+ if(typeof m.date.toDate==='function')return m.date.toDate();
+ if(m.date instanceof Date)return m.date;
+ if(typeof m.date.seconds==='number')return new Date(m.date.seconds*1000);
+ const d=new Date(m.date); return Number.isNaN(d.getTime())?null:d;
+}
+function protocolShuffle(arr){
+ const a=[...arr];
+ for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}
+ return a;
+}
+function protocolPositionKey(position){
+ const x=String(position||'').trim().toLowerCase();
+ if(x.includes('bram'))return 'gk';
+ if(x.includes('obro'))return 'def';
+ if(x.includes('pomoc'))return 'mid';
+ if(x.includes('napast'))return 'fwd';
+ return 'other';
+}
+function protocolEligiblePlayers(roster){
+ return (roster||[]).filter(p=>{
+   const status=String(p.status||'available').toLowerCase();
+   return status!=='injured' && status!=='suspended' && status!=='kontuzjowany' && status!=='zawieszony';
+ });
+}
+function buildAutomaticLineup(roster){
+ const available=protocolShuffle(protocolEligiblePlayers(roster));
+ const pools={gk:[],def:[],mid:[],fwd:[]};
+ available.forEach(p=>{const k=protocolPositionKey(p.position);if(pools[k])pools[k].push(p);});
+ const starters=[];
+ const starterPlan=[['gk',1],['def',4],['mid',5],['fwd',1]];
+ for(const [k,count] of starterPlan){for(let i=0;i<count&&pools[k].length;i++)starters.push(pools[k].shift());}
+ const starterNames=new Set(starters.map(p=>String(p.player)));
+ const bench=[];
+ const benchPlan=[['gk',1],['def',3],['mid',3],['fwd',2]];
+ for(const [k,count] of benchPlan){for(let i=0;i<count&&pools[k].length;i++)bench.push(pools[k].shift());}
+ return [...starters.map(p=>({player:p.player,number:p.number||'',position:p.position||'',role:'starter'})),...bench.map(p=>({player:p.player,number:p.number||'',position:p.position||'',role:'bench'}))];
+}
+async function ensureAutomaticLineup(db,m,homeRoster,awayRoster){
+ if(!db||!m||!matchIsUpcoming(m)||m.lineupHome?.length||m.lineupAway?.length)return [m.lineupHome||[],m.lineupAway||[]];
+ const date=protocolMatchDate(m), now=new Date();
+ if(!date)return [[],[]];
+ const diffHours=(date-now)/3600000;
+ if(diffHours<0 || diffHours>48)return [[],[]];
+ const home=buildAutomaticLineup(homeRoster), away=buildAutomaticLineup(awayRoster);
+ if(!home.length && !away.length)return [[],[]];
+ try{
+   await db.collection('matches').doc(m.id).update({lineupHome:home,lineupAway:away,lineupsAutoGenerated:true,lineupsUpdatedAt:firebase.firestore.FieldValue.serverTimestamp()});
+   m.lineupHome=home;m.lineupAway=away;m.lineupsAutoGenerated=true;
+ }catch(e){console.error('Automatyczne ustawienie składu:',e);}
+ return [home,away];
 }
 async function loadMatchProtocol(){
  const sel=document.getElementById('mp-match'); if(!sel||!sel.value){protocolState.match=null;document.getElementById('mp-match-summary').style.display='none';document.getElementById('mp-lineups').style.display='none';document.getElementById('mp-events-box').style.display='none';return;}
@@ -2573,8 +2637,9 @@ async function loadMatchProtocol(){
   document.getElementById('mp-match-summary').innerHTML=`<div><span>${phEsc(L[m.league]||m.league)}</span><strong>${phEsc(m.homeTeam)} <em>${matchIsUpcoming(m)?'vs':phEsc((m.scoreHome??'-')+':'+(m.scoreAway??'-'))}</em> ${phEsc(m.awayTeam)}</strong></div><small>${phEsc(m.date?fmtFinished(m.date):'')}</small>`;
   document.getElementById('mp-lineups').style.display='block'; document.getElementById('mp-events-box').style.display='block';
   document.getElementById('mp-home-title').textContent=m.homeTeam||'Gospodarze'; document.getElementById('mp-away-title').textContent=m.awayTeam||'Goście';
-  const [hr,ar]=await Promise.all([getRosterForProtocol(m.homeTeam),getRosterForProtocol(m.awayTeam)]); protocolState.homeRoster=hr; protocolState.awayRoster=ar;
-  renderProtocolPlayers('mp-home-players',hr,m.lineupHome||[]); renderProtocolPlayers('mp-away-players',ar,m.lineupAway||[]);
+  const [hr,ar]=await Promise.all([getRosterForProtocol(m.homeTeam,db),getRosterForProtocol(m.awayTeam,db)]); protocolState.homeRoster=hr; protocolState.awayRoster=ar;
+  const [autoHome,autoAway]=await ensureAutomaticLineup(db,m,hr,ar);
+  renderProtocolPlayers('mp-home-players',hr,autoHome); renderProtocolPlayers('mp-away-players',ar,autoAway);
   refreshProtocolPlayerOptions(); updateProtocolEventFields(); await loadProtocolEvents();
  }catch(e){console.error(e);alert('Nie udało się wczytać protokołu meczu.');}
 }
@@ -3373,5 +3438,37 @@ main{max-width:1280px!important;margin:0 auto!important;padding:18px 18px 48px!i
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',buildLeagueSwitcher);
   else buildLeagueSwitcher();
   setTimeout(buildLeagueSwitcher,250);
+})();
+</script>
+
+
+<style id="final-requested-fixes">
+/* Tylko poprawki wskazane w ostatnim zgłoszeniu. */
+#planet-sidebar{display:none!important}
+#planet-layout{display:block!important;grid-template-columns:none!important}
+#planet-content{min-width:0!important;width:100%!important}
+.sub-nav.dynamic-leagues{display:none!important}
+#matches-sub .sub-nav.dynamic-leagues,#table-sub .sub-nav.dynamic-leagues,#stats-sub .sub-nav.dynamic-leagues{display:none!important}
+
+/* Szczegóły meczu mają własny przewijany obszar — cała zawartość jest dostępna na dole. */
+#match-detail-modal{overflow-y:auto!important;overflow-x:hidden!important;align-items:flex-start!important;justify-content:center!important;padding:18px 10px!important;box-sizing:border-box!important}
+#match-detail-modal .modal-content{max-height:calc(100vh - 36px)!important;overflow-y:auto!important;overflow-x:hidden!important;-webkit-overflow-scrolling:touch!important}
+
+@media(max-width:700px){
+  #match-detail-modal{padding:8px!important}
+  #match-detail-modal .modal-content{max-height:calc(100vh - 16px)!important}
+}
+</style>
+<script id="automatic-match-lineups-init">
+(function(){
+  // Po otwarciu panelu administracyjnego odświeżamy wybór meczów; przy wejściu w mecz
+  // ensureAutomaticLineup() ustawi skład automatycznie, jeśli do rozpoczęcia zostało <=48 h.
+  const oldShowAT=window.showAT;
+  if(typeof oldShowAT==='function'){
+    window.showAT=function(tab){
+      oldShowAT(tab);
+      if(tab==='ma' && typeof syncMatchProtocolOptions==='function' && Array.isArray(window.mc)) syncMatchProtocolOptions(window.mc);
+    };
+  }
 })();
 </script>
