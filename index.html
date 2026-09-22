@@ -882,6 +882,14 @@ Orzeł vs Wisłoka, 2026-09-21, 17:00, 0:0"></textarea>
                             <button type="button" class="btn-sm admin-match-filter" data-filter="friendly" onclick="filterAdminMatches('friendly',this)">Mecze towarzyskie</button>
                             <button type="button" class="btn-sm admin-match-filter" data-filter="all" onclick="filterAdminMatches('all',this)">Wszystkie</button>
                         </div>
+                        <div class="card" style="margin-bottom:1.2rem;border:1px solid rgba(220,38,38,.18);">
+                            <h3 style="font-size:0.75rem;color:#dc2626;margin-bottom:0.65rem;text-transform:uppercase;letter-spacing:1.2px;">Masowe usuwanie meczów</h3>
+                            <p style="font-size:0.72rem;color:var(--muted);margin-bottom:0.8rem;">Wklej jeden mecz w jednej linii. Format: <strong>Nazwa drużyny vs Nazwa drużyny, 2026-09-14, 18:00</strong>. System wyszuka takie spotkania w bazach i usunie wszystkie dokładnie pasujące.</p>
+                            <textarea id="bulk-delete-matches" placeholder="Nazwa drużyny vs Nazwa drużyny, 2026-09-14, 18:00
+Drugi Klub vs Trzeci Klub, 2026-09-15, 19:30" style="min-height:120px;width:100%;resize:vertical;"></textarea>
+                            <button type="button" class="btn-sm btn-del" onclick="bulkDeleteMatches()" style="margin-top:8px;width:100%;padding:10px 14px;"><i class="fa-solid fa-trash"></i> Usuń wskazane mecze masowo</button>
+                            <div id="bulk-delete-status" style="font-size:0.72rem;color:var(--muted);margin-top:8px;"></div>
+                        </div>
                         <div id="admin-mlist" class="grid"></div>
                     </div>
 
@@ -2224,6 +2232,77 @@ async function sendContact(){
                 await matchRef.delete();
                 if(league && league !== 'friendly') await recalculateStandings(league);
                 loadAdminM();
+            }
+        }
+        function normalizeBulkMatchTeam(name){
+            return String(name||'').trim().replace(/\s+/g,' ').toLocaleLowerCase('pl-PL');
+        }
+
+        function parseBulkDeleteMatchLine(line){
+            const raw=String(line||'').trim();
+            if(!raw) return null;
+            const m=raw.match(/^(.+?)\s+vs\s+(.+?)\s*,\s*(\d{4}-\d{2}-\d{2})\s*,\s*(\d{1,2}:\d{2})$/i);
+            if(!m) return null;
+            const [y,mo,d]=m[3].split('-').map(Number);
+            const [hh,mm]=m[4].split(':').map(Number);
+            const date=new Date(y,mo-1,d,hh,mm,0,0);
+            if(Number.isNaN(date.getTime()) || date.getFullYear()!==y || date.getMonth()!==mo-1 || date.getDate()!==d || date.getHours()!==hh || date.getMinutes()!==mm) return null;
+            return {home:m[1].trim(),away:m[2].trim(),time:date.getTime(),label:raw};
+        }
+
+        function matchTimestampMs(value){
+            try{
+                if(value && typeof value.toDate==='function') return value.toDate().getTime();
+                const d=new Date(value);
+                return Number.isNaN(d.getTime()) ? NaN : d.getTime();
+            }catch(e){ return NaN; }
+        }
+
+        async function bulkDeleteMatches(){
+            if(!user) return;
+            const status=document.getElementById('bulk-delete-status');
+            const lines=String(document.getElementById('bulk-delete-matches')?.value||'').split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
+            if(!lines.length){status.textContent='Wklej co najmniej jeden mecz.';status.style.color='#dc2626';return;}
+            const parsed=lines.map(parseBulkDeleteMatchLine);
+            const invalid=lines.filter((_,i)=>!parsed[i]);
+            if(invalid.length){status.textContent='Błędny format w '+invalid.length+' linii. Użyj: Nazwa drużyny vs Nazwa drużyny, 2026-09-14, 18:00';status.style.color='#dc2626';return;}
+
+            try{
+                status.textContent='Sprawdzanie meczów...'; status.style.color='var(--muted)';
+                const sources=[{db:window.db,key:'db1'}];
+                if(window.db2) sources.push({db:window.db2,key:'db2'});
+                let all=[];
+                for(const src of sources){
+                    if(!src.db) continue;
+                    const snap=await src.db.collection('matches').get();
+                    all=all.concat(snap.docs.map(d=>({id:d.id,_db:src.key,data:d.data(),db:src.db})));
+                }
+                const toDelete=[];
+                const affectedLeagues=new Set();
+                for(const target of parsed){
+                    const home=normalizeBulkMatchTeam(target.home), away=normalizeBulkMatchTeam(target.away);
+                    for(const m of all){
+                        const md=m.data||{};
+                        const sameTeams=normalizeBulkMatchTeam(md.homeTeam)===home && normalizeBulkMatchTeam(md.awayTeam)===away;
+                        const sameDate=matchTimestampMs(md.date)===target.time;
+                        if(sameTeams && sameDate){
+                            toDelete.push(m);
+                            if(md.league && md.league!=='friendly') affectedLeagues.add(md.league);
+                        }
+                    }
+                }
+                const unique=[...new Map(toDelete.map(m=>[m._db+'::'+m.id,m])).values()];
+                if(!unique.length){status.textContent='Nie znaleziono żadnego dokładnie pasującego meczu.';status.style.color='var(--muted)';return;}
+                const ok=confirm('Znaleziono '+unique.length+' mecz(ów). Czy na pewno je usunąć?');
+                if(!ok){status.textContent='Usuwanie anulowane.';return;}
+                for(const m of unique) await m.db.collection('matches').doc(m.id).delete();
+                for(const league of affectedLeagues){try{await recalculateStandings(league);}catch(e){}}
+                document.getElementById('bulk-delete-matches').value='';
+                status.textContent='Usunięto '+unique.length+' mecz(ów).';status.style.color='var(--green)';
+                await loadAdminM();
+            }catch(e){
+                console.error(e);
+                status.textContent='Wystąpił błąd podczas masowego usuwania.';status.style.color='#dc2626';
             }
         }
         function clearMF(){document.getElementById('m-id').value=''; document.getElementById('m-db').value='';['m-home','m-away','m-sh','m-sa','m-date'].forEach(i=>document.getElementById(i).value='');}
