@@ -370,7 +370,6 @@ nav .tab{height:42px!important;margin:auto 2px!important;padding:0 14px!importan
         </div>
     </nav>
 
-    <div class="secret-trigger" id="mobile-admin-trigger"></div>
 
     <!-- PROFIL KLUBU -->
     <div id="club-modal" class="modal-overlay club-profile-overlay" onclick="if(event.target===this) closeClubProfile()">
@@ -1087,15 +1086,6 @@ Adam Wiśniewski | 1 | Bramkarz | Zawieszony | 2 mecze"></textarea>
 
         document.addEventListener('keydown', e => {
             if((e.ctrlKey||e.metaKey) && e.key.toLowerCase()==='m'){ e.preventDefault(); go('admin'); }
-        });
-
-        let tapCount = 0;
-        let tapTimer;
-        document.getElementById('mobile-admin-trigger').addEventListener('click', () => {
-            tapCount++;
-            clearTimeout(tapTimer);
-            if(tapCount >= 5) { tapCount = 0; go('admin'); }
-            tapTimer = setTimeout(() => { tapCount = 0; }, 1500);
         });
 
         function switchGroup(sectionId, grp, btn) {
