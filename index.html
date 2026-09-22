@@ -711,7 +711,7 @@ nav .tab{height:42px!important;margin:auto 2px!important;padding:0 14px!importan
                             </div>
                             <div class="form-grid">
                                 <input type="datetime-local" id="m-date">
-                                <select id="m-league"><option value="liga1">Liga 1</option><option value="liga2">2 liga</option><option value="okr_podkarpacka">Okręgowa Liga Podkarpacka</option><option value="okr_pomorska">Okręgowa Liga Pomorska</option><option value="okr_warminsko_mazurska">Okręgowa Liga Warmińsko-Mazurska</option><option value="okr_slaska">Okręgowa Liga Śląska</option><option value="okr_dolnoslaska">Okręgowa Liga Dolnośląska</option><option value="okr_malopolska">Okręgowa Liga Małopolska</option><option value="okr_mazowiecka">Okręgowa Liga Mazowiecka</option><option value="okr_lubelska">Okręgowa Liga Lubelska</option><option value="okr_lubuska">Okręgowa Liga Lubuska</option><option value="okr_lodzkie">Okręgowa Liga Łódzka</option><option value="okr_opolska">Okręgowa Liga Opolska</option><option value="okr_podlaska">Okręgowa Liga Podlaska</option><option value="okr_swietokrzyska">Okręgowa Liga Świętokrzyska</option><option value="okr_wielkopolska">Okręgowa Liga Wielkopolska</option><option value="okr_zachodniopomorska">Okręgowa Liga Zachodniopomorska</option><option value="okr_kujawsko_pomorska">Okręgowa Liga Kujawsko-Pomorska</option></select>
+                                <select id="m-league"><option value="liga1">Liga 1</option><option value="liga2">2 liga</option><option value="okr_podkarpacka">Okręgowa Liga Podkarpacka</option><option value="okr_pomorska">Okręgowa Liga Pomorska</option><option value="okr_warminsko_mazurska">Okręgowa Liga Warmińsko-Mazurska</option><option value="okr_slaska">Okręgowa Liga Śląska</option><option value="okr_dolnoslaska">Okręgowa Liga Dolnośląska</option><option value="okr_malopolska">Okręgowa Liga Małopolska</option><option value="okr_mazowiecka">Okręgowa Liga Mazowiecka</option><option value="okr_lubelska">Okręgowa Liga Lubelska</option><option value="okr_lubuska">Okręgowa Liga Lubuska</option><option value="okr_lodzkie">Okręgowa Liga Łódzka</option><option value="okr_opolska">Okręgowa Liga Opolska</option><option value="okr_podlaska">Okręgowa Liga Podlaska</option><option value="okr_swietokrzyska">Okręgowa Liga Świętokrzyska</option><option value="okr_wielkopolska">Okręgowa Liga Wielkopolska</option><option value="okr_zachodniopomorska">Okręgowa Liga Zachodniopomorska</option><option value="okr_kujawsko_pomorska">Okręgowa Liga Kujawsko-Pomorska</option><option value="friendly">Mecz towarzyski</option></select>
                             </div>
                             <div class="form-grid">
                                 <input type="number" id="m-sh" placeholder="Bramki G (puste = nadchodzący)">
@@ -984,6 +984,12 @@ Adam Wiśniewski | 1 | Bramkarz | Zawieszony | 2 mecze"></textarea>
             okr_zachodniopomorska:'Okręgowa Liga Zachodniopomorska', okr_kujawsko_pomorska:'Okręgowa Liga Kujawsko-Pomorska'
         };
         
+        const MATCH_TYPE_LABELS = { friendly: 'Mecz towarzyski' };
+        function matchCompetitionLabel(value){
+            const key = typeof value === 'string' ? value : (value && value.league);
+            return MATCH_TYPE_LABELS[key] || L[key] || key || '';
+        }
+
         const A_LEAGUES=[]; const B_LEAGUES=[]; const DB2_A_LEAGUES=[]; const NEW_LEAGUES=Object.keys(L); function getDB(league){ return window.db || PH_DB; }
 
         const DEFAULT_ZONES = { promo:[1], barage:[2], releg:[14,15,16] };
@@ -1221,7 +1227,7 @@ Adam Wiśniewski | 1 | Bramkarz | Zawieszony | 2 mecze"></textarea>
         function matchCard(m){
             const up=matchIsUpcoming(m);
             return `<div class="card">
-                <div class="league-label"><i class="fa-solid fa-circle"></i>${L[m.league]||m.league}${up?'<span class="badge-up">Nadchodzący</span>':''}</div>
+                <div class="league-label"><i class="fa-solid fa-circle"></i>${matchCompetitionLabel(m)}${up?'<span class="badge-up">Nadchodzący</span>':''}</div>
                 <div class="match-row">
                     <div class="team-wrap">${crestImg(m.homeTeam)}<span class="team-name" onclick="openClubProfile('${m.homeTeam}')">${m.homeTeam||'?'}</span></div>
                     <div class="score-box ${up?'vs':''}">${up?'vs':`${m.scoreHome??'-'}:${m.scoreAway??'-'}`}</div>
@@ -2068,6 +2074,14 @@ async function sendContact(){
                 const newDbase = getDB(newLeague);
                 const oldDbVal = document.getElementById('m-db').value;
                 const oldDbase = oldDbVal === 'db2' ? window.db2 : window.db;
+                let oldLeague = '';
+
+                if(id && oldDbase){
+                    try {
+                        const oldDoc = await oldDbase.collection('matches').doc(id).get();
+                        if(oldDoc.exists) oldLeague = oldDoc.data().league || '';
+                    } catch(e) {}
+                }
 
                 if(id){
                     if(oldDbase && oldDbase !== newDbase) {
@@ -2079,9 +2093,11 @@ async function sendContact(){
                 } else {
                     await newDbase.collection('matches').add(data);
                 }
-                await recalculateStandings(newLeague);
+
+                if(oldLeague && oldLeague !== newLeague && oldLeague !== 'friendly') await recalculateStandings(oldLeague);
+                if(newLeague !== 'friendly') await recalculateStandings(newLeague);
                 clearMF();loadAdminM();
-            }catch(e){alert('Błąd zapisu spotkania');}
+            }catch(e){console.error(e);alert('Błąd zapisu spotkania');}
         }
         
         async function loadAdminM(){
@@ -2109,7 +2125,7 @@ async function sendContact(){
             document.getElementById('admin-mlist').innerHTML=sorted.map(m=>`
                 <div class="card" style="padding:0.9rem;display:flex;justify-content:space-between;align-items:center;">
                     <div><div style="font-weight:600;font-size:0.9rem;">${m.homeTeam} vs ${m.awayTeam}</div>
-                    <div style="font-size:0.72rem;color:var(--muted);">${L[m.league]} • ${matchIsUpcoming(m)?'Nadchodzący':`Wynik ${m.scoreHome}:${m.scoreAway}`}</div></div>
+                    <div style="font-size:0.72rem;color:var(--muted);">${matchCompetitionLabel(m)} • ${matchIsUpcoming(m)?'Nadchodzący':`Wynik ${m.scoreHome}:${m.scoreAway}`}</div></div>
                     <div style="display:flex;gap:4px;"><button class="btn-sm" onclick='editM("${m.id}",${JSON.stringify(m).replace(/'/g,"&#39;")})'><i class="fa-solid fa-pen"></i></button><button class="btn-sm btn-del" onclick="delM('${m.id}', '${m._db}')"><i class="fa-solid fa-trash"></i></button></div>
                 </div>`).join('')||'<p style="color:var(--muted);">Brak spotkań.</p>';
         }
@@ -2129,7 +2145,7 @@ async function sendContact(){
                 const matchDoc = await matchRef.get();
                 const league = matchDoc.exists ? matchDoc.data().league : '';
                 await matchRef.delete();
-                if(league) await recalculateStandings(league);
+                if(league && league !== 'friendly') await recalculateStandings(league);
                 loadAdminM();
             }
         }
@@ -2555,7 +2571,7 @@ function phEsc(v){return String(v??'').replace(/[&<>\"']/g,c=>({'&':'&amp;','<':
 function syncMatchProtocolOptions(matches){
  const el=document.getElementById('mp-match'); if(!el)return;
  const current=el.value;
- el.innerHTML='<option value="">Wybierz mecz z bazy...</option>'+matches.map(m=>`<option value="${phEsc((m._db||'db1')+'::'+m.id)}">${phEsc(m.homeTeam)} vs ${phEsc(m.awayTeam)} — ${phEsc(L[m.league]||m.league)} — ${phEsc(m.date?fmtFinished(m.date):'')}</option>`).join('');
+ el.innerHTML='<option value="">Wybierz mecz z bazy...</option>'+matches.map(m=>`<option value="${phEsc((m._db||'db1')+'::'+m.id)}">${phEsc(m.homeTeam)} vs ${phEsc(m.awayTeam)} — ${phEsc(matchCompetitionLabel(m))} — ${phEsc(m.date?fmtFinished(m.date):'')}</option>`).join('');
  if([...el.options].some(o=>o.value===current))el.value=current;
 }
 async function getRosterForProtocol(team,sourceDb){
@@ -2634,7 +2650,7 @@ async function loadMatchProtocol(){
   const doc=await db.collection('matches').doc(id).get(); if(!doc.exists)return;
   const m={id:doc.id,_db:dbName,...doc.data()}; protocolState.match=m; protocolState.db=db;
   document.getElementById('mp-match-summary').style.display='flex';
-  document.getElementById('mp-match-summary').innerHTML=`<div><span>${phEsc(L[m.league]||m.league)}</span><strong>${phEsc(m.homeTeam)} <em>${matchIsUpcoming(m)?'vs':phEsc((m.scoreHome??'-')+':'+(m.scoreAway??'-'))}</em> ${phEsc(m.awayTeam)}</strong></div><small>${phEsc(m.date?fmtFinished(m.date):'')}</small>`;
+  document.getElementById('mp-match-summary').innerHTML=`<div><span>${phEsc(matchCompetitionLabel(m))}</span><strong>${phEsc(m.homeTeam)} <em>${matchIsUpcoming(m)?'vs':phEsc((m.scoreHome??'-')+':'+(m.scoreAway??'-'))}</em> ${phEsc(m.awayTeam)}</strong></div><small>${phEsc(m.date?fmtFinished(m.date):'')}</small>`;
   document.getElementById('mp-lineups').style.display='block'; document.getElementById('mp-events-box').style.display='block';
   document.getElementById('mp-home-title').textContent=m.homeTeam||'Gospodarze'; document.getElementById('mp-away-title').textContent=m.awayTeam||'Goście';
   const [hr,ar]=await Promise.all([getRosterForProtocol(m.homeTeam,db),getRosterForProtocol(m.awayTeam,db)]); protocolState.homeRoster=hr; protocolState.awayRoster=ar;
@@ -2677,7 +2693,7 @@ async function openMatchDetails(id,dbName){
   const d=await db.collection('matches').doc(id).get();if(!d.exists)return;const m={id:d.id,...d.data()};
   const snap=await db.collection('matchEvents').where('matchId','==',id).get();const ev=snap.docs.map(x=>x.data()).sort((a,b)=>(a.minute||0)-(b.minute||0));
   const score=matchIsUpcoming(m)?'<span class="detail-vs">VS</span>':`<span class="detail-score">${phEsc(m.scoreHome??'-')} : ${phEsc(m.scoreAway??'-')}</span>`;
-  document.getElementById('match-detail-body').innerHTML=`<div class="detail-match-head"><div class="detail-league">${phEsc(L[m.league]||m.league)}</div><div class="detail-teams"><div>${crestImg(m.homeTeam)}<b>${phEsc(m.homeTeam)}</b></div>${score}<div>${crestImg(m.awayTeam)}<b>${phEsc(m.awayTeam)}</b></div></div><div class="detail-date">${phEsc(m.date?fmtFinished(m.date):'')}</div></div><div class="detail-section"><div class="detail-section-head"><span>PRZEBIEG MECZU</span><h3>Sytuacje meczowe</h3></div><div class="detail-events">${ev.length?ev.map(e=>`<div class="detail-event"><time>${phEsc(e.minute||0)}'</time><div><b>${protocolEventLabel(e)}</b><span>${protocolEventDesc(e)}</span></div><small>${phEsc(e.team||'')}</small></div>`).join(''):'<div class="detail-empty">Brak szczegółowych wydarzeń.</div>'}</div></div><div class="detail-section"><div class="detail-section-head"><span>SKŁADY</span><h3>Wyjściowe jedenastki i ławki</h3></div><div class="detail-lineups">${renderPublicLineup(m.homeTeam,m.lineupHome||[])}${renderPublicLineup(m.awayTeam,m.lineupAway||[])}</div></div>`;
+  document.getElementById('match-detail-body').innerHTML=`<div class="detail-match-head"><div class="detail-league">${phEsc(matchCompetitionLabel(m))}</div><div class="detail-teams"><div>${crestImg(m.homeTeam)}<b>${phEsc(m.homeTeam)}</b></div>${score}<div>${crestImg(m.awayTeam)}<b>${phEsc(m.awayTeam)}</b></div></div><div class="detail-date">${phEsc(m.date?fmtFinished(m.date):'')}</div></div><div class="detail-section"><div class="detail-section-head"><span>PRZEBIEG MECZU</span><h3>Sytuacje meczowe</h3></div><div class="detail-events">${ev.length?ev.map(e=>`<div class="detail-event"><time>${phEsc(e.minute||0)}'</time><div><b>${protocolEventLabel(e)}</b><span>${protocolEventDesc(e)}</span></div><small>${phEsc(e.team||'')}</small></div>`).join(''):'<div class="detail-empty">Brak szczegółowych wydarzeń.</div>'}</div></div><div class="detail-section"><div class="detail-section-head"><span>SKŁADY</span><h3>Wyjściowe jedenastki i ławki</h3></div><div class="detail-lineups">${renderPublicLineup(m.homeTeam,m.lineupHome||[])}${renderPublicLineup(m.awayTeam,m.lineupAway||[])}</div></div>`;
   document.getElementById('match-detail-modal').classList.add('active');
  }catch(e){console.error(e);alert('Nie udało się otworzyć szczegółów meczu.');}
 }
