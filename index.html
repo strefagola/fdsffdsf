@@ -301,6 +301,53 @@ nav .tab{height:42px!important;margin:auto 2px!important;padding:0 14px!importan
 .admin-match-filter{transition:.18s ease;}
 .admin-match-filter.active{background:var(--green-glow)!important;color:var(--green)!important;border-color:var(--green)!important;}
 </style>
+
+<style id="original-player-stats-ui">
+.stats-dashboard{margin-top:1.4rem;}
+.stats-dashboard-head{display:flex;justify-content:space-between;align-items:flex-end;gap:24px;padding:26px 28px;border:1px solid rgba(22,139,214,.18);border-radius:22px;background:linear-gradient(135deg,#ffffff 0%,#edf7ff 100%);box-shadow:0 12px 30px rgba(16,42,67,.07);position:relative;overflow:hidden;}
+.stats-dashboard-head:after{content:"";position:absolute;right:-60px;top:-70px;width:210px;height:210px;border:26px solid rgba(22,139,214,.08);border-radius:50%;transform:rotate(22deg);}
+.stats-kicker{font-size:.68rem;letter-spacing:1.8px;font-weight:800;color:#168bd6;margin-bottom:7px;}
+.stats-dashboard-head h2{margin:0;font-family:Outfit,sans-serif;font-size:1.8rem;color:#102a43;}
+.stats-dashboard-head p{margin:7px 0 0;max-width:620px;color:#647b91;font-size:.84rem;line-height:1.55;}
+.stats-season-mark{position:relative;z-index:1;text-align:right;font:800 1.5rem/1 Outfit,sans-serif;color:#168bd6;letter-spacing:1px;}
+.stats-season-mark span{font:700 .55rem Inter,sans-serif;letter-spacing:2px;color:#647b91;}
+.stats-switcher{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:16px 0;}
+.stats-mode{appearance:none;border:1px solid rgba(16,42,67,.1);background:#fff;border-radius:16px;padding:13px 16px;display:flex;align-items:center;gap:12px;text-align:left;cursor:pointer;color:#647b91;transition:.2s ease;box-shadow:0 5px 15px rgba(16,42,67,.04);}
+.stats-mode:hover{transform:translateY(-1px);border-color:rgba(22,139,214,.35);}
+.stats-mode.active{background:#102a43;color:#fff;border-color:#102a43;box-shadow:0 10px 22px rgba(16,42,67,.14);}
+.stats-mode-icon{width:38px;height:38px;border-radius:11px;display:grid;place-items:center;background:#eaf6ff;color:#168bd6;font-size:1rem;flex:0 0 auto;}
+.stats-mode.active .stats-mode-icon{background:#168bd6;color:#fff;}
+.stats-mode strong{display:block;font-size:.88rem;line-height:1.1;}
+.stats-mode small{display:block;margin-top:4px;font-size:.67rem;color:#7a8da0;}
+.stats-mode.active small{color:rgba(255,255,255,.62);}
+.stats-board{border:1px solid rgba(16,42,67,.1);border-radius:22px;background:#fff;overflow:hidden;box-shadow:0 12px 30px rgba(16,42,67,.06);}
+.stats-board-top{display:flex;justify-content:space-between;align-items:center;gap:15px;padding:20px 22px;border-bottom:1px solid rgba(16,42,67,.08);background:#fbfdff;}
+.stats-board-label{font-size:.62rem;font-weight:800;letter-spacing:1.5px;color:#168bd6;}
+.stats-board-top h3{margin:5px 0 0;font:700 1.05rem Outfit,sans-serif;color:#102a43;}
+.stats-board-count{font-size:.7rem;font-weight:700;color:#647b91;background:#eef5fa;border-radius:999px;padding:7px 10px;white-space:nowrap;}
+.stats-table-wrap{overflow-x:auto;}
+.stats-modern-table{width:100%;border-collapse:collapse;min-width:650px;}
+.stats-modern-table thead th{font-size:.62rem;letter-spacing:1.2px;color:#7a8da0;text-align:left;padding:12px 16px;background:#f6f9fc;border-bottom:1px solid rgba(16,42,67,.08);}
+.stats-modern-table thead th.stats-rank-head{width:86px;text-align:center;}
+.stats-modern-table thead th.stats-value-head{text-align:center;width:110px;}
+.stats-modern-table tbody tr{border-bottom:1px solid rgba(16,42,67,.07);transition:.15s ease;}
+.stats-modern-table tbody tr:last-child{border-bottom:0;}
+.stats-modern-table tbody tr:hover{background:#f7fbff;}
+.stats-modern-table td{padding:14px 16px;vertical-align:middle;}
+.stats-rank{text-align:center;width:86px;}
+.stats-rank-badge{display:inline-grid;place-items:center;width:30px;height:30px;border-radius:9px;background:#edf2f6;color:#647b91;font-weight:800;font-size:.75rem;}
+.stats-rank-1{background:#dceeff;color:#126da9;} .stats-rank-2{background:#edf1f4;color:#506171;} .stats-rank-3{background:#f4e9dc;color:#8a6337;}
+.stats-player-name{display:block;font-weight:800;font-size:.86rem;color:#102a43;}
+.stats-player-meta{display:none;}
+.stats-club{font-size:.78rem;color:#647b91;}
+.stats-club .team-cell{display:flex;align-items:center;gap:8px;}
+.stats-value{text-align:center;}
+.stats-value span{display:inline-block;min-width:42px;padding:7px 10px;border-radius:10px;background:#eaf6ff;color:#126da9;font:800 1rem Outfit,sans-serif;}
+.stats-state{text-align:center!important;color:#7a8da0!important;padding:42px 20px!important;font-size:.8rem;}
+.stats-empty-icon{width:46px;height:46px;border-radius:14px;background:#eef5fa;color:#168bd6;display:grid;place-items:center;margin:0 auto 10px;font-size:1rem;}
+.stats-error{color:#c0392b!important;}
+@media(max-width:700px){.stats-dashboard-head{padding:20px;align-items:flex-start}.stats-season-mark{display:none}.stats-dashboard-head h2{font-size:1.45rem}.stats-switcher{grid-template-columns:1fr}.stats-board-top{align-items:flex-start;flex-direction:column}.stats-board-count{align-self:flex-start}}
+</style>
 </head>
 <body>
 
@@ -579,17 +626,41 @@ nav .tab{height:42px!important;margin:auto 2px!important;padding:0 14px!importan
                 </div>
             </div>
 
-            <div style="display:flex; gap:10px; margin-bottom:1.5rem;" class="anim d1">
-                <button class="btn-sm" id="btn-stat-goals" onclick="switchStatType('goals')" style="background:var(--green); color:var(--navy); font-weight:700; padding:8px 16px; border-radius:10px;"><i class="fa-solid fa-futbol"></i> Klasyfikacja Strzelców (Gole)</button>
-                <button class="btn-sm" id="btn-stat-assists" onclick="switchStatType('assists')" style="background:rgba(255,255,255,0.05); color:var(--muted); font-weight:700; padding:8px 16px; border-radius:10px;"><i class="fa-solid fa-shoe-prints"></i> Klasyfikacja Asystentów (Asysty)</button>
-            </div>
+            <div class="stats-dashboard anim d1">
+                <div class="stats-dashboard-head">
+                    <div>
+                        <div class="stats-kicker"><i class="fa-solid fa-chart-line"></i> CENTRUM WYNIKÓW ZAWODNIKÓW</div>
+                        <h2>Indywidualne statystyki</h2>
+                        <p>Ranking zawodników według zdobytych bramek i ostatnich podań otwierających drogę do gola.</p>
+                    </div>
+                    <div class="stats-season-mark">2026<br><span>SEZON</span></div>
+                </div>
 
-            <div class="table-container anim d2">
-                <div class="table-wrap">
-                    <table>
-                        <thead id="stats-th"></thead>
-                        <tbody id="stats-tb"></tbody>
-                    </table>
+                <div class="stats-switcher" role="tablist" aria-label="Rodzaj statystyki">
+                    <button class="stats-mode active" id="btn-stat-goals" onclick="switchStatType('goals')" type="button">
+                        <span class="stats-mode-icon"><i class="fa-solid fa-bullseye"></i></span>
+                        <span><strong>Bramki</strong><small>zdobyte gole</small></span>
+                    </button>
+                    <button class="stats-mode" id="btn-stat-assists" onclick="switchStatType('assists')" type="button">
+                        <span class="stats-mode-icon"><i class="fa-solid fa-share-nodes"></i></span>
+                        <span><strong>Asysty</strong><small>kluczowe podania</small></span>
+                    </button>
+                </div>
+
+                <div class="stats-board">
+                    <div class="stats-board-top">
+                        <div>
+                            <span class="stats-board-label" id="stats-board-label">KLASYFIKACJA BRAMEK</span>
+                            <h3 id="stats-board-title">Najskuteczniejsi zawodnicy</h3>
+                        </div>
+                        <span class="stats-board-count" id="stats-board-count">0 zawodników</span>
+                    </div>
+                    <div class="stats-table-wrap">
+                        <table class="stats-modern-table">
+                            <thead id="stats-th"></thead>
+                            <tbody id="stats-tb"></tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </section>
@@ -1512,17 +1583,8 @@ Adam Wiśniewski | 1 | Bramkarz | Zawieszony | 2 mecze"></textarea>
             currentStatType = type;
             const btnG = document.getElementById('btn-stat-goals');
             const btnA = document.getElementById('btn-stat-assists');
-            if(type === 'goals') {
-                btnG.style.background = 'var(--green)';
-                btnG.style.color = 'var(--navy)';
-                btnA.style.background = 'rgba(255,255,255,0.05)';
-                btnA.style.color = 'var(--muted)';
-            } else {
-                btnA.style.background = 'var(--gold)';
-                btnA.style.color = 'var(--navy)';
-                btnG.style.background = 'rgba(255,255,255,0.05)';
-                btnG.style.color = 'var(--muted)';
-            }
+            if(btnG) btnG.classList.toggle('active', type === 'goals');
+            if(btnA) btnA.classList.toggle('active', type === 'assists');
             renderStatsTable();
         }
 
@@ -1533,7 +1595,7 @@ Adam Wiśniewski | 1 | Bramkarz | Zawieszony | 2 mecze"></textarea>
             }
             currentStatLeague = league;
             const tb = document.getElementById('stats-tb');
-            tb.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:2rem;">Ładowanie...</td></tr>';
+            tb.innerHTML = '<tr><td colspan="4" class="stats-state">Ładowanie danych...</td></tr>';
             try {
                 if(statsCache.has(league)){
                     cachedStats = statsCache.get(league);
@@ -1555,45 +1617,42 @@ Adam Wiśniewski | 1 | Bramkarz | Zawieszony | 2 mecze"></textarea>
                 }
                 renderStatsTable();
             } catch(e) {
-                tb.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#ff6b6b;padding:2rem;">Błąd ładowania statystyk.</td></tr>';
+                tb.innerHTML = '<tr><td colspan="4" class="stats-state stats-error">Nie udało się pobrać statystyk.</td></tr>';
             }
         }
 
         function renderStatsTable() {
             const th = document.getElementById('stats-th');
             const tb = document.getElementById('stats-tb');
-            
-            if(currentStatType === 'goals') {
-                th.innerHTML = `<tr><th>#</th><th>Zawodnik</th><th>Klub</th><th style="text-align:center;"><i class="fa-solid fa-futbol" style="color:var(--green)"></i> Bramki</th></tr>`;
-                const sorted = [...cachedStats].filter(s => (s.goals || 0) > 0).sort((a,b) => (b.goals||0) - (a.goals||0));
-                if(!sorted.length) {
-                    tb.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:2rem;">Brak wpisów w klasyfikacji strzelców.</td></tr>';
-                    return;
-                }
-                tb.innerHTML = sorted.map((st, i) => `
-                    <tr>
-                        <td style="color:var(--muted); font-weight:800;">${i+1}</td>
-                        <td style="font-weight:600;">${st.player}</td>
-                        <td style="color:var(--muted); font-size:0.8rem;"><div class="team-cell">${crestImgSmallFromStr(st.team)} <span class="team-name" onclick="openClubProfile('${st.team}')">${st.team}</span></div></td>
-                        <td style="font-weight:800; color:var(--green); font-size:1.15rem; text-align:center;">${st.goals||0}</td>
-                    </tr>
-                `).join('');
-            } else {
-                th.innerHTML = `<tr><th>#</th><th>Zawodnik</th><th>Klub</th><th style="text-align:center;"><i class="fa-solid fa-shoe-prints" style="color:var(--gold)"></i> Asysty</th></tr>`;
-                const sorted = [...cachedStats].filter(s => (s.assists || 0) > 0).sort((a,b) => (b.assists||0) - (a.assists||0));
-                if(!sorted.length) {
-                    tb.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:2rem;">Brak wpisów w klasyfikacji asystentów.</td></tr>';
-                    return;
-                }
-                tb.innerHTML = sorted.map((st, i) => `
-                    <tr>
-                        <td style="color:var(--muted); font-weight:800;">${i+1}</td>
-                        <td style="font-weight:600;">${st.player}</td>
-                        <td style="color:var(--muted); font-size:0.8rem;"><div class="team-cell">${crestImgSmallFromStr(st.team)} <span class="team-name" onclick="openClubProfile('${st.team}')">${st.team}</span></div></td>
-                        <td style="font-weight:800; color:var(--gold); font-size:1.15rem; text-align:center;">${st.assists||0}</td>
-                    </tr>
-                `).join('');
+            const count = document.getElementById('stats-board-count');
+            const label = document.getElementById('stats-board-label');
+            const title = document.getElementById('stats-board-title');
+            const isGoals = currentStatType === 'goals';
+            const metric = isGoals ? 'goals' : 'assists';
+            const metricName = isGoals ? 'BRAMKI' : 'ASYSTY';
+            const metricText = isGoals ? 'Gole' : 'Asysty';
+            const sorted = [...cachedStats].filter(s => (Number(s[metric]) || 0) > 0).sort((a,b) => (Number(b[metric])||0) - (Number(a[metric])||0) || String(a.player||'').localeCompare(String(b.player||''),'pl'));
+
+            if(label) label.textContent = `KLASYFIKACJA ${metricName}`;
+            if(title) title.textContent = isGoals ? 'Najskuteczniejsi zawodnicy' : 'Najlepiej obsługujący partnerów';
+            if(count) count.textContent = `${sorted.length} ${sorted.length === 1 ? 'zawodnik' : 'zawodników'}`;
+
+            th.innerHTML = `<tr><th class="stats-rank-head">MIEJSCE</th><th>ZAWODNIK</th><th>KLUB</th><th class="stats-value-head">${metricText.toUpperCase()}</th></tr>`;
+            if(!sorted.length) {
+                tb.innerHTML = `<tr><td colspan="4" class="stats-state"><div class="stats-empty-icon"><i class="fa-solid fa-chart-simple"></i></div>Brak danych dla tej klasyfikacji.</td></tr>`;
+                return;
             }
+            tb.innerHTML = sorted.map((st, i) => {
+                const value = Number(st[metric]) || 0;
+                const rankClass = i < 3 ? ` stats-rank-${i+1}` : '';
+                return `
+                    <tr>
+                        <td class="stats-rank"><span class="stats-rank-badge${rankClass}">${i+1}</span></td>
+                        <td class="stats-player"><span class="stats-player-name">${st.player || 'Nieznany zawodnik'}</span><span class="stats-player-meta">${metricText}: ${value}</span></td>
+                        <td class="stats-club"><div class="team-cell">${crestImgSmallFromStr(st.team)} <span class="team-name" onclick="openClubProfile('${String(st.team||'').replace(/'/g,"\\'")}')">${st.team || 'Brak klubu'}</span></div></td>
+                        <td class="stats-value"><span>${value}</span></td>
+                    </tr>`;
+            }).join('');
         }
 
         let allTransfers = [];
