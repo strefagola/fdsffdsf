@@ -2810,8 +2810,22 @@ async function loadMatchProtocol(){
  }catch(e){console.error(e);alert('Nie udało się wczytać protokołu meczu.');}
 }
 function collectProtocolLineup(targetId){return [...document.querySelectorAll('#'+targetId+' .mp-role')].filter(x=>x.value).map(x=>({player:x.dataset.player,number:x.dataset.number||'',position:x.dataset.position||'',role:x.value}));}
+function setProtocolRoles(targetId,role){document.querySelectorAll('#'+targetId+' .mp-role').forEach(x=>x.value=role||'');}
+function resetProtocolLineupsToAuto(){
+ const h=buildAutomaticLineup(protocolState.homeRoster||[]),a=buildAutomaticLineup(protocolState.awayRoster||[]);
+ renderProtocolPlayers('mp-home-players',protocolState.homeRoster||[],h);
+ renderProtocolPlayers('mp-away-players',protocolState.awayRoster||[],a);
+ protocolState.match.lineupHome=h; protocolState.match.lineupAway=a;
+ const st=document.getElementById('mp-save-status');if(st)st.textContent='Ustawiono automatycznie — kliknij „Zapisz składy meczu”.';
+ refreshProtocolPlayerOptions();
+}
+function clearProtocolLineups(){
+ setProtocolRoles('mp-home-players',''); setProtocolRoles('mp-away-players','');
+ const st=document.getElementById('mp-save-status');if(st)st.textContent='Składy wyczyszczone — wybierz zawodników i zapisz.';
+}
 async function saveMatchLineups(){
- if(!user||!protocolState.match||!protocolState.db)return;
+ if(!user){alert('Musisz być zalogowany jako administrator, aby zapisać skład.');return;}
+ if(!protocolState.match||!protocolState.db){alert('Najpierw wybierz mecz.');return;}
  const home=collectProtocolLineup('mp-home-players'),away=collectProtocolLineup('mp-away-players');
  const hs=home.filter(x=>x.role==='starter').length,as=away.filter(x=>x.role==='starter').length;
  if(hs>11||as>11){alert('Wyjściowy skład nie może mieć więcej niż 11 zawodników na drużynę.');return;}
