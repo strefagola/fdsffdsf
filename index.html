@@ -845,7 +845,8 @@ Orzeł vs Wisłoka, 2026-09-21, 17:00, 0:0"></textarea>
                                         <div id="mp-away-players" class="mp-player-list"></div>
                                     </div>
                                 </div>
-                                <button class="btn mp-save-lineups" onclick="saveMatchLineups()"><i class="fa-solid fa-floppy-disk"></i> Zapisz składy meczu</button>
+                                <div class="mp-manual-toolbar" id="mp-manual-toolbar"><div><b>RĘCZNA ZMIANA SKŁADU</b><small>Przy każdym zawodniku wybierz: wyjściowy, rezerwowy albo poza kadrą.</small></div><div class="mp-manual-actions"><button type="button" class="btn-sm" onclick="resetProtocolLineupsToAuto()"><i class="fa-solid fa-wand-magic-sparkles"></i> Ustaw automatycznie</button><button type="button" class="btn-sm" onclick="clearProtocolLineups()"><i class="fa-solid fa-eraser"></i> Wyczyść</button></div></div>
+<button class="btn mp-save-lineups" onclick="saveMatchLineups()"><i class="fa-solid fa-floppy-disk"></i> Zapisz składy meczu</button>
                             </div>
                             <div id="mp-events-box" style="display:none;">
                                 <div class="mp-section-title"><span>PRZEBIEG MECZU</span><strong>Dodaj sytuację meczową</strong></div>
@@ -1261,9 +1262,11 @@ Adam Wiśniewski | 1 | Bramkarz | Zawieszony | 2 mecze"></textarea>
         }
 
         let mc=[], curFilter='all', curMatchType='all';
-        function matchIsUpcoming(m){ return (m.status==='upcoming' || (m.scoreHome==null||m.scoreAway==null)) && m.status!=='finished'; }
-        function upcomingList(list){ return list.filter(matchIsUpcoming).sort((a,b)=>(a.date?.seconds||0)-(b.date?.seconds||0)); }
-        function finishedList(list){ return list.filter(m=>!matchIsUpcoming(m)).sort((a,b)=>(b.date?.seconds||0)-(a.date?.seconds||0)); }
+        function matchIsLive(m){ return !!m && (m.status==='live' || m.status==='halftime'); }
+        function matchIsFinished(m){ return !!m && m.status==='finished'; }
+        function matchIsUpcoming(m){ return !!m && !matchIsLive(m) && !matchIsFinished(m) && (m.status==='upcoming' || m.scoreHome==null || m.scoreAway==null); }
+        function upcomingList(list){ return list.filter(m=>matchIsUpcoming(m)||matchIsLive(m)).sort((a,b)=>(a.date?.seconds||0)-(b.date?.seconds||0)); }
+        function finishedList(list){ return list.filter(matchIsFinished).sort((a,b)=>(b.date?.seconds||0)-(a.date?.seconds||0)); }
 
         const DAYS=['niedziela','poniedziałek','wtorek','środa','czwartek','piątek','sobota'];
         function fmtUpcoming(ts){
@@ -1282,41 +1285,29 @@ Adam Wiśniewski | 1 | Bramkarz | Zawieszony | 2 mecze"></textarea>
         }
 
         async function refreshMatches(){
-            const c1=document.getElementById('home-upcoming');
-            if(!c1) return;
+            const c1=document.getElementById('home-upcoming'); if(!c1)return;
             try{
-                await loadCrests();
-                const s1 = await window.db.collection('matches').orderBy('date','asc').limit(8300).get();
-                let allM = s1.docs.map(d=>({id:d.id, _db:'db1', ...d.data()}));
-                if (window.db2) {
-                    try {
-                        const s2 = await window.db2.collection('matches').orderBy('date','asc').limit(8300).get();
-                        allM = allM.concat(s2.docs.map(d=>({id:d.id, _db:'db2', ...d.data()})));
-                    } catch(e) {}
-                }
+                const [_,s1,s2]=await Promise.all([loadCrests(),window.db.collection('matches').orderBy('date','asc').limit(8300).get(),window.db2?window.db2.collection('matches').orderBy('date','asc').limit(8300).get().catch(()=>null):Promise.resolve(null)]);
+                let allM=s1.docs.map(d=>({id:d.id,_db:'db1',...d.data()}));if(s2)allM=allM.concat(s2.docs.map(d=>({id:d.id,_db:'db2',...d.data()})));
                 allM.sort((a,b)=>(a.date?.seconds||0)-(b.date?.seconds||0));
-
-                // Automatyczne składy są generowane przy ładowaniu meczów,
-                // bez potrzeby otwierania panelu admina lub protokołu meczu.
-                await autoGenerateUpcomingLineups(allM);
-
-                mc = allM;
-                renderGrid(upcomingList(mc).slice(0,6),'home-upcoming');
-                renderGrid(finishedList(mc).slice(0,6),'home-grid');
-                applyFilter();
-            }catch(e){ c1.innerHTML='<p style="color:#ff6b6b;">Błąd bazy.</p>'; }
+                await autoGenerateUpcomingLineups(allM); await autoSimulateMatches(allM);
+                mc=allM; renderGrid(upcomingList(mc).slice(0,6),'home-upcoming'); renderGrid(finishedList(mc).slice(0,6),'home-grid'); applyFilter();
+            }catch(e){console.error(e);c1.innerHTML='<p style="color:#ff6b6b;">Błąd bazy.</p>';}
         }
 
+        function fmtLiveMatch(m){if(!m)return '';if(m.status==='halftime')return '<i class="fa-solid fa-mug-hot"></i> PRZERWA — po 45. minucie';const min=Math.max(1,Math.min(90,Number(m.liveMinute)||1));return `<i class="fa-solid fa-circle" style="font-size:.42rem;color:#ef4444"></i> NA ŻYWO • ${min}'`;}
         function matchCard(m){
-            const up=matchIsUpcoming(m);
-            return `<div class="card">
-                <div class="league-label"><i class="fa-solid fa-circle"></i>${matchCompetitionLabel(m)}${up?'<span class="badge-up">Nadchodzący</span>':''}</div>
+            const up=matchIsUpcoming(m),live=matchIsLive(m);
+            const score=up?'<span class="match-vs-text">vs</span>':`${m.scoreHome??0}:${m.scoreAway??0}`;
+            const statusLabel=live?fmtLiveMatch(m):(up?'<span class="badge-up">Nadchodzący</span>':'');
+            return `<div class="card match-card-live-${live?'yes':'no'}">
+                <div class="league-label"><i class="fa-solid fa-circle"></i>${matchCompetitionLabel(m)}${statusLabel}</div>
                 <div class="match-row">
                     <div class="team-wrap">${crestImg(m.homeTeam)}<span class="team-name" onclick="openClubProfile('${m.homeTeam}')">${m.homeTeam||'?'}</span></div>
-                    <div class="score-box ${up?'vs':''}">${up?'vs':`${m.scoreHome??'-'}:${m.scoreAway??'-'}`}</div>
+                    <div class="score-box ${up?'vs':''} ${live?'live-score':''}">${score}</div>
                     <div class="team-wrap away"><span class="team-name" onclick="openClubProfile('${m.awayTeam}')">${m.awayTeam||'?'}</span>${crestImg(m.awayTeam)}</div>
                 </div>
-                <div class="match-date ${up?'up':''}">${up?fmtUpcoming(m.date):fmtFinished(m.date)}</div><button class="match-action" onclick="openMatchDetails('${m.id}','${m._db||'db1'}')">Szczegóły meczu · składy · gole · zmiany</button>
+                <div class="match-date ${up?'up':''} ${live?'live-date':''}">${live?fmtLiveMatch(m):(up?fmtUpcoming(m.date):fmtFinished(m.date))}</div><button class="match-action" onclick="openMatchDetails('${m.id}','${m._db||'db1'}')">Szczegóły meczu · składy · gole · zmiany</button>
             </div>`;
         }
 
@@ -2766,73 +2757,33 @@ function protocolEligiblePlayers(roster){
  });
 }
 function buildAutomaticLineup(roster){
-  const available=protocolShuffle(protocolEligiblePlayers(roster));
-  const pools={gk:[],def:[],mid:[],fwd:[]};
-  available.forEach(p=>{const k=protocolPositionKey(p.position);if(pools[k])pools[k].push(p);});
-  const starters=[];
-  const starterPlan=[['gk',1],['def',4],['mid',5],['fwd',1]];
-  for(const [k,count] of starterPlan){for(let i=0;i<count&&pools[k].length;i++)starters.push(pools[k].shift());}
-  const bench=[];
-  const benchPlan=[['gk',1],['def',3],['mid',3],['fwd',2]];
-  for(const [k,count] of benchPlan){for(let i=0;i<count&&pools[k].length;i++)bench.push(pools[k].shift());}
-  return [...starters.map(p=>({player:p.player,number:p.number||'',position:p.position||'',role:'starter'})),...bench.map(p=>({player:p.player,number:p.number||'',position:p.position||'',role:'bench'}))];
- }
-
- async function ensureAutomaticLineup(db,m,homeRoster,awayRoster){
-  if(!db||!m||!matchIsUpcoming(m))return [m?.lineupHome||[],m?.lineupAway||[]];
-
-  const date=protocolMatchDate(m), now=new Date();
-  if(!date)return [m.lineupHome||[],m.lineupAway||[]];
-
-  const diffHours=(date-now)/3600000;
-  if(diffHours<0 || diffHours>48)return [m.lineupHome||[],m.lineupAway||[]];
-
-  const currentHome=Array.isArray(m.lineupHome)?m.lineupHome:[];
-  const currentAway=Array.isArray(m.lineupAway)?m.lineupAway:[];
-
-  // Nie nadpisuj ręcznie ustawionego składu. Uzupełnij tylko brakującą stronę.
-  const home=currentHome.length ? currentHome : buildAutomaticLineup(homeRoster);
-  const away=currentAway.length ? currentAway : buildAutomaticLineup(awayRoster);
-
-  if(currentHome.length && currentAway.length)return [currentHome,currentAway];
-  if(!home.length && !away.length)return [home,away];
-
-  const update={lineupsAutoGenerated:true,lineupsUpdatedAt:firebase.firestore.FieldValue.serverTimestamp()};
-  if(!currentHome.length)update.lineupHome=home;
-  if(!currentAway.length)update.lineupAway=away;
-
-  try{
-    await db.collection('matches').doc(m.id).update(update);
-    m.lineupHome=home;
-    m.lineupAway=away;
-    m.lineupsAutoGenerated=true;
-  }catch(e){console.error('Automatyczne ustawienie składu:',e);}
-  return [home,away];
- }
-
- async function autoGenerateUpcomingLineups(matches){
-  const now=new Date();
-  const jobs=(matches||[]).filter(m=>{
-    if(!matchIsUpcoming(m))return false;
-    const d=protocolMatchDate(m);
-    if(!d)return false;
-    const hours=(d-now)/3600000;
-    return hours>=0 && hours<=48;
-  }).map(async m=>{
-    const db=m._db==='db2'&&window.db2?window.db2:window.db;
-    if(!db)return;
-    try{
-      const [homeRoster,awayRoster]=await Promise.all([
-        getRosterForProtocol(m.homeTeam,db),
-        getRosterForProtocol(m.awayTeam,db)
-      ]);
-      await ensureAutomaticLineup(db,m,homeRoster,awayRoster);
-    }catch(e){console.error('Automatyczne składy dla meczu:',m.id,e);}
-  });
-  await Promise.all(jobs);
- }
-
- async function loadMatchProtocol(){
+ const available=protocolShuffle(protocolEligiblePlayers(roster));
+ const pools={gk:[],def:[],mid:[],fwd:[]};
+ available.forEach(p=>{const k=protocolPositionKey(p.position);if(pools[k])pools[k].push(p);});
+ const starters=[];
+ const starterPlan=[['gk',1],['def',4],['mid',5],['fwd',1]];
+ for(const [k,count] of starterPlan){for(let i=0;i<count&&pools[k].length;i++)starters.push(pools[k].shift());}
+ const starterNames=new Set(starters.map(p=>String(p.player)));
+ const bench=[];
+ const benchPlan=[['gk',1],['def',3],['mid',3],['fwd',2]];
+ for(const [k,count] of benchPlan){for(let i=0;i<count&&pools[k].length;i++)bench.push(pools[k].shift());}
+ return [...starters.map(p=>({player:p.player,number:p.number||'',position:p.position||'',role:'starter'})),...bench.map(p=>({player:p.player,number:p.number||'',position:p.position||'',role:'bench'}))];
+}
+async function ensureAutomaticLineup(db,m,homeRoster,awayRoster){
+ if(!db||!m||!matchIsUpcoming(m)||m.lineupHome?.length||m.lineupAway?.length)return [m.lineupHome||[],m.lineupAway||[]];
+ const date=protocolMatchDate(m), now=new Date();
+ if(!date)return [[],[]];
+ const diffHours=(date-now)/3600000;
+ if(diffHours<0 || diffHours>48)return [[],[]];
+ const home=buildAutomaticLineup(homeRoster), away=buildAutomaticLineup(awayRoster);
+ if(!home.length && !away.length)return [[],[]];
+ try{
+   await db.collection('matches').doc(m.id).update({lineupHome:home,lineupAway:away,lineupsAutoGenerated:true,lineupsUpdatedAt:firebase.firestore.FieldValue.serverTimestamp()});
+   m.lineupHome=home;m.lineupAway=away;m.lineupsAutoGenerated=true;
+ }catch(e){console.error('Automatyczne ustawienie składu:',e);}
+ return [home,away];
+}
+async function loadMatchProtocol(){
  const sel=document.getElementById('mp-match'); if(!sel||!sel.value){protocolState.match=null;document.getElementById('mp-match-summary').style.display='none';document.getElementById('mp-lineups').style.display='none';document.getElementById('mp-events-box').style.display='none';return;}
  const [dbName,id]=sel.value.split('::'); const db=dbName==='db2'&&window.db2?window.db2:window.db; if(!db)return;
  try{
@@ -2860,7 +2811,7 @@ function rosterNames(side){return (side==='away'?protocolState.awayRoster:protoc
 function fillProtocolSelect(id,names,placeholder){const el=document.getElementById(id);if(!el)return;const current=el.value;el.innerHTML=`<option value="">${placeholder}</option>`+names.map(n=>`<option value="${phEsc(n)}">${phEsc(n)}</option>`).join('');if(names.includes(current))el.value=current;}
 function refreshProtocolPlayerOptions(){const side=document.getElementById('mp-event-team')?.value||'home',names=rosterNames(side);fillProtocolSelect('mp-event-player',names,'Zawodnik');fillProtocolSelect('mp-event-assist',names,'Asystujący (opcjonalnie)');fillProtocolSelect('mp-player-out',names,'Schodzi');fillProtocolSelect('mp-player-in',names,'Wchodzi');}
 function updateProtocolEventFields(){const type=document.getElementById('mp-event-type')?.value||'goal',isSub=type==='sub',isGoal=type==='goal'||type==='own_goal';document.getElementById('mp-player-out').style.display=isSub?'block':'none';document.getElementById('mp-player-in').style.display=isSub?'block':'none';document.getElementById('mp-event-player').style.display=isSub?'none':'block';document.getElementById('mp-event-assist').style.display=isGoal?'block':'none';}
-function protocolEventLabel(e){return ({goal:'Gol',yellow:'Żółta kartka',red:'Czerwona kartka',sub:'Zmiana',penalty_missed:'Niewykorzystany karny',own_goal:'Gol samobójczy',note:'Sytuacja'})[e.type]||({card:'Kartka'})[e.type]||'Wydarzenie';}
+function protocolEventLabel(e){return ({goal:'Gol',yellow:'Żółta kartka',red:'Czerwona kartka',sub:'Zmiana',penalty_missed:'Niewykorzystany karny',own_goal:'Gol samobójczy',goal_cancelled:'Anulowany gol',note:'Sytuacja'})[e.type]||({card:'Kartka'})[e.type]||'Wydarzenie';}
 async function addProtocolEvent(){
  if(!user||!protocolState.match||!protocolState.db)return;
  const type=document.getElementById('mp-event-type').value,side=document.getElementById('mp-event-team').value,team=side==='away'?protocolState.match.awayTeam:protocolState.match.homeTeam;
@@ -3459,6 +3410,48 @@ main{margin-top:0!important;padding-top:16px!important}
 }
 </style>
 
+
+<style id="mass-match-automation-style">
+.mp-manual-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:12px;padding:12px 14px;background:#f5f9fc;border:1px solid #dce7ef;border-radius:11px}.mp-manual-toolbar b{display:block;font-size:.68rem;letter-spacing:1px;color:#31536b}.mp-manual-toolbar small{display:block;color:#7b8b98;font-size:.65rem;margin-top:2px}.mp-manual-actions{display:flex;gap:6px;flex-wrap:wrap}.mp-manual-actions .btn-sm{border:1px solid #dce5ec;background:#fff}.live-score{border-color:#ef4444!important;box-shadow:0 0 0 2px rgba(239,68,68,.08)}.live-date{color:#ef4444!important;font-weight:800}.match-vs-text{color:var(--muted)}
+@media(max-width:700px){.mp-manual-toolbar{align-items:flex-start;flex-direction:column}.mp-manual-actions{width:100%}.mp-manual-actions .btn-sm{flex:1}}
+</style>
+<script id="mass-match-automation">
+(function(){
+const HALF=45*60*1000,BREAK=15*60*1000,FULL=HALF+BREAK+HALF;let busy=false,timer=null;
+function hash(x){let h=2166136261>>>0;for(let i=0;i<String(x).length;i++){h^=String(x).charCodeAt(i);h=Math.imul(h,16777619);}return(h>>>0)/4294967296}
+function rnd(id,min,slot){return hash(id+'|'+min+'|'+slot)}
+function simState(m,now){const d=protocolMatchDate(m);if(!d)return{phase:'upcoming',minute:0};const e=now-d;if(e<0)return{phase:'upcoming',minute:0};if(e<HALF)return{phase:'first',minute:Math.min(45,Math.floor(e/60000)+1)};if(e<HALF+BREAK)return{phase:'halftime',minute:45};if(e<FULL)return{phase:'second',minute:Math.min(90,45+Math.floor((e-HALF-BREAK)/60000)+1)};return{phase:'finished',minute:90}}
+function role(lineup,r){return(lineup||[]).filter(x=>x.role===r&&x.player).map(x=>({...x}))}
+function state(h,a){return{home:{active:role(h,'starter'),bench:role(h,'bench'),red:new Set()},away:{active:role(a,'starter'),bench:role(a,'bench'),red:new Set()}}}
+function pick(a,r){return a.length?a[Math.floor(r*a.length)%a.length]:null}
+function subs(st,side,r){const out=st[side].active.filter(p=>!st[side].red.has(String(p.player))),bench=st[side].bench;if(!out.length||!bench.length)return null;const po=pick(out,r),pi=bench.splice(Math.floor(r*bench.length)%bench.length,1)[0];if(!pi)return null;const i=st[side].active.findIndex(p=>String(p.player)===String(po.player));if(i>=0)st[side].active[i]=pi;return{playerOut:po.player,playerIn:pi.player}}
+function minuteEvents(m,min,st){const out=[];if(min===45)return out;const id=m.id;
+if(min>=55&&min<=82)['home','away'].forEach((side,i)=>{const r=rnd(id,min,'sub'+i);if(r<.035){const x=subs(st,side,rnd(id,min,'subpick'+i));if(x)out.push({minute:min,type:'sub',team:side==='home'?m.homeTeam:m.awayTeam,side,...x})}});
+['home','away'].forEach((side,i)=>{const r=rnd(id,min,'event'+i),a=st[side].active.filter(p=>!st[side].red.has(String(p.player)));if(!a.length)return;const team=side==='home'?m.homeTeam:m.awayTeam;
+if(r<.011){const p=pick(a,rnd(id,min,'goal'+i)),ap=a.filter(x=>x.player!==p.player),as=ap.length&&rnd(id,min,'assist'+i)<.68?pick(ap,rnd(id,min,'assistpick'+i)):null;out.push({minute:min,type:'goal',team,side,player:p.player,assist:as?.player||''})}
+else if(r<.0122){const p=pick(a,rnd(id,min,'og'+i));out.push({minute:min,type:'own_goal',team:side==='home'?m.awayTeam:m.homeTeam,side:side==='home'?'away':'home',creditedSide:side,player:p.player})}
+else if(r<.0205){const p=pick(a,rnd(id,min,'yellow'+i));out.push({minute:min,type:'yellow',team,side,player:p.player})}
+else if(r<.0216){const p=pick(a,rnd(id,min,'red'+i));st[side].red.add(String(p.player));st[side].active=st[side].active.filter(x=>x.player!==p.player);out.push({minute:min,type:'red',team,side,player:p.player})}
+else if(r<.0227){const p=pick(a,rnd(id,min,'cancel'+i));out.push({minute:min,type:'goal_cancelled',team,side,player:p.player,note:'Gol anulowany po analizie sytuacji'})}
+else if(r<.025){const p=pick(a,rnd(id,min,'pen'+i));out.push({minute:min,type:'penalty_missed',team,side,player:p.player})}});return out}
+function plan(m,target){if(!m.lineupHome?.length&&!m.lineupAway?.length)return[];const st=state(m.lineupHome,m.lineupAway),out=[];for(let i=1;i<=Math.min(90,target);i++)out.push(...minuteEvents(m,i,st));return out}
+async function events(db,id){const s=await db.collection('matchEvents').where('matchId','==',id).get();return s.docs.map(d=>({id:d.id,...d.data()}))}
+function score(ev){let h=0,a=0;ev.forEach(e=>{if(e.type==='goal')e.side==='home'?h++:a++;else if(e.type==='own_goal')e.creditedSide==='home'?a++:h++});return[h,a]}
+async function sideLineup(db,m,side,roster){const f=side==='home'?'lineupHome':'lineupAway';if(m[f]?.length)return m[f];const x=buildAutomaticLineup(roster);if(x.length){await db.collection('matches').doc(m.id).update({[f]:x,lineupsAutoGenerated:true,lineupsUpdatedAt:firebase.firestore.FieldValue.serverTimestamp()});m[f]=x}return x}
+async function autoGenerateUpcomingLineups(matches){const now=new Date();await Promise.all((matches||[]).filter(matchIsUpcoming).map(async m=>{const d=protocolMatchDate(m);if(!d)return;const h=(d-now)/3600000;if(h<0||h>48)return;const db=m._db==='db2'&&window.db2?window.db2:window.db;try{const[hr,ar]=await Promise.all([getRosterForProtocol(m.homeTeam,db),getRosterForProtocol(m.awayTeam,db)]);await sideLineup(db,m,'home',hr);await sideLineup(db,m,'away',ar)}catch(e){console.error('Automatyczne składy',e)}}))}
+window.autoGenerateUpcomingLineups=autoGenerateUpcomingLineups;
+async function updateStats(db,m,ev){const goals=ev.filter(e=>e.type==='goal'),ass=goals.filter(e=>e.assist);if(!goals.length&&!ass.length)return;const snap=await db.collection('stats').get(),rows=snap.docs.map(d=>({id:d.id,...d.data()})),batch=db.batch();for(const e of goals){const r=rows.find(x=>normalizeTeamName(x.team)===normalizeTeamName(e.team)&&String(x.player||'').trim()===String(e.player||'').trim()&&(!x.league||x.league===m.league));if(r)batch.update(db.collection('stats').doc(r.id),{goals:(Number(r.goals)||0)+1})}for(const e of ass){const r=rows.find(x=>normalizeTeamName(x.team)===normalizeTeamName(e.team)&&String(x.player||'').trim()===String(e.assist||'').trim()&&(!x.league||x.league===m.league));if(r)batch.update(db.collection('stats').doc(r.id),{assists:(Number(r.assists)||0)+1})}await batch.commit()}
+async function simulate(m,now){if(!m||m.status==='finished')return false;const db=m._db==='db2'&&window.db2?window.db2:window.db,st=simState(m,now);if(st.phase==='upcoming')return false;if(!m.lineupHome?.length||!m.lineupAway?.length){const[hr,ar]=await Promise.all([getRosterForProtocol(m.homeTeam,db),getRosterForProtocol(m.awayTeam,db)]);await sideLineup(db,m,'home',hr);await sideLineup(db,m,'away',ar)}if(!m.lineupHome?.length&&!m.lineupAway?.length)return false;const old=await events(db,m.id),keys=new Set(old.map(e=>`${e.minute}|${e.type}|${e.side||''}|${e.player||''}|${e.playerOut||''}|${e.playerIn||''}`)),target=st.phase==='halftime'?45:st.minute,planned=plan(m,target),missing=planned.filter(e=>!keys.has(`${e.minute}|${e.type}|${e.side||''}|${e.player||''}|${e.playerOut||''}|${e.playerIn||''}`));if(missing.length){const b=db.batch();missing.forEach(e=>b.set(db.collection('matchEvents').doc(),{...e,matchId:m.id,simulation:true,createdAt:firebase.firestore.FieldValue.serverTimestamp()}));await b.commit()}const all=old.concat(missing),[sh,sa]=score(all);if(st.phase==='halftime'){await db.collection('matches').doc(m.id).update({status:'halftime',scoreHome:sh,scoreAway:sa,liveMinute:45,livePhase:'halftime',simulation:true});Object.assign(m,{status:'halftime',scoreHome:sh,scoreAway:sa,liveMinute:45});return true}if(st.phase==='first'||st.phase==='second'){await db.collection('matches').doc(m.id).update({status:'live',scoreHome:sh,scoreAway:sa,liveMinute:st.minute,livePhase:st.phase,simulation:true});Object.assign(m,{status:'live',scoreHome:sh,scoreAway:sa,liveMinute:st.minute});return true}await db.collection('matches').doc(m.id).update({status:'finished',scoreHome:sh,scoreAway:sa,liveMinute:90,livePhase:'finished',simulation:true,finishedAt:firebase.firestore.FieldValue.serverTimestamp()});Object.assign(m,{status:'finished',scoreHome:sh,scoreAway:sa,liveMinute:90});if(m.league&&m.league!=='friendly')await recalculateStandings(m.league);await updateStats(db,m,all);return true}
+async function autoSimulateMatches(matches){if(busy)return;busy=true;try{for(const m of(matches||[]).filter(x=>!matchIsFinished(x))){try{await simulate(m,new Date())}catch(e){console.error('Symulacja',m.id,e)}}}finally{busy=false}}
+window.autoSimulateMatches=autoSimulateMatches;
+window.resetProtocolLineupsToAuto=async function(){if(!protocolState.match)return;const[h,a]=await Promise.all([getRosterForProtocol(protocolState.match.homeTeam,protocolState.db),getRosterForProtocol(protocolState.match.awayTeam,protocolState.db)]);renderProtocolPlayers('mp-home-players',h,buildAutomaticLineup(h));renderProtocolPlayers('mp-away-players',a,buildAutomaticLineup(a));protocolState.homeRoster=h;protocolState.awayRoster=a};
+window.clearProtocolLineups=function(){renderProtocolPlayers('mp-home-players',protocolState.homeRoster,[]);renderProtocolPlayers('mp-away-players',protocolState.awayRoster,[])};
+const oldLoad=window.loadMatchProtocol;window.loadMatchProtocol=async function(){if(typeof oldLoad==='function')await oldLoad();const x=document.getElementById('mp-manual-toolbar');if(x)x.style.display='flex'};
+async function tick(){if(busy)return;try{const[s1,s2]=await Promise.all([window.db.collection('matches').orderBy('date','asc').limit(8300).get(),window.db2?window.db2.collection('matches').orderBy('date','asc').limit(8300).get().catch(()=>null):Promise.resolve(null)]);let all=s1.docs.map(d=>({id:d.id,_db:'db1',...d.data()}));if(s2)all=all.concat(s2.docs.map(d=>({id:d.id,_db:'db2',...d.data()})));await autoGenerateUpcomingLineups(all);await autoSimulateMatches(all);mc=all;applyFilter()}catch(e){console.error('Automatyka meczów',e)}}
+function start(){tick();if(timer)clearInterval(timer);timer=setInterval(tick,60000);setInterval(()=>{if(Array.isArray(mc)&&mc.some(matchIsLive)){mc.forEach(m=>{if(matchIsLive(m)){const st=simState(m,new Date());m.status=st.phase==='halftime'?'halftime':st.phase==='finished'?'finished':'live';m.liveMinute=st.minute}});applyFilter()}},1000)}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start);else start();
+})();
+</script>
 </body>
 </html>
 <style id="planethc-pro-overhaul">
