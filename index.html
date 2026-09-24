@@ -2196,7 +2196,9 @@ async function sendContact(){
                 } catch(e) {}
             }
             adminMatchesCache=all;
+            window.mc=all;
             renderAdminMatches();
+            if(typeof syncMatchProtocolOptions==='function') syncMatchProtocolOptions(all);
         }
         function editM(id,d){
             document.getElementById('m-id').value=id; document.getElementById('m-db').value=d._db||'db1';
