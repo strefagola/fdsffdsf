@@ -1049,6 +1049,40 @@ Adam Wiśniewski | 1 | Bramkarz | Zawieszony | 2 mecze"></textarea>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
     <script src="firebase-config.js"></script>
 
+    <script id="server-time-core">
+    // Wspólny zegar czasu serwera — musi być dostępny zanim uruchomi się automatyka meczów.
+    window.__serverClockState = window.__serverClockState || {serverEpochMs:null, serverPerfMs:null, ready:false, syncing:false};
+    window.getServerNow = window.getServerNow || function(){
+        const s=window.__serverClockState;
+        if(s.ready && s.serverEpochMs!==null && s.serverPerfMs!==null){
+            return new Date(s.serverEpochMs + (performance.now()-s.serverPerfMs));
+        }
+        return new Date();
+    };
+    window.syncServerTime = window.syncServerTime || async function(db){
+        const s=window.__serverClockState;
+        if(!db || s.syncing) return false;
+        s.syncing=true;
+        try{
+            const ref=db.collection('_system').doc('serverClock');
+            const perfBefore=performance.now();
+            await ref.set({serverTimestamp:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});
+            const snap=await ref.get({source:'server'});
+            const ts=snap.get('serverTimestamp');
+            const perfAfter=performance.now();
+            if(ts && typeof ts.toMillis==='function'){
+                s.serverEpochMs=ts.toMillis();
+                s.serverPerfMs=(perfBefore+perfAfter)/2;
+                s.ready=true;
+                return true;
+            }
+        }catch(e){
+            console.error('Synchronizacja czasu serwera:',e);
+        }finally{ s.syncing=false; }
+        return false;
+    };
+    </script>
+
     <script>
         // PAMIĘTAJ: Aby dane A-klas i B-klas zapisywały się w drugiej bazie danych Firebase, 
         // musisz w pliku firebase-config.js zdefiniować zmienną window.db2!
@@ -3471,34 +3505,17 @@ main{margin-top:0!important;padding-top:16px!important}
 </style>
 <script id="mass-match-automation">
 (function(){
-let serverEpochMs=null,serverPerfMs=null,serverTimeReady=false,serverTimeSyncing=false;
-function getServerNow(){
- if(serverTimeReady&&serverEpochMs!==null&&serverPerfMs!==null)return new Date(serverEpochMs+(performance.now()-serverPerfMs));
- return new Date();
-}
-async function syncServerTime(db){
- if(!db||serverTimeSyncing)return false;
- serverTimeSyncing=true;
- try{
-  const ref=db.collection('_system').doc('serverClock');
-  const perfBefore=performance.now();
-  await ref.set({serverTimestamp:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});
-  const snap=await ref.get({source:'server'});
-  const ts=snap.get('serverTimestamp');
-  const perfAfter=performance.now();
-  if(ts&&typeof ts.toMillis==='function'){serverEpochMs=ts.toMillis();serverPerfMs=(perfBefore+perfAfter)/2;serverTimeReady=true;return true;}
- }catch(e){console.error('Synchronizacja czasu serwera:',e);}
- finally{serverTimeSyncing=false;}
- return false;
-}
+const serverClockState=window.__serverClockState;
+function getServerNow(){ return window.getServerNow(); }
+async function syncServerTime(db){ return window.syncServerTime(db); }
 function updateServerClock(){
  const box=document.getElementById('server-clock'),dateEl=document.getElementById('server-clock-date'),timeEl=document.getElementById('server-clock-time'),status=document.getElementById('server-clock-status');
  if(!box||!dateEl||!timeEl||!status)return;
  const now=getServerNow();
  dateEl.textContent=now.toLocaleDateString('pl-PL',{day:'2-digit',month:'2-digit',year:'numeric'});
  timeEl.textContent=now.toLocaleTimeString('pl-PL',{hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false});
- box.classList.toggle('server-clock-ok',serverTimeReady);box.classList.toggle('server-clock-error',!serverTimeReady);
- status.textContent=serverTimeReady?'Czas serwera':'Oczekiwanie na czas serwera';
+ box.classList.toggle('server-clock-ok',serverClockState.ready);box.classList.toggle('server-clock-error',!serverClockState.ready);
+ status.textContent=serverClockState.ready?'Czas serwera':'Oczekiwanie na czas serwera';
 }
 async function initServerClock(){
  updateServerClock();
