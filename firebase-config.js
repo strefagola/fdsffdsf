@@ -1,11 +1,12 @@
 const firebaseConfig = {
-  apiKey: "AIzaSyDRe-r50Ip_FgMIbociR5BRVonxQvh_VsQ",
-  authDomain: "insta-18495.firebaseapp.com",
-  projectId: "insta-18495",
-  storageBucket: "insta-18495.firebasestorage.app",
-  messagingSenderId: "722306681308",
-  appId: "1:722306681308:web:66715ab9a6fb4fd0e0a719",
-  measurementId: "G-18K686YMZX"
+  apiKey: "AIzaSyAFd36LXlmO1vyS6ztRZcilPWNyEU6L8T8",
+  authDomain: "biuro-16f65.firebaseapp.com",
+  databaseURL: "https://biuro-16f65-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "biuro-16f65",
+  storageBucket: "biuro-16f65.firebasestorage.app",
+  messagingSenderId: "720364589922",
+  appId: "1:720364589922:web:97225720a4f608a14a123b",
+  measurementId: "G-Z4WH749S27"
 };
 
 // Inicjalizacja Firebase
