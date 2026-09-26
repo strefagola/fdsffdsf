@@ -3568,21 +3568,21 @@ function eventBlocked(st,min){
     const n=Number(min);
     // Wszystkie sytuacje meczowe mają odstęp — nie robimy kilku zdarzeń
     // w tej samej minucie ani serii zdarzeń minuta po minucie.
-    return st.eventMinutes?.some(x=>Math.abs(Number(x)-n)<4);
+    return st.eventMinutes?.some(x=>Math.abs(Number(x)-n)<5);
 }
 function blockEventMinute(st,min){if(!st.eventMinutes)st.eventMinutes=[];st.eventMinutes.push(Number(min));}
 function blockGoalMinute(st,min){if(!st.blockedGoalMinutes)st.blockedGoalMinutes=new Set();st.blockedGoalMinutes.add(Number(min));blockEventMinute(st,min);}
 function minuteEvents(m,min,st){const out=[];if(min===45)return out;const id=m.id;const seed=matchSeed(m);
 if(min>=55&&min<=82&&!eventBlocked(st,min))['home','away'].forEach((side,i)=>{const r=rnd(id,min,'sub'+i);if(r<.025&&!eventBlocked(st,min)){const x=subs(st,side,rnd(id,min,'subpick'+i));if(x){out.push({minute:min,type:'sub',team:side==='home'?m.homeTeam:m.awayTeam,side,...x});blockEventMinute(st,min)}}});
 ['home','away'].forEach((side,i)=>{const r=rnd(id,min,'event'+i),a=st[side].active.filter(p=>!st[side].red.has(String(p.player)));if(!a.length||eventBlocked(st,min))return;const team=side==='home'?m.homeTeam:m.awayTeam;
-const goalCut=0.0060*matchGoalFactor(m,side)+matchGoalBias(m,side);
+const goalCut=0.0070*matchGoalFactor(m,side)+matchGoalBias(m,side);
 const ownGoalCut=goalCut+0.0010*matchGoalFactor(m,side);
 if(r<goalCut&&!goalEventBlocked(st,min)){const p=pick(a,rnd(id,min,'goal'+i)),ap=a.filter(x=>x.player!==p.player),as=ap.length&&rnd(id,min,'assist'+i)<.68?pick(ap,rnd(id,min,'assistpick'+i)):null;out.push({minute:min,type:'goal',team,side,player:p.player,assist:as?.player||''});registerGoal(st,min);blockGoalMinute(st,min)}
 else if(r<ownGoalCut&&!goalEventBlocked(st,min)){const p=pick(a,rnd(id,min,'og'+i));out.push({minute:min,type:'own_goal',team:side==='home'?m.awayTeam:m.homeTeam,side:side==='home'?'away':'home',creditedSide:side,player:p.player});registerGoal(st,min);blockGoalMinute(st,min)}
-else if(r<.0150&&!eventBlocked(st,min)){const p=pick(a,rnd(id,min,'yellow'+i));out.push({minute:min,type:'yellow',team,side,player:p.player});blockEventMinute(st,min)}
-else if(r<.01525&&!eventBlocked(st,min)){const p=pick(a,rnd(id,min,'red'+i));st[side].red.add(String(p.player));st[side].active=st[side].active.filter(x=>x.player!==p.player);out.push({minute:min,type:'red',team,side,player:p.player});blockEventMinute(st,min)}
-else if(r<.0215&&!goalEventBlocked(st,min)&&!eventBlocked(st,min)){const p=pick(a,rnd(id,min,'cancel'+i));out.push({minute:min,type:'goal_cancelled',team,side,player:p.player,note:'Gol anulowany po analizie sytuacji'});blockGoalMinute(st,min)}
-else if(r<.0221&&!goalEventBlocked(st,min)&&!eventBlocked(st,min)){const p=pick(a,rnd(id,min,'pen'+i));out.push({minute:min,type:'penalty_missed',team,side,player:p.player});blockGoalMinute(st,min)}});return out}
+else if(r<.0085&&!eventBlocked(st,min)){const p=pick(a,rnd(id,min,'yellow'+i));out.push({minute:min,type:'yellow',team,side,player:p.player});blockEventMinute(st,min)}
+else if(r<.0088&&!eventBlocked(st,min)){const p=pick(a,rnd(id,min,'red'+i));st[side].red.add(String(p.player));st[side].active=st[side].active.filter(x=>x.player!==p.player);out.push({minute:min,type:'red',team,side,player:p.player});blockEventMinute(st,min)}
+else if(r<.0120&&!goalEventBlocked(st,min)&&!eventBlocked(st,min)){const p=pick(a,rnd(id,min,'cancel'+i));out.push({minute:min,type:'goal_cancelled',team,side,player:p.player,note:'Gol anulowany po analizie sytuacji'});blockGoalMinute(st,min)}
+else if(r<.0130&&!goalEventBlocked(st,min)&&!eventBlocked(st,min)){const p=pick(a,rnd(id,min,'pen'+i));out.push({minute:min,type:'penalty_missed',team,side,player:p.player});blockGoalMinute(st,min)}});return out}
 function plan(m,target){if(!m.lineupHome?.length&&!m.lineupAway?.length)return[];const st=state(m.lineupHome,m.lineupAway),out=[];for(let i=1;i<=Math.min(90,target);i++)out.push(...minuteEvents(m,i,st));return out}
 async function events(db,id){const s=await db.collection('matchEvents').where('matchId','==',id).get();return dedupeMatchEvents(s.docs.map(d=>({id:d.id,...d.data()})))}
 function score(ev){let h=0,a=0;dedupeMatchEvents(ev).forEach(e=>{if(e.type==='goal')e.side==='home'?h++:a++;else if(e.type==='own_goal')e.creditedSide==='home'?a++:h++});return[h,a]}
@@ -3590,82 +3590,62 @@ async function sideLineup(db,m,side,roster){const f=side==='home'?'lineupHome':'
 async function autoGenerateUpcomingLineups(matches){const now=getServerNow();await Promise.all((matches||[]).filter(matchIsUpcoming).map(async m=>{const d=protocolMatchDate(m);if(!d)return;const h=(d-now)/3600000;if(h<0||h>48)return;const db=m._db==='db2'&&window.db2?window.db2:window.db;try{const[hr,ar]=await Promise.all([getRosterForProtocol(m.homeTeam,db),getRosterForProtocol(m.awayTeam,db)]);await sideLineup(db,m,'home',hr);await sideLineup(db,m,'away',ar)}catch(e){console.error('Automatyczne składy',e)}}))}
 window.autoGenerateUpcomingLineups=autoGenerateUpcomingLineups;
 async function updateStats(db,m,ev){const goals=ev.filter(e=>e.type==='goal'),ass=goals.filter(e=>e.assist);if(!goals.length&&!ass.length)return;const snap=await db.collection('stats').get(),rows=snap.docs.map(d=>({id:d.id,...d.data()})),batch=db.batch();for(const e of goals){const r=rows.find(x=>normalizeTeamName(x.team)===normalizeTeamName(e.team)&&String(x.player||'').trim()===String(e.player||'').trim()&&(!x.league||x.league===m.league));if(r)batch.update(db.collection('stats').doc(r.id),{goals:(Number(r.goals)||0)+1})}for(const e of ass){const r=rows.find(x=>normalizeTeamName(x.team)===normalizeTeamName(e.team)&&String(x.player||'').trim()===String(e.assist||'').trim()&&(!x.league||x.league===m.league));if(r)batch.update(db.collection('stats').doc(r.id),{assists:(Number(r.assists)||0)+1})}await batch.commit()}
-async function simulate(m,now){if(!m||m.status==='finished')return false;const db=m._db==='db2'&&window.db2?window.db2:window.db,st=simState(m,now);if(st.phase==='upcoming')return false;if(!m.lineupHome?.length||!m.lineupAway?.length){const[hr,ar]=await Promise.all([getRosterForProtocol(m.homeTeam,db),getRosterForProtocol(m.awayTeam,db)]);await sideLineup(db,m,'home',hr);await sideLineup(db,m,'away',ar)}if(!m.lineupHome?.length&&!m.lineupAway?.length)return false;const old=await events(db,m.id);
+async function simulate(m,now){
+if(!m||m.status==='finished')return false;
+const db=m._db==='db2'&&window.db2?window.db2:window.db,st=simState(m,now);
+if(st.phase==='upcoming')return false;
+if(!m.lineupHome?.length||!m.lineupAway?.length){const[hr,ar]=await Promise.all([getRosterForProtocol(m.homeTeam,db),getRosterForProtocol(m.awayTeam,db)]);await sideLineup(db,m,'home',hr);await sideLineup(db,m,'away',ar)}
+if(!m.lineupHome?.length&&!m.lineupAway?.length)return false;
+const old=await events(db,m.id);
 
-// Twarda ochrona symulacji: w jednym meczu tylko jeden automatyczny gol
-// może przypadać na daną minutę, a kolejne gole są odsuwane o co najmniej 10 minut.
-// Przy okazji usuwamy stare, automatyczne duplikaty minutowe, ale NIE ruszamy
-// ręcznie dodanych zdarzeń.
-const oldSimulationGoals=old.filter(e=>e.simulation===true&&(e.type==='goal'||e.type==='own_goal'));
-const keptSimulationGoals=[];
-const duplicateSimulationGoalIds=[];
-const occupiedSimulationMinutes=new Set();
-
-for(const e of oldSimulationGoals){
-    const minute=Number(e.minute);
-    if(!Number.isFinite(minute)) continue;
-    if(occupiedSimulationMinutes.has(minute)){
-        if(e.id) duplicateSimulationGoalIds.push(e.id);
-        continue;
-    }
-    occupiedSimulationMinutes.add(minute);
-    keptSimulationGoals.push(e);
+// Symulacja jest deterministyczna: stare automatyczne wydarzenia są przebudowywane
+// z tego samego ziarna meczu. Dzięki temu odświeżenie strony nie zmienia wyniku.
+// Ręcznie dodane wydarzenia zostają bez zmian.
+const manual=old.filter(e=>e.simulation!==true);
+const oldSimulation=old.filter(e=>e.simulation===true);
+if(oldSimulation.length){
+    const b=db.batch();
+    oldSimulation.forEach(e=>{if(e.id)b.delete(db.collection('matchEvents').doc(e.id));});
+    await b.commit();
 }
 
-if(duplicateSimulationGoalIds.length){
-    const cleanup=db.batch();
-    duplicateSimulationGoalIds.forEach(id=>cleanup.delete(db.collection('matchEvents').doc(id)));
-    await cleanup.commit();
-}
+st.goalMinutes=[...new Set(manual.filter(e=>e.type==='goal'||e.type==='own_goal').map(e=>Number(e.minute)).filter(Number.isFinite))];
+st.eventMinutes=[...new Set(manual.map(e=>Number(e.minute)).filter(Number.isFinite))];
 
-const cleanedOld=duplicateSimulationGoalIds.length
-    ? old.filter(e=>!duplicateSimulationGoalIds.includes(e.id))
-    : old;
-
-st.goalMinutes=[...new Set(
-    cleanedOld
-        .filter(e=>e.type==='goal'||e.type==='own_goal')
-        .map(e=>Number(e.minute))
-        .filter(Number.isFinite)
-)];
-// Uwzględniamy także już zapisane zdarzenia, żeby nowe zdarzenie nie pojawiło
-// się np. minutę po żółtej kartce albo anulowanym golu po ponownym uruchomieniu.
-st.eventMinutes=[...new Set(
-    cleanedOld
-        .map(e=>Number(e.minute))
-        .filter(Number.isFinite)
-)];
-
-const keys=new Set(cleanedOld.map(e=>`${e.minute}|${e.type}|${e.side||''}|${e.player||''}|${e.playerOut||''}|${e.playerIn||''}`));
 const target=st.phase==='halftime'?45:st.minute;
 const planned=plan(m,target);
-
-// Druga blokada po wygenerowaniu planu. Chroni również przed sytuacją,
-// w której dwa różne typy goli zostałyby wygenerowane na tej samej minucie.
 const acceptedGoalMinutes=new Set(st.goalMinutes);
+const acceptedEventMinutes=[...st.eventMinutes];
 const filteredPlanned=[];
 for(const e of planned){
+    const minute=Number(e.minute);
+    if(!Number.isFinite(minute))continue;
     const isGoal=e.type==='goal'||e.type==='own_goal';
+    if(acceptedEventMinutes.some(x=>Math.abs(Number(x)-minute)<5))continue;
     if(isGoal){
-        const minute=Number(e.minute);
-        if(!Number.isFinite(minute)||acceptedGoalMinutes.has(minute)) continue;
-        if([...acceptedGoalMinutes].some(x=>Math.abs(Number(x)-minute)<10)) continue;
+        if(acceptedGoalMinutes.has(minute))continue;
+        if([...acceptedGoalMinutes].some(x=>Math.abs(Number(x)-minute)<10))continue;
         acceptedGoalMinutes.add(minute);
     }
+    acceptedEventMinutes.push(minute);
     filteredPlanned.push(e);
 }
 
-const missing=filteredPlanned.filter(e=>!keys.has(`${e.minute}|${e.type}|${e.side||''}|${e.player||''}|${e.playerOut||''}|${e.playerIn||''}`));
-if(missing.length){
+if(filteredPlanned.length){
     const b=db.batch();
-    missing.forEach(e=>{
+    filteredPlanned.forEach(e=>{
         const fp=eventFingerprint(e).replace(/[^a-zA-Z0-9|_-]/g,'_');
         const docId='sim_'+String(m.id)+'_'+hash(fp).toString(36).replace('.','');
         b.set(db.collection('matchEvents').doc(docId),{...e,matchId:m.id,simulation:true,simulationKey:fp,createdAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});
     });
     await b.commit();
 }
-const all=cleanedOld.concat(missing),[sh,sa]=score(all);if(st.phase==='halftime'){await db.collection('matches').doc(m.id).update({status:'halftime',scoreHome:sh,scoreAway:sa,liveMinute:45,livePhase:'halftime',simulation:true});Object.assign(m,{status:'halftime',scoreHome:sh,scoreAway:sa,liveMinute:45});return true}if(st.phase==='first'||st.phase==='second'){await db.collection('matches').doc(m.id).update({status:'live',scoreHome:sh,scoreAway:sa,liveMinute:st.minute,livePhase:st.phase,simulation:true});Object.assign(m,{status:'live',scoreHome:sh,scoreAway:sa,liveMinute:st.minute});return true}await db.collection('matches').doc(m.id).update({status:'finished',scoreHome:sh,scoreAway:sa,liveMinute:90,livePhase:'finished',simulation:true,finishedAt:firebase.firestore.FieldValue.serverTimestamp()});Object.assign(m,{status:'finished',scoreHome:sh,scoreAway:sa,liveMinute:90});if(m.league&&m.league!=='friendly')await recalculateStandings(m.league);await updateStats(db,m,all);return true}
+
+const all=manual.concat(filteredPlanned),[sh,sa]=score(all);
+if(st.phase==='halftime'){await db.collection('matches').doc(m.id).update({status:'halftime',scoreHome:sh,scoreAway:sa,liveMinute:45,livePhase:'halftime',simulation:true});Object.assign(m,{status:'halftime',scoreHome:sh,scoreAway:sa,liveMinute:45});return true}
+if(st.phase==='first'||st.phase==='second'){await db.collection('matches').doc(m.id).update({status:'live',scoreHome:sh,scoreAway:sa,liveMinute:st.minute,livePhase:st.phase,simulation:true});Object.assign(m,{status:'live',scoreHome:sh,scoreAway:sa,liveMinute:st.minute});return true}
+await db.collection('matches').doc(m.id).update({status:'finished',scoreHome:sh,scoreAway:sa,liveMinute:90,livePhase:'finished',simulation:true,finishedAt:firebase.firestore.FieldValue.serverTimestamp()});Object.assign(m,{status:'finished',scoreHome:sh,scoreAway:sa,liveMinute:90});if(m.league&&m.league!=='friendly')await recalculateStandings(m.league);await updateStats(db,m,all);return true}
+
 async function autoSimulateMatches(matches){if(busy)return;busy=true;try{for(const m of(matches||[]).filter(x=>!matchIsFinished(x))){try{await simulate(m,getServerNow())}catch(e){console.error('Symulacja',m.id,e)}}}finally{busy=false}}
 window.autoSimulateMatches=autoSimulateMatches;
 window.resetProtocolLineupsToAuto=async function(){if(!protocolState.match)return;const[h,a]=await Promise.all([getRosterForProtocol(protocolState.match.homeTeam,protocolState.db),getRosterForProtocol(protocolState.match.awayTeam,protocolState.db)]);renderProtocolPlayers('mp-home-players',h,buildAutomaticLineup(h));renderProtocolPlayers('mp-away-players',a,buildAutomaticLineup(a));protocolState.homeRoster=h;protocolState.awayRoster=a};
