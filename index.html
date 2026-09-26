@@ -2890,18 +2890,37 @@ function fillProtocolSelect(id,names,placeholder){const el=document.getElementBy
 function refreshProtocolPlayerOptions(){const side=document.getElementById('mp-event-team')?.value||'home',names=rosterNames(side);fillProtocolSelect('mp-event-player',names,'Zawodnik');fillProtocolSelect('mp-event-assist',names,'Asystujący (opcjonalnie)');fillProtocolSelect('mp-player-out',names,'Schodzi');fillProtocolSelect('mp-player-in',names,'Wchodzi');}
 function updateProtocolEventFields(){const type=document.getElementById('mp-event-type')?.value||'goal',isSub=type==='sub',isGoal=type==='goal'||type==='own_goal';document.getElementById('mp-player-out').style.display=isSub?'block':'none';document.getElementById('mp-player-in').style.display=isSub?'block':'none';document.getElementById('mp-event-player').style.display=isSub?'none':'block';document.getElementById('mp-event-assist').style.display=isGoal?'block':'none';}
 function protocolEventLabel(e){return ({goal:'Gol',yellow:'Żółta kartka',red:'Czerwona kartka',sub:'Zmiana',penalty_missed:'Niewykorzystany karny',own_goal:'Gol samobójczy',goal_cancelled:'Anulowany gol',note:'Sytuacja'})[e.type]||({card:'Kartka'})[e.type]||'Wydarzenie';}
+let protocolEventSaving=false;
+function eventFingerprint(e){
+ const norm=v=>String(v??'').trim().toLowerCase();
+ return [Number(e.minute)||0,norm(e.type),norm(e.side),norm(e.team),norm(e.player),norm(e.assist),norm(e.playerOut),norm(e.playerIn),norm(e.creditedSide),norm(e.note)].join('|');
+}
+function dedupeMatchEvents(rows){
+ const seen=new Set(),out=[];
+ for(const e of (rows||[])){const key=eventFingerprint(e);if(seen.has(key))continue;seen.add(key);out.push(e);}
+ return out;
+}
 async function addProtocolEvent(){
- if(!user||!protocolState.match||!protocolState.db)return;
+ if(!user||!protocolState.match||!protocolState.db||protocolEventSaving)return;
+ protocolEventSaving=true;
  const type=document.getElementById('mp-event-type').value,side=document.getElementById('mp-event-team').value,team=side==='away'?protocolState.match.awayTeam:protocolState.match.homeTeam;
  const data={matchId:protocolState.match.id,minute:Number(document.getElementById('mp-minute').value)||0,type,team,side,player:document.getElementById('mp-event-player').value,assist:document.getElementById('mp-event-assist').value,playerOut:document.getElementById('mp-player-out').value,playerIn:document.getElementById('mp-player-in').value,note:document.getElementById('mp-event-note').value.trim(),createdAt:firebase.firestore.FieldValue.serverTimestamp()};
- if(type==='sub'&&(!data.playerOut||!data.playerIn)){alert('Przy zmianie wybierz zawodnika schodzącego i wchodzącego.');return;}
- if(type!=='sub'&&type!=='note'&&!data.player){alert('Wybierz zawodnika.');return;}
- try{await protocolState.db.collection('matchEvents').add(data);document.getElementById('mp-minute').value='';document.getElementById('mp-event-note').value='';document.getElementById('mp-event-player').value='';document.getElementById('mp-event-assist').value='';document.getElementById('mp-player-out').value='';document.getElementById('mp-player-in').value='';await loadProtocolEvents();}catch(e){console.error(e);alert('Błąd zapisu wydarzenia.');}
+ if(type==='sub'&&(!data.playerOut||!data.playerIn)){protocolEventSaving=false;alert('Przy zmianie wybierz zawodnika schodzącego i wchodzącego.');return;}
+ if(type!=='sub'&&type!=='note'&&!data.player){protocolEventSaving=false;alert('Wybierz zawodnika.');return;}
+ try{
+   const col=protocolState.db.collection('matchEvents');
+   const snap=await col.where('matchId','==',protocolState.match.id).get();
+   if(dedupeMatchEvents(snap.docs.map(d=>d.data())).some(e=>eventFingerprint(e)===eventFingerprint(data))){alert('To wydarzenie jest już zapisane.');await loadProtocolEvents();return;}
+   await col.add(data);
+   document.getElementById('mp-minute').value='';document.getElementById('mp-event-note').value='';document.getElementById('mp-event-player').value='';document.getElementById('mp-event-assist').value='';document.getElementById('mp-player-out').value='';document.getElementById('mp-player-in').value='';
+   await loadProtocolEvents();
+ }catch(e){console.error(e);alert('Błąd zapisu wydarzenia.');}
+ finally{protocolEventSaving=false;}
 }
 function protocolEventDesc(e){if(e.type==='sub')return `${phEsc(e.playerOut||'')} <i class="fa-solid fa-arrow-right-arrow-left"></i> ${phEsc(e.playerIn||'')}`;let x=phEsc(e.player||'');if(e.assist)x+=` <small>asysta: ${phEsc(e.assist)}</small>`;if(e.note)x+=` <small>${phEsc(e.note)}</small>`;return x||phEsc(e.note||'');}
 async function loadProtocolEvents(){
  const el=document.getElementById('mp-events-list');if(!el||!protocolState.match||!protocolState.db)return;
- try{const snap=await protocolState.db.collection('matchEvents').where('matchId','==',protocolState.match.id).get();const rows=snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(a.minute||0)-(b.minute||0));el.innerHTML=rows.length?rows.map(e=>`<div class="mp-event-row"><div class="mp-event-minute">${phEsc(e.minute||0)}'</div><div class="mp-event-main"><b>${protocolEventLabel(e)}</b><span>${protocolEventDesc(e)}</span></div><div class="mp-event-team">${phEsc(e.team||'')}</div><button class="mp-event-delete" onclick="deleteProtocolEvent('${e.id}')" title="Usuń"><i class="fa-solid fa-trash"></i></button></div>`).join(''):'<div class="mp-empty">Nie dodano jeszcze żadnych sytuacji meczowych.</div>';}catch(e){console.error(e);el.innerHTML='<div class="mp-empty">Nie udało się pobrać wydarzeń.</div>';}
+ try{const snap=await protocolState.db.collection('matchEvents').where('matchId','==',protocolState.match.id).get();const rows=dedupeMatchEvents(snap.docs.map(d=>({id:d.id,...d.data()}))).sort((a,b)=>(a.minute||0)-(b.minute||0));el.innerHTML=rows.length?rows.map(e=>`<div class="mp-event-row"><div class="mp-event-minute">${phEsc(e.minute||0)}'</div><div class="mp-event-main"><b>${protocolEventLabel(e)}</b><span>${protocolEventDesc(e)}</span></div><div class="mp-event-team">${phEsc(e.team||'')}</div><button class="mp-event-delete" onclick="deleteProtocolEvent('${e.id}')" title="Usuń"><i class="fa-solid fa-trash"></i></button></div>`).join(''):'<div class="mp-empty">Nie dodano jeszcze żadnych sytuacji meczowych.</div>';}catch(e){console.error(e);el.innerHTML='<div class="mp-empty">Nie udało się pobrać wydarzeń.</div>';}
 }
 async function deleteProtocolEvent(id){if(!protocolState.db||!confirm('Usunąć to wydarzenie?'))return;await protocolState.db.collection('matchEvents').doc(id).delete();loadProtocolEvents();}
 function renderPublicLineup(title,lineup){const starters=(lineup||[]).filter(x=>x.role==='starter'),bench=(lineup||[]).filter(x=>x.role==='bench');const rows=a=>a.length?a.map(x=>`<div class="detail-player"><span>${phEsc(x.number||'—')}</span><b>${phEsc(x.player)}</b><small>${phEsc(x.position||'')}</small></div>`).join(''):'<div class="detail-empty">Brak danych</div>';return `<div class="detail-lineup-team"><h4>${phEsc(title)}</h4><div class="detail-label">WYJŚCIOWY SKŁAD</div>${rows(starters)}<div class="detail-label detail-bench-label">REZERWOWI</div>${rows(bench)}</div>`;}
@@ -2909,7 +2928,7 @@ async function openMatchDetails(id,dbName){
  const db=dbName==='db2'&&window.db2?window.db2:window.db;
  try{
   const d=await db.collection('matches').doc(id).get();if(!d.exists)return;const m={id:d.id,...d.data()};
-  const snap=await db.collection('matchEvents').where('matchId','==',id).get();const ev=snap.docs.map(x=>x.data()).sort((a,b)=>(a.minute||0)-(b.minute||0));
+  const snap=await db.collection('matchEvents').where('matchId','==',id).get();const ev=dedupeMatchEvents(snap.docs.map(x=>x.data())).sort((a,b)=>(a.minute||0)-(b.minute||0));
   const score=matchIsUpcoming(m)?'<span class="detail-vs">VS</span>':`<span class="detail-score">${phEsc(m.scoreHome??'-')} : ${phEsc(m.scoreAway??'-')}</span>`;
   document.getElementById('match-detail-body').innerHTML=`<div class="detail-match-head"><div class="detail-league">${phEsc(matchCompetitionLabel(m))}</div><div class="detail-teams"><div>${crestImg(m.homeTeam)}<b>${phEsc(m.homeTeam)}</b></div>${score}<div>${crestImg(m.awayTeam)}<b>${phEsc(m.awayTeam)}</b></div></div><div class="detail-date">${phEsc(m.date?fmtFinished(m.date):'')}</div></div><div class="detail-section"><div class="detail-section-head"><span>PRZEBIEG MECZU</span><h3>Sytuacje meczowe</h3></div><div class="detail-events">${ev.length?ev.map(e=>`<div class="detail-event"><time>${phEsc(e.minute||0)}'</time><div><b>${protocolEventLabel(e)}</b><span>${protocolEventDesc(e)}</span></div><small>${phEsc(e.team||'')}</small></div>`).join(''):'<div class="detail-empty">Brak szczegółowych wydarzeń.</div>'}</div></div><div class="detail-section"><div class="detail-section-head"><span>SKŁADY</span><h3>Wyjściowe jedenastki i ławki</h3></div><div class="detail-lineups">${renderPublicLineup(m.homeTeam,m.lineupHome||[])}${renderPublicLineup(m.awayTeam,m.lineupAway||[])}</div></div>`;
   document.getElementById('match-detail-modal').classList.add('active');
@@ -3543,8 +3562,8 @@ else if(r<.0216){const p=pick(a,rnd(id,min,'red'+i));st[side].red.add(String(p.p
 else if(r<.0227){const p=pick(a,rnd(id,min,'cancel'+i));out.push({minute:min,type:'goal_cancelled',team,side,player:p.player,note:'Gol anulowany po analizie sytuacji'})}
 else if(r<.025){const p=pick(a,rnd(id,min,'pen'+i));out.push({minute:min,type:'penalty_missed',team,side,player:p.player})}});return out}
 function plan(m,target){if(!m.lineupHome?.length&&!m.lineupAway?.length)return[];const st=state(m.lineupHome,m.lineupAway),out=[];for(let i=1;i<=Math.min(90,target);i++)out.push(...minuteEvents(m,i,st));return out}
-async function events(db,id){const s=await db.collection('matchEvents').where('matchId','==',id).get();return s.docs.map(d=>({id:d.id,...d.data()}))}
-function score(ev){let h=0,a=0;ev.forEach(e=>{if(e.type==='goal')e.side==='home'?h++:a++;else if(e.type==='own_goal')e.creditedSide==='home'?a++:h++});return[h,a]}
+async function events(db,id){const s=await db.collection('matchEvents').where('matchId','==',id).get();return dedupeMatchEvents(s.docs.map(d=>({id:d.id,...d.data()})))}
+function score(ev){let h=0,a=0;dedupeMatchEvents(ev).forEach(e=>{if(e.type==='goal')e.side==='home'?h++:a++;else if(e.type==='own_goal')e.creditedSide==='home'?a++:h++});return[h,a]}
 async function sideLineup(db,m,side,roster){const f=side==='home'?'lineupHome':'lineupAway';if(m[f]?.length)return m[f];const x=buildAutomaticLineup(roster);if(x.length){await db.collection('matches').doc(m.id).update({[f]:x,lineupsAutoGenerated:true,lineupsUpdatedAt:firebase.firestore.FieldValue.serverTimestamp()});m[f]=x}return x}
 async function autoGenerateUpcomingLineups(matches){const now=getServerNow();await Promise.all((matches||[]).filter(matchIsUpcoming).map(async m=>{const d=protocolMatchDate(m);if(!d)return;const h=(d-now)/3600000;if(h<0||h>48)return;const db=m._db==='db2'&&window.db2?window.db2:window.db;try{const[hr,ar]=await Promise.all([getRosterForProtocol(m.homeTeam,db),getRosterForProtocol(m.awayTeam,db)]);await sideLineup(db,m,'home',hr);await sideLineup(db,m,'away',ar)}catch(e){console.error('Automatyczne składy',e)}}))}
 window.autoGenerateUpcomingLineups=autoGenerateUpcomingLineups;
