@@ -3547,6 +3547,9 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 const HALF=45*60*1000,BREAK=15*60*1000,FULL=HALF+BREAK+HALF;let busy=false,timer=null;
 function hash(x){let h=2166136261>>>0;for(let i=0;i<String(x).length;i++){h^=String(x).charCodeAt(i);h=Math.imul(h,16777619);}return(h>>>0)/4294967296}
 function rnd(id,min,slot){return hash(id+'|'+min+'|'+slot)}
+function matchSeed(m){return String(m.id||'')+'|'+String(m.date?.toDate?m.date.toDate().toISOString():m.date||'')+'|'+String(m.homeTeam||'')+'|'+String(m.awayTeam||'')}
+function matchGoalFactor(m,side){const base=hash(matchSeed(m)+'|goal-factor|'+side);return 0.72+base*0.58}
+function matchGoalBias(m,side){return (hash(matchSeed(m)+'|goal-bias|'+side)-0.5)*0.0022}
 function simState(m,now){const d=protocolMatchDate(m);if(!d)return{phase:'upcoming',minute:0};const e=now-d;if(e<0)return{phase:'upcoming',minute:0};if(e<HALF)return{phase:'first',minute:Math.min(45,Math.floor(e/60000)+1)};if(e<HALF+BREAK)return{phase:'halftime',minute:45};if(e<FULL)return{phase:'second',minute:Math.min(90,45+Math.floor((e-HALF-BREAK)/60000)+1)};return{phase:'finished',minute:90}}
 function role(lineup,r){return(lineup||[]).filter(x=>x.role===r&&x.player).map(x=>({...x}))}
 function state(h,a){return{home:{active:role(h,'starter'),bench:role(h,'bench'),red:new Set()},away:{active:role(a,'starter'),bench:role(a,'bench'),red:new Set()},goalMinutes:[]}}
@@ -3554,11 +3557,13 @@ function pick(a,r){return a.length?a[Math.floor(r*a.length)%a.length]:null}
 function subs(st,side,r){const out=st[side].active.filter(p=>!st[side].red.has(String(p.player))),bench=st[side].bench;if(!out.length||!bench.length)return null;const po=pick(out,r),pi=bench.splice(Math.floor(r*bench.length)%bench.length,1)[0];if(!pi)return null;const i=st[side].active.findIndex(p=>String(p.player)===String(po.player));if(i>=0)st[side].active[i]=pi;return{playerOut:po.player,playerIn:pi.player}}
 function goalTooSoon(st,min){return (st.goalMinutes||[]).some(x=>Math.abs(Number(x)-Number(min))<5)}
 function registerGoal(st,min){if(!st.goalMinutes)st.goalMinutes=[];st.goalMinutes.push(Number(min));}
-function minuteEvents(m,min,st){const out=[];if(min===45)return out;const id=m.id;
+function minuteEvents(m,min,st){const out=[];if(min===45)return out;const id=m.id;const seed=matchSeed(m);
 if(min>=55&&min<=82)['home','away'].forEach((side,i)=>{const r=rnd(id,min,'sub'+i);if(r<.035){const x=subs(st,side,rnd(id,min,'subpick'+i));if(x)out.push({minute:min,type:'sub',team:side==='home'?m.homeTeam:m.awayTeam,side,...x})}});
 ['home','away'].forEach((side,i)=>{const r=rnd(id,min,'event'+i),a=st[side].active.filter(p=>!st[side].red.has(String(p.player)));if(!a.length)return;const team=side==='home'?m.homeTeam:m.awayTeam;
-if(r<.011&&!goalTooSoon(st,min)){const p=pick(a,rnd(id,min,'goal'+i)),ap=a.filter(x=>x.player!==p.player),as=ap.length&&rnd(id,min,'assist'+i)<.68?pick(ap,rnd(id,min,'assistpick'+i)):null;out.push({minute:min,type:'goal',team,side,player:p.player,assist:as?.player||''});registerGoal(st,min)}
-else if(r<.0122&&!goalTooSoon(st,min)){const p=pick(a,rnd(id,min,'og'+i));out.push({minute:min,type:'own_goal',team:side==='home'?m.awayTeam:m.homeTeam,side:side==='home'?'away':'home',creditedSide:side,player:p.player});registerGoal(st,min)}
+const goalCut=0.011*matchGoalFactor(m,side)+matchGoalBias(m,side);
+const ownGoalCut=goalCut+0.0012*matchGoalFactor(m,side);
+if(r<goalCut&&!goalTooSoon(st,min)){const p=pick(a,rnd(id,min,'goal'+i)),ap=a.filter(x=>x.player!==p.player),as=ap.length&&rnd(id,min,'assist'+i)<.68?pick(ap,rnd(id,min,'assistpick'+i)):null;out.push({minute:min,type:'goal',team,side,player:p.player,assist:as?.player||''});registerGoal(st,min)}
+else if(r<ownGoalCut&&!goalTooSoon(st,min)){const p=pick(a,rnd(id,min,'og'+i));out.push({minute:min,type:'own_goal',team:side==='home'?m.awayTeam:m.homeTeam,side:side==='home'?'away':'home',creditedSide:side,player:p.player});registerGoal(st,min)}
 else if(r<.0205){const p=pick(a,rnd(id,min,'yellow'+i));out.push({minute:min,type:'yellow',team,side,player:p.player})}
 else if(r<.0216){const p=pick(a,rnd(id,min,'red'+i));st[side].red.add(String(p.player));st[side].active=st[side].active.filter(x=>x.player!==p.player);out.push({minute:min,type:'red',team,side,player:p.player})}
 else if(r<.0227){const p=pick(a,rnd(id,min,'cancel'+i));out.push({minute:min,type:'goal_cancelled',team,side,player:p.player,note:'Gol anulowany po analizie sytuacji'})}
