@@ -3897,8 +3897,8 @@ async function tick(){
    if(nowMs-lastUpcomingLineupSync>=10*60*1000){
      lastUpcomingLineupSync=nowMs;
      try{
-       const upcomingSnap=await window.db.collection('matches').where('status','==','upcoming').orderBy('date','asc').limit(50).get();
-       const upcoming=upcomingSnap.docs.map(d=>({id:d.id,_db:'db1',...d.data()}));
+       const upcomingSnap=await window.db.collection('matches').where('status','==','upcoming').limit(100).get();
+       const upcoming=upcomingSnap.docs.map(d=>({id:d.id,_db:'db1',...d.data()})).sort((a,b)=>(a.date?.seconds||0)-(b.date?.seconds||0));
        await autoGenerateUpcomingLineups(upcoming);
        automationCandidates.push(...upcoming);
      }catch(e){
