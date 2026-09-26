@@ -2261,15 +2261,37 @@ async function sendContact(){
             if(mp){ mp.value=(d._db||'db1')+'::'+id; if(mp.value) loadMatchProtocol(); }
             window.scrollTo({top:0,behavior:'smooth'});
         }
+        async function deleteMatchCompletely(dbase,id){
+            if(!dbase||!id)return null;
+            const matchRef=dbase.collection('matches').doc(id);
+            const matchDoc=await matchRef.get();
+            const matchData=matchDoc.exists?matchDoc.data():null;
+            // Usuwamy również WSZYSTKIE zdarzenia przypisane do meczu.
+            // Dzięki temu po ponownym dodaniu tego samego spotkania nie zostają
+            // stare gole, kartki, składy sytuacji ani stary przebieg meczu.
+            const evSnap=await dbase.collection('matchEvents').where('matchId','==',id).get();
+            const refs=[...evSnap.docs.map(d=>d.ref),matchRef];
+            for(let i=0;i<refs.length;i+=450){
+                const batch=dbase.batch();
+                refs.slice(i,i+450).forEach(ref=>batch.delete(ref));
+                await batch.commit();
+            }
+            return matchData;
+        }
+
         async function delM(id, dbVal){
-            if(confirm('Usunąć?')){
+            if(confirm('Usunąć mecz wraz z całym jego wynikiem, wydarzeniami i zapisanym przebiegiem?')){
                 const dbase = (dbVal==='db2' && window.db2) ? window.db2 : window.db;
-                const matchRef = dbase.collection('matches').doc(id);
-                const matchDoc = await matchRef.get();
-                const league = matchDoc.exists ? matchDoc.data().league : '';
-                await matchRef.delete();
-                if(league && league !== 'friendly') await recalculateStandings(league);
-                loadAdminM();
+                try{
+                    const matchData=await deleteMatchCompletely(dbase,id);
+                    const league=matchData?.league||'';
+                    if(league && league !== 'friendly') await recalculateStandings(league);
+                    // Natychmiast usuwamy również lokalny wpis z pamięci strony.
+                    mc=Array.isArray(mc)?mc.filter(x=>!(x.id===id&&((x._db||'db1')===(dbVal||'db1')))):mc;
+                    adminMatchesCache=Array.isArray(adminMatchesCache)?adminMatchesCache.filter(x=>!(x.id===id&&x._db===(dbVal||'db1'))):adminMatchesCache;
+                    await loadAdminM();
+                    applyFilter();
+                }catch(e){console.error(e);alert('Nie udało się całkowicie usunąć meczu.');}
             }
         }
         function normalizeBulkMatchTeam(name){
@@ -2333,7 +2355,9 @@ async function sendContact(){
                 if(!unique.length){status.textContent='Nie znaleziono żadnego dokładnie pasującego meczu.';status.style.color='var(--muted)';return;}
                 const ok=confirm('Znaleziono '+unique.length+' mecz(ów). Czy na pewno je usunąć?');
                 if(!ok){status.textContent='Usuwanie anulowane.';return;}
-                for(const m of unique) await m.db.collection('matches').doc(m.id).delete();
+                // Usuwamy mecz razem ze wszystkimi dokumentami matchEvents.
+                // Stare wydarzenia nie mogą pozostać i mieszać się z nowym meczem.
+                for(const m of unique) await deleteMatchCompletely(m.db,m.id);
                 for(const league of affectedLeagues){try{await recalculateStandings(league);}catch(e){}}
                 document.getElementById('bulk-delete-matches').value='';
                 status.textContent='Usunięto '+unique.length+' mecz(ów).';status.style.color='var(--green)';
@@ -2931,18 +2955,10 @@ async function openMatchDetails(id,dbName){
  try{
   const d=await db.collection('matches').doc(id).get();if(!d.exists)return;const m={id:d.id,...d.data()};
   const snap=await db.collection('matchEvents').where('matchId','==',id).get();const ev=dedupeMatchEvents(snap.docs.map(x=>x.data())).sort((a,b)=>(a.minute||0)-(b.minute||0));
-  // Dla zakończonych meczów symulowanych wynik jest liczony z zapisanych wydarzeń.
-  // Dzięki temu lista wyników i szczegóły nie mogą pokazać dwóch różnych rezultatów.
-  if(m.status==='finished' && m.simulation===true){
-    const [eh,ea]=score(ev);
-    const dh=Number(m.scoreHome), da=Number(m.scoreAway);
-    if(Number.isFinite(eh)&&Number.isFinite(ea)&&(dh!==eh||da!==ea)){
-      await db.collection('matches').doc(id).update({scoreHome:eh,scoreAway:ea});
-      m.scoreHome=eh; m.scoreAway=ea;
-      const idx=Array.isArray(mc)?mc.findIndex(x=>x.id===id&&((x._db||'db1')===dbName)): -1;
-      if(idx>=0){mc[idx]={...mc[idx],scoreHome:eh,scoreAway:ea};applyFilter();}
-    }
-  }
+  // Wynik zapisany w dokumencie meczu jest źródłem prawdy.
+  // Nie nadpisujemy go już wynikiem wyliczonym z wydarzeń, ponieważ ręczne
+  // wydarzenia mogą być niepełne. Dzięki temu lista wyników i szczegóły
+  // zawsze pokazują dokładnie ten sam zapisany rezultat.
   const score=matchIsUpcoming(m)?'<span class="detail-vs">VS</span>':`<span class="detail-score">${phEsc(m.scoreHome??'-')} : ${phEsc(m.scoreAway??'-')}</span>`;
   document.getElementById('match-detail-body').innerHTML=`<div class="detail-match-head"><div class="detail-league">${phEsc(matchCompetitionLabel(m))}</div><div class="detail-teams"><div>${crestImg(m.homeTeam)}<b>${phEsc(m.homeTeam)}</b></div>${score}<div>${crestImg(m.awayTeam)}<b>${phEsc(m.awayTeam)}</b></div></div><div class="detail-date">${phEsc(m.date?fmtFinished(m.date):'')}</div></div><div class="detail-section"><div class="detail-section-head"><span>PRZEBIEG MECZU</span><h3>Sytuacje meczowe</h3></div><div class="detail-events">${ev.length?ev.map(e=>`<div class="detail-event"><time>${phEsc(e.minute||0)}'</time><div><b>${protocolEventLabel(e)}</b><span>${protocolEventDesc(e)}</span></div><small>${phEsc(e.team||'')}</small></div>`).join(''):'<div class="detail-empty">Brak szczegółowych wydarzeń.</div>'}</div></div><div class="detail-section"><div class="detail-section-head"><span>SKŁADY</span><h3>Wyjściowe jedenastki i ławki</h3></div><div class="detail-lineups">${renderPublicLineup(m.homeTeam,m.lineupHome||[])}${renderPublicLineup(m.awayTeam,m.lineupAway||[])}</div></div>`;
   document.getElementById('match-detail-modal').classList.add('active');
