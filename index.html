@@ -3557,7 +3557,7 @@ function pick(a,r){return a.length?a[Math.floor(r*a.length)%a.length]:null}
 function subs(st,side,r){const out=st[side].active.filter(p=>!st[side].red.has(String(p.player))),bench=st[side].bench;if(!out.length||!bench.length)return null;const po=pick(out,r),pi=bench.splice(Math.floor(r*bench.length)%bench.length,1)[0];if(!pi)return null;const i=st[side].active.findIndex(p=>String(p.player)===String(po.player));if(i>=0)st[side].active[i]=pi;return{playerOut:po.player,playerIn:pi.player}}
 function goalTooSoon(st,min){
     const n=Number(min);
-    return (st.goalMinutes||[]).some(x=>Math.abs(Number(x)-n)<6);
+    return (st.goalMinutes||[]).some(x=>Math.abs(Number(x)-n)<11);
 }
 function registerGoal(st,min){if(!st.goalMinutes)st.goalMinutes=[];st.goalMinutes.push(Number(min));}
 function goalEventBlocked(st,min){const n=Number(min);return st.blockedGoalMinutes?.has(n)||goalTooSoon(st,n)}
@@ -3565,7 +3565,7 @@ function blockGoalMinute(st,min){if(!st.blockedGoalMinutes)st.blockedGoalMinutes
 function minuteEvents(m,min,st){const out=[];if(min===45)return out;const id=m.id;const seed=matchSeed(m);
 if(min>=55&&min<=82)['home','away'].forEach((side,i)=>{const r=rnd(id,min,'sub'+i);if(r<.035){const x=subs(st,side,rnd(id,min,'subpick'+i));if(x)out.push({minute:min,type:'sub',team:side==='home'?m.homeTeam:m.awayTeam,side,...x})}});
 ['home','away'].forEach((side,i)=>{const r=rnd(id,min,'event'+i),a=st[side].active.filter(p=>!st[side].red.has(String(p.player)));if(!a.length)return;const team=side==='home'?m.homeTeam:m.awayTeam;
-const goalCut=0.011*matchGoalFactor(m,side)+matchGoalBias(m,side);
+const goalCut=0.008*matchGoalFactor(m,side)+matchGoalBias(m,side);
 const ownGoalCut=goalCut+0.0012*matchGoalFactor(m,side);
 if(r<goalCut&&!goalEventBlocked(st,min)){const p=pick(a,rnd(id,min,'goal'+i)),ap=a.filter(x=>x.player!==p.player),as=ap.length&&rnd(id,min,'assist'+i)<.68?pick(ap,rnd(id,min,'assistpick'+i)):null;out.push({minute:min,type:'goal',team,side,player:p.player,assist:as?.player||''});registerGoal(st,min);blockGoalMinute(st,min)}
 else if(r<ownGoalCut&&!goalEventBlocked(st,min)){const p=pick(a,rnd(id,min,'og'+i));out.push({minute:min,type:'own_goal',team:side==='home'?m.awayTeam:m.homeTeam,side:side==='home'?'away':'home',creditedSide:side,player:p.player});registerGoal(st,min);blockGoalMinute(st,min)}
