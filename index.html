@@ -1344,10 +1344,21 @@ Adam Wiśniewski | 1 | Bramkarz | Zawieszony | 2 mecze"></textarea>
                     <div class="score-box ${up?'vs':''} ${live?'live-score':''}">${score}</div>
                     <div class="team-wrap away"><span class="team-name" onclick="openClubProfile('${m.awayTeam}')">${m.awayTeam||'?'}</span>${crestImg(m.awayTeam)}</div>
                 </div>
-                <div class="match-date ${up?'up':''} ${live?'live-date':''}">${live?fmtLiveMatch(m):(up?fmtUpcoming(m.date):fmtFinished(m.date))}</div><button class="match-action" onclick="openMatchDetails('${m.id}','${m._db||'db1'}')">Szczegóły meczu · składy · gole · zmiany</button>
+                <div class="match-date ${up?'up':''} ${live?'live-date':''}">${live?fmtLiveMatch(m):(up?fmtUpcoming(m.date):fmtFinished(m.date))}</div><button class="match-action" onclick="openMatchDetailsByKey('${matchDetailKey(m)}')">Szczegóły meczu · składy · gole · zmiany</button>
             </div>`;
         }
 
+        window.__matchDetailMap=window.__matchDetailMap||{};
+        function matchDetailKey(m){
+            const key=String(m?._db||'db1')+'::'+String(m?.id||'');
+            window.__matchDetailMap[key]={id:String(m?.id||''),dbName:String(m?._db||'db1')};
+            return key;
+        }
+        function openMatchDetailsByKey(key){
+            const x=window.__matchDetailMap?.[String(key)];
+            if(!x)return;
+            return openMatchDetails(x.id,x.dbName);
+        }
         function renderGrid(data,cid){
             const c=document.getElementById(cid);
             if(c) c.innerHTML = data.length ? data.map(matchCard).join('') : '<p style="color:var(--muted);text-align:center;padding:1.5rem;">Brak danych.</p>';
@@ -2951,14 +2962,27 @@ async function loadProtocolEvents(){
 async function deleteProtocolEvent(id){if(!protocolState.db||!confirm('Usunąć to wydarzenie?'))return;await protocolState.db.collection('matchEvents').doc(id).delete();loadProtocolEvents();}
 function renderPublicLineup(title,lineup){const starters=(lineup||[]).filter(x=>x.role==='starter'),bench=(lineup||[]).filter(x=>x.role==='bench');const rows=a=>a.length?a.map(x=>`<div class="detail-player"><span>${phEsc(x.number||'—')}</span><b>${phEsc(x.player)}</b><small>${phEsc(x.position||'')}</small></div>`).join(''):'<div class="detail-empty">Brak danych</div>';return `<div class="detail-lineup-team"><h4>${phEsc(title)}</h4><div class="detail-label">WYJŚCIOWY SKŁAD</div>${rows(starters)}<div class="detail-label detail-bench-label">REZERWOWI</div>${rows(bench)}</div>`;}
 async function openMatchDetails(id,dbName){
- const db=dbName==='db2'&&window.db2?window.db2:window.db;
+ const source=String(dbName||'db1');
+ const db=source==='db2'&&window.db2?window.db2:window.db;
  try{
-  const d=await db.collection('matches').doc(id).get();if(!d.exists)return;const m={id:d.id,...d.data()};
-  const snap=await db.collection('matchEvents').where('matchId','==',id).get();const ev=dedupeMatchEvents(snap.docs.map(x=>x.data())).sort((a,b)=>(a.minute||0)-(b.minute||0));
-  // Wynik zapisany w dokumencie meczu jest źródłem prawdy.
-  // Nie nadpisujemy go już wynikiem wyliczonym z wydarzeń, ponieważ ręczne
-  // wydarzenia mogą być niepełne. Dzięki temu lista wyników i szczegóły
-  // zawsze pokazują dokładnie ten sam zapisany rezultat.
+  if(!db||!id)return;
+  // Zawsze pobieramy dokładnie ten dokument z tej samej bazy, z której pochodzi karta.
+  // Dzięki temu identyczne ID występujące w db1 i db2 nie może pomylić wyniku.
+  const d=await db.collection('matches').doc(String(id)).get({source:'server'});
+  if(!d.exists)return;
+  const m={id:d.id,_db:source,...d.data()};
+  // Aktualizujemy lokalny rekord tej samej pary (baza + ID), aby karta i szczegóły
+  // korzystały z identycznego, świeżego wyniku.
+  if(Array.isArray(mc)){
+   const idx=mc.findIndex(x=>String(x.id)===String(id)&&String(x._db||'db1')===source);
+   if(idx>=0)mc[idx]=m;
+  }
+  if(Array.isArray(adminMatchesCache)){
+   const idx=adminMatchesCache.findIndex(x=>String(x.id)===String(id)&&String(x._db||'db1')===source);
+   if(idx>=0)adminMatchesCache[idx]=m;
+  }
+  const snap=await db.collection('matchEvents').where('matchId','==',String(id)).get();
+  const ev=dedupeMatchEvents(snap.docs.map(x=>x.data())).sort((a,b)=>(a.minute||0)-(b.minute||0));
   const score=matchIsUpcoming(m)?'<span class="detail-vs">VS</span>':`<span class="detail-score">${phEsc(m.scoreHome??'-')} : ${phEsc(m.scoreAway??'-')}</span>`;
   document.getElementById('match-detail-body').innerHTML=`<div class="detail-match-head"><div class="detail-league">${phEsc(matchCompetitionLabel(m))}</div><div class="detail-teams"><div>${crestImg(m.homeTeam)}<b>${phEsc(m.homeTeam)}</b></div>${score}<div>${crestImg(m.awayTeam)}<b>${phEsc(m.awayTeam)}</b></div></div><div class="detail-date">${phEsc(m.date?fmtFinished(m.date):'')}</div></div><div class="detail-section"><div class="detail-section-head"><span>PRZEBIEG MECZU</span><h3>Sytuacje meczowe</h3></div><div class="detail-events">${ev.length?ev.map(e=>`<div class="detail-event"><time>${phEsc(e.minute||0)}'</time><div><b>${protocolEventLabel(e)}</b><span>${protocolEventDesc(e)}</span></div><small>${phEsc(e.team||'')}</small></div>`).join(''):'<div class="detail-empty">Brak szczegółowych wydarzeń.</div>'}</div></div><div class="detail-section"><div class="detail-section-head"><span>SKŁADY</span><h3>Wyjściowe jedenastki i ławki</h3></div><div class="detail-lineups">${renderPublicLineup(m.homeTeam,m.lineupHome||[])}${renderPublicLineup(m.awayTeam,m.lineupAway||[])}</div></div>`;
   document.getElementById('match-detail-modal').classList.add('active');
