@@ -2981,8 +2981,18 @@ async function openMatchDetails(id,dbName){
    const idx=adminMatchesCache.findIndex(x=>String(x.id)===String(id)&&String(x._db||'db1')===source);
    if(idx>=0)adminMatchesCache[idx]=m;
   }
-  const snap=await db.collection('matchEvents').where('matchId','==',String(id)).get();
-  const ev=dedupeMatchEvents(snap.docs.map(x=>x.data())).sort((a,b)=>(a.minute||0)-(b.minute||0));
+  // Przed pokazaniem szczegółów normalizujemy również stare wydarzenia.
+  // Dzięki temu nawet pojedynczy stary mecz nie może wyświetlić np. 3 zdarzeń w 59'.
+  const ev=await events(db,String(id));
+  const [detailHome,detailAway]=score(ev);
+  if((Number(m.scoreHome)||0)!==detailHome || (Number(m.scoreAway)||0)!==detailAway){
+    await db.collection('matches').doc(String(id)).update({scoreHome:detailHome,scoreAway:detailAway});
+    m.scoreHome=detailHome;m.scoreAway=detailAway;
+    if(Array.isArray(mc)){
+      const idx=mc.findIndex(x=>String(x.id)===String(id)&&String(x._db||'db1')===source);
+      if(idx>=0)mc[idx]={...mc[idx],scoreHome:detailHome,scoreAway:detailAway};
+    }
+  }
   const score=matchIsUpcoming(m)?'<span class="detail-vs">VS</span>':`<span class="detail-score">${phEsc(m.scoreHome??'-')} : ${phEsc(m.scoreAway??'-')}</span>`;
   document.getElementById('match-detail-body').innerHTML=`<div class="detail-match-head"><div class="detail-league">${phEsc(matchCompetitionLabel(m))}</div><div class="detail-teams"><div>${crestImg(m.homeTeam)}<b>${phEsc(m.homeTeam)}</b></div>${score}<div>${crestImg(m.awayTeam)}<b>${phEsc(m.awayTeam)}</b></div></div><div class="detail-date">${phEsc(m.date?fmtFinished(m.date):'')}</div></div><div class="detail-section"><div class="detail-section-head"><span>PRZEBIEG MECZU</span><h3>Sytuacje meczowe</h3></div><div class="detail-events">${ev.length?ev.map(e=>`<div class="detail-event"><time>${phEsc(e.minute||0)}'</time><div><b>${protocolEventLabel(e)}</b><span>${protocolEventDesc(e)}</span></div><small>${phEsc(e.team||'')}</small></div>`).join(''):'<div class="detail-empty">Brak szczegółowych wydarzeń.</div>'}</div></div><div class="detail-section"><div class="detail-section-head"><span>SKŁADY</span><h3>Wyjściowe jedenastki i ławki</h3></div><div class="detail-lineups">${renderPublicLineup(m.homeTeam,m.lineupHome||[])}${renderPublicLineup(m.awayTeam,m.lineupAway||[])}</div></div>`;
   document.getElementById('match-detail-modal').classList.add('active');
@@ -3637,23 +3647,27 @@ else if(r<.0120&&!goalEventBlocked(st,min)&&!eventBlocked(st,min)){const p=pick(
 else if(r<.0130&&!goalEventBlocked(st,min)&&!eventBlocked(st,min)){const p=pick(a,rnd(id,min,'pen'+i));out.push({minute:min,type:'penalty_missed',team,side,player:p.player});blockGoalMinute(st,min)}});return out}
 function plan(m,target){if(!m.lineupHome?.length&&!m.lineupAway?.length)return[];const st=state(m.lineupHome,m.lineupAway),out=[];for(let i=1;i<=Math.min(90,target);i++)out.push(...minuteEvents(m,i,st));return out}
 function normalizeEventSpacing(rows){
- const input=dedupeMatchEvents(rows||[]).map(e=>({...e,minute:Number(e.minute)})).filter(e=>Number.isFinite(e.minute));
  const priority={goal:0,own_goal:1,red:2,yellow:3,goal_cancelled:4,penalty_missed:5,sub:6,note:7};
- input.sort((a,b)=>(a.minute-b.minute)||((priority[a.type]??9)-(priority[b.type]??9)));
+ const input=dedupeMatchEvents(rows||[])
+   .map(e=>({...e,minute:Math.max(1,Math.min(90,Number(e.minute)||1))}))
+   .filter(e=>Number.isFinite(e.minute));
+ input.sort((a,b)=>(a.minute-b.minute)||((priority[a.type]??9)-(priority[b.type]??9))||String(a.id||'').localeCompare(String(b.id||'')));
  const used=[],goalMins=[];
  const isGoal=e=>e.type==='goal'||e.type==='own_goal';
  function freeAt(n,e){
    if(n<1||n>90)return false;
-   if(used.some(x=>Math.abs(x-n)<5))return false;
-   if(isGoal(e)&&goalMins.some(x=>Math.abs(x-n)<10))return false;
+   if(used.some(x=>Math.abs(Number(x)-n)<5))return false;
+   if(isGoal(e)&&goalMins.some(x=>Math.abs(Number(x)-n)<10))return false;
    return true;
  }
  for(const e of input){
    const original=e.minute;
    if(freeAt(original,e)){used.push(original);if(isGoal(e))goalMins.push(original);continue;}
    let found=null;
-   for(let d=5;d<=45&&!found;d+=1){
-     for(const n of [original+d,original-d]){
+   // Najpierw próbujemy blisko pierwotnej minuty, ale szukamy w całym meczu.
+   for(let d=1;d<=89&&!found;d++){
+     const candidates=[original-d,original+d];
+     for(const n of candidates){
        if(freeAt(n,e)){found=n;break;}
      }
    }
@@ -3661,24 +3675,36 @@ function normalizeEventSpacing(rows){
      e.minute=found;
      used.push(found);
      if(isGoal(e))goalMins.push(found);
-   }else{
-     // Jeżeli nie ma już wolnej minuty, pozostawiamy zdarzenie zamiast je usuwać.
-     used.push(original);
-     if(isGoal(e))goalMins.push(original);
    }
  }
+ input.sort((a,b)=>(a.minute-b.minute)||((priority[a.type]??9)-(priority[b.type]??9)));
  return input;
 }
 async function events(db,id){
- const s=await db.collection('matchEvents').where('matchId','==',id).get();
- const rows=dedupeMatchEvents(s.docs.map(d=>({id:d.id,...d.data()})));
- const normalized=normalizeEventSpacing(rows);
- const changed=normalized.some((e,i)=>Number(e.minute)!==Number(rows[i]?.minute));
- if(changed){
-   const b=db.batch();
-   normalized.forEach(e=>b.update(db.collection('matchEvents').doc(e.id),{minute:e.minute}));
-   await b.commit();
- }
+ const s=await db.collection('matchEvents').where('matchId','==',String(id)).get();
+ const raw=s.docs.map(d=>({id:d.id,...d.data()}));
+ const deduped=dedupeMatchEvents(raw);
+ const normalized=normalizeEventSpacing(deduped);
+ const keepIds=new Set(normalized.map(e=>e.id).filter(Boolean));
+ const byId=new Map(raw.filter(e=>e.id).map(e=>[e.id,e]));
+ const b=db.batch();
+ let writes=0;
+ // Usuwamy dokładne duplikaty, które mogły powstać w starszych wersjach.
+ raw.forEach(e=>{
+   if(e.id&&!keepIds.has(e.id)&&deduped.some(x=>eventFingerprint(x)===eventFingerprint(e))){
+     b.delete(db.collection('matchEvents').doc(e.id));
+     writes++;
+   }
+ });
+ normalized.forEach(e=>{
+   if(!e.id)return;
+   const before=byId.get(e.id);
+   if(!before || Number(before.minute)!==Number(e.minute)){
+     b.update(db.collection('matchEvents').doc(e.id),{minute:e.minute});
+     writes++;
+   }
+ });
+ if(writes)await b.commit();
  return normalized;
 }
 function score(ev){let h=0,a=0;dedupeMatchEvents(ev).forEach(e=>{if(e.type==='goal')e.side==='home'?h++:a++;else if(e.type==='own_goal')e.creditedSide==='home'?a++:h++});return[h,a]}
