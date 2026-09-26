@@ -1350,8 +1350,8 @@ Adam Wiśniewski | 1 | Bramkarz | Zawieszony | 2 mecze"></textarea>
 
         window.__matchDetailMap=window.__matchDetailMap||{};
         function matchDetailKey(m){
-            const key=String(m?._db||'db1')+'::'+String(m?.id||'');
-            window.__matchDetailMap[key]={id:String(m?.id||''),dbName:String(m?._db||'db1')};
+            const key='db1::'+String(m?.id||'');
+            window.__matchDetailMap[key]={id:String(m?.id||''),dbName:'db1'};
             return key;
         }
         function openMatchDetailsByKey(key){
@@ -2981,18 +2981,11 @@ async function openMatchDetails(id,dbName){
    const idx=adminMatchesCache.findIndex(x=>String(x.id)===String(id)&&String(x._db||'db1')===source);
    if(idx>=0)adminMatchesCache[idx]=m;
   }
-  // Przed pokazaniem szczegółów normalizujemy również stare wydarzenia.
-  // Dzięki temu nawet pojedynczy stary mecz nie może wyświetlić np. 3 zdarzeń w 59'.
+  // WYNIK ZAWSZE BIERZEMY Z DOKUMENTU MATCHES.
+  // matchEvents służy wyłącznie do pokazania przebiegu meczu i NIE może
+  // nadpisywać zapisanego wyniku. Dzięki temu lista meczów i szczegóły
+  // korzystają z dokładnie tego samego wyniku z jednej bazy Firestore.
   const ev=await events(db,String(id));
-  const [detailHome,detailAway]=score(ev);
-  if((Number(m.scoreHome)||0)!==detailHome || (Number(m.scoreAway)||0)!==detailAway){
-    await db.collection('matches').doc(String(id)).update({scoreHome:detailHome,scoreAway:detailAway});
-    m.scoreHome=detailHome;m.scoreAway=detailAway;
-    if(Array.isArray(mc)){
-      const idx=mc.findIndex(x=>String(x.id)===String(id)&&String(x._db||'db1')===source);
-      if(idx>=0)mc[idx]={...mc[idx],scoreHome:detailHome,scoreAway:detailAway};
-    }
-  }
   const score=matchIsUpcoming(m)?'<span class="detail-vs">VS</span>':`<span class="detail-score">${phEsc(m.scoreHome??'-')} : ${phEsc(m.scoreAway??'-')}</span>`;
   document.getElementById('match-detail-body').innerHTML=`<div class="detail-match-head"><div class="detail-league">${phEsc(matchCompetitionLabel(m))}</div><div class="detail-teams"><div>${crestImg(m.homeTeam)}<b>${phEsc(m.homeTeam)}</b></div>${score}<div>${crestImg(m.awayTeam)}<b>${phEsc(m.awayTeam)}</b></div></div><div class="detail-date">${phEsc(m.date?fmtFinished(m.date):'')}</div></div><div class="detail-section"><div class="detail-section-head"><span>PRZEBIEG MECZU</span><h3>Sytuacje meczowe</h3></div><div class="detail-events">${ev.length?ev.map(e=>`<div class="detail-event"><time>${phEsc(e.minute||0)}'</time><div><b>${protocolEventLabel(e)}</b><span>${protocolEventDesc(e)}</span></div><small>${phEsc(e.team||'')}</small></div>`).join(''):'<div class="detail-empty">Brak szczegółowych wydarzeń.</div>'}</div></div><div class="detail-section"><div class="detail-section-head"><span>SKŁADY</span><h3>Wyjściowe jedenastki i ławki</h3></div><div class="detail-lineups">${renderPublicLineup(m.homeTeam,m.lineupHome||[])}${renderPublicLineup(m.awayTeam,m.lineupAway||[])}</div></div>`;
   document.getElementById('match-detail-modal').classList.add('active');
