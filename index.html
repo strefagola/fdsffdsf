@@ -1300,6 +1300,13 @@ Adam Wiśniewski | 1 | Bramkarz | Zawieszony | 2 mecze"></textarea>
         function matchIsLive(m){ return !!m && (m.status==='live' || m.status==='halftime'); }
         function matchIsFinished(m){ return !!m && m.status==='finished'; }
         function matchIsUpcoming(m){ return !!m && !matchIsLive(m) && !matchIsFinished(m) && (m.status==='upcoming' || m.scoreHome==null || m.scoreAway==null); }
+        function matchNeedsAutoCatchup(m, now=getServerNow()){
+            if(!m) return false;
+            if(matchIsFinished(m) && Number.isFinite(Number(m.scoreHome)) && Number.isFinite(Number(m.scoreAway))) return false;
+            const d=protocolMatchDate(m);
+            if(!d) return false;
+            return d.getTime()<=now.getTime();
+        }
         function upcomingList(list){ return list.filter(m=>matchIsUpcoming(m)||matchIsLive(m)).sort((a,b)=>(a.date?.seconds||0)-(b.date?.seconds||0)); }
         function finishedList(list){ return list.filter(matchIsFinished).sort((a,b)=>(b.date?.seconds||0)-(a.date?.seconds||0)); }
 
@@ -1331,8 +1338,8 @@ Adam Wiśniewski | 1 | Bramkarz | Zawieszony | 2 mecze"></textarea>
                 ]);
                 let allM=snap.docs.map(d=>({id:d.id,_db:'db1',...d.data()}));
                 allM.sort((a,b)=>(a.date?.seconds||0)-(b.date?.seconds||0));
-                // Automatyka działa tylko na aktywnych spotkaniach; obiekt allM zostanie
-                // zaktualizowany bez ponownego pobierania każdego dokumentu.
+                // Automatyka obsługuje mecze na żywo oraz stare, niedokończone spotkania
+                // po ponownym dodaniu, bez kolejnego pobierania każdego dokumentu.
                 await autoGenerateUpcomingLineups(allM);
                 await autoSimulateMatches(allM);
                 mc=allM;
@@ -2302,6 +2309,8 @@ async function sendContact(){
                 refs.slice(i,i+450).forEach(ref=>batch.delete(ref));
                 await batch.commit();
             }
+            invalidateMatchEventsCache(id);
+            simulationMinuteCache.delete(matchCacheKey(dbase,id));
             return matchData;
         }
 
@@ -3737,20 +3746,34 @@ async function autoGenerateUpcomingLineups(matches){const now=getServerNow();awa
 window.autoGenerateUpcomingLineups=autoGenerateUpcomingLineups;
 async function updateStats(db,m,ev){const goals=ev.filter(e=>e.type==='goal'),ass=goals.filter(e=>e.assist);if(!goals.length&&!ass.length)return;const snap=await db.collection('stats').get(),rows=snap.docs.map(d=>({id:d.id,...d.data()})),batch=db.batch();for(const e of goals){const r=rows.find(x=>normalizeTeamName(x.team)===normalizeTeamName(e.team)&&String(x.player||'').trim()===String(e.player||'').trim()&&(!x.league||x.league===m.league));if(r)batch.update(db.collection('stats').doc(r.id),{goals:(Number(r.goals)||0)+1})}for(const e of ass){const r=rows.find(x=>normalizeTeamName(x.team)===normalizeTeamName(e.team)&&String(x.player||'').trim()===String(e.assist||'').trim()&&(!x.league||x.league===m.league));if(r)batch.update(db.collection('stats').doc(r.id),{assists:(Number(r.assists)||0)+1})}await batch.commit()}
 async function simulate(m,now){
-if(!m||m.status==='finished')return false;
+if(!m||!m.id)return false;
 const db=window.db;
+if(!db)return false;
 const matchRef=db.collection('matches').doc(m.id);
-if(!m.id)return false;
+const existingFinished=matchIsFinished(m)&&Number.isFinite(Number(m.scoreHome))&&Number.isFinite(Number(m.scoreAway));
+if(existingFinished)return false;
 const st=simState(m,now);
 if(st.phase==='upcoming')return false;
 const cacheKey=matchCacheKey(db,m.id);
 const minuteKey=st.phase==='halftime'?45:st.minute;
 if(st.phase!=='finished'&&simulationMinuteCache.get(cacheKey)===minuteKey)return false;
 simulationMinuteCache.set(cacheKey,minuteKey);
-if(!m.lineupHome?.length||!m.lineupAway?.length){if(!m.lineupHome?.length){const hr=await getRosterForProtocol(m.homeTeam,db);await sideLineup(db,m,'home',hr)}if(!m.lineupAway?.length){const ar=await getRosterForProtocol(m.awayTeam,db);await sideLineup(db,m,'away',ar)}}
-if(!m.lineupHome?.length&&!m.lineupAway?.length)return false;
-// Odczytujemy wydarzenia tylko raz. Nie przebudowujemy i nie usuwamy starych
-// wydarzeń przy każdym ticku, bo powodowało to ogromną liczbę operacji Firestore.
+
+// Każdy mecz, również świeżo ponownie dodany ze starą datą, dostaje automatyczny skład.
+// Nie zależymy tutaj od statusu "upcoming", ponieważ mecz po usunięciu i ponownym
+// dodaniu może mieć już przeszłą datę.
+if(!m.lineupHome?.length){
+    const hr=await getRosterForProtocol(m.homeTeam,db);
+    await sideLineup(db,m,'home',hr);
+}
+if(!m.lineupAway?.length){
+    const ar=await getRosterForProtocol(m.awayTeam,db);
+    await sideLineup(db,m,'away',ar);
+}
+if(!m.lineupHome?.length||!m.lineupAway?.length)return false;
+
+// Wydarzenia pobieramy raz i dokładamy tylko nowe. Ten sam mecz ma stały seed,
+// więc ponowny tick nie losuje od początku innego przebiegu.
 const old=await getMatchEventsCached(db,m.id);
 const manual=old.filter(e=>e.simulation!==true);
 const oldSimulation=old.filter(e=>e.simulation===true);
@@ -3792,12 +3815,68 @@ if(filteredPlanned.length){
     matchEventsCache.set(cacheKey,old.concat(filteredPlanned).map(x=>({...x})));
 }
 
-const all=manual.concat(oldSimulation,filteredPlanned),[sh,sa]=score(all);
-if(st.phase==='halftime'){await matchRef.update({status:'halftime',scoreHome:sh,scoreAway:sa,liveMinute:45,livePhase:'halftime',simulation:true});Object.assign(m,{status:'halftime',scoreHome:sh,scoreAway:sa,liveMinute:45});return true}
-if(st.phase==='first'||st.phase==='second'){await matchRef.update({status:'live',scoreHome:sh,scoreAway:sa,liveMinute:st.minute,livePhase:st.phase,simulation:true});Object.assign(m,{status:'live',scoreHome:sh,scoreAway:sa,liveMinute:st.minute});return true}
-await matchRef.update({status:'finished',scoreHome:sh,scoreAway:sa,liveMinute:90,livePhase:'finished',simulation:true,finishedAt:firebase.firestore.FieldValue.serverTimestamp()});Object.assign(m,{status:'finished',scoreHome:sh,scoreAway:sa,liveMinute:90});if(m.league&&m.league!=='friendly')await recalculateStandings(m.league);await updateStats(db,m,all);return true}
+const all=dedupeMatchEvents(manual.concat(oldSimulation,filteredPlanned));
+const [sh,sa]=score(all);
 
-async function autoSimulateMatches(matches){if(busy)return;busy=true;try{for(const m of(matches||[]).filter(matchIsLive)){try{await simulate(m,getServerNow())}catch(e){if(e?.code==='resource-exhausted'){quotaBlockedUntil=Date.now()+15*60*1000;console.warn('Firestore quota przekroczona — automatyka wstrzymana na 15 minut.');break}if(e?.code!=='not-found')console.error('Symulacja',m.id,e)}}}finally{busy=false}}
+if(st.phase==='halftime'){
+    await matchRef.update({status:'halftime',scoreHome:sh,scoreAway:sa,liveMinute:45,livePhase:'halftime',simulation:true,simulationComplete:false});
+    Object.assign(m,{status:'halftime',scoreHome:sh,scoreAway:sa,liveMinute:45});
+    return true;
+}
+if(st.phase==='first'||st.phase==='second'){
+    await matchRef.update({status:'live',scoreHome:sh,scoreAway:sa,liveMinute:st.minute,livePhase:st.phase,simulation:true,simulationComplete:false});
+    Object.assign(m,{status:'live',scoreHome:sh,scoreAway:sa,liveMinute:st.minute});
+    return true;
+}
+
+// Mecz z przeszłą datą lub normalnie zakończony jest zapisywany jako pełny wynik.
+// Ten zapis jest jedynym źródłem wyniku: szczegóły nie mają go przeliczać.
+await matchRef.update({
+    status:'finished',
+    scoreHome:sh,
+    scoreAway:sa,
+    liveMinute:90,
+    livePhase:'finished',
+    simulation:true,
+    simulationComplete:true,
+    simulationVersion:6,
+    simulationSeed:matchSeed(m),
+    finishedAt:firebase.firestore.FieldValue.serverTimestamp()
+});
+Object.assign(m,{status:'finished',scoreHome:sh,scoreAway:sa,liveMinute:90,livePhase:'finished',simulation:true,simulationComplete:true,simulationVersion:6});
+if(m.league&&m.league!=='friendly')await recalculateStandings(m.league);
+await updateStats(db,m,all);
+return true;
+}
+async function autoSimulateMatches(matches){
+ if(busy)return;
+ const now=getServerNow();
+ const candidates=(matches||[]).filter(m=>matchIsLive(m)||matchNeedsAutoCatchup(m,now));
+ // Przy masowym odtwarzaniu nie uderzamy jednocześnie w setki dokumentów.
+ // Najpierw mecze na żywo, potem najstarsze niedokończone mecze.
+ candidates.sort((a,b)=>{
+   const al=matchIsLive(a)?0:1, bl=matchIsLive(b)?0:1;
+   if(al!==bl)return al-bl;
+   return (protocolMatchDate(a)?.getTime()||0)-(protocolMatchDate(b)?.getTime()||0);
+ });
+ const batchCandidates=candidates.slice(0,25);
+ if(!batchCandidates.length)return;
+ busy=true;
+ try{
+   for(const m of batchCandidates){
+     try{
+       await simulate(m,now);
+     }catch(e){
+       if(e?.code==='resource-exhausted'){
+         quotaBlockedUntil=Date.now()+15*60*1000;
+         console.warn('Firestore quota przekroczona — automatyka wstrzymana na 15 minut.');
+         break;
+       }
+       if(e?.code!=='not-found')console.error('Symulacja',m.id,e);
+     }
+   }
+ }finally{busy=false;}
+}
 window.autoSimulateMatches=autoSimulateMatches;
 window.resetProtocolLineupsToAuto=async function(){if(!protocolState.match)return;const[h,a]=await Promise.all([getRosterForProtocol(protocolState.match.homeTeam,protocolState.db),getRosterForProtocol(protocolState.match.awayTeam,protocolState.db)]);renderProtocolPlayers('mp-home-players',h,buildAutomaticLineup(h));renderProtocolPlayers('mp-away-players',a,buildAutomaticLineup(a));protocolState.homeRoster=h;protocolState.awayRoster=a};
 window.clearProtocolLineups=function(){renderProtocolPlayers('mp-home-players',protocolState.homeRoster,[]);renderProtocolPlayers('mp-away-players',protocolState.awayRoster,[])};
@@ -3809,23 +3888,28 @@ async function tick(){
    // Co minutę pobieramy tylko aktywne mecze. To jedno zapytanie zamiast trzech.
    const liveSnap=await window.db.collection('matches').where('status','in',['live','halftime']).get();
    const active=liveSnap.docs.map(d=>({id:d.id,_db:'db1',...d.data()}));
+   let automationCandidates=[...active];
 
-   // Składy dla najbliższych meczów sprawdzamy maksymalnie raz na 10 minut.
+   // Składy dla najbliższych meczów i jednocześnie wykrywanie świeżo ponownie
+   // dodanych starych spotkań robimy co 10 minut. Sortowanie po dacie sprawia,
+   // że najstarsze niedokończone mecze trafiają do automatycznego catch-up.
    const nowMs=Date.now();
    if(nowMs-lastUpcomingLineupSync>=10*60*1000){
      lastUpcomingLineupSync=nowMs;
      try{
-       const upcomingSnap=await window.db.collection('matches').where('status','==','upcoming').orderBy('date','asc').limit(100).get();
-       await autoGenerateUpcomingLineups(upcomingSnap.docs.map(d=>({id:d.id,_db:'db1',...d.data()})));
+       const upcomingSnap=await window.db.collection('matches').where('status','==','upcoming').orderBy('date','asc').limit(50).get();
+       const upcoming=upcomingSnap.docs.map(d=>({id:d.id,_db:'db1',...d.data()}));
+       await autoGenerateUpcomingLineups(upcoming);
+       automationCandidates.push(...upcoming);
      }catch(e){
        if(e?.code==='resource-exhausted'){quotaBlockedUntil=Date.now()+15*60*1000;return;}
        console.warn('Automatyczne składy:',e);
      }
    }
 
-   await autoSimulateMatches(active);
+   await autoSimulateMatches(automationCandidates);
    if(Array.isArray(mc)){
-     const map=new Map(active.map(m=>[m.id,m]));
+     const map=new Map(automationCandidates.map(m=>[m.id,m]));
      mc=mc.map(m=>map.get(m.id)||m);
    }
    applyFilter();
