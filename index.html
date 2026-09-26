@@ -1326,7 +1326,9 @@ Adam Wiśniewski | 1 | Bramkarz | Zawieszony | 2 mecze"></textarea>
                 let allM=s1.docs.map(d=>({id:d.id,_db:'db1',...d.data()}));if(s2)allM=allM.concat(s2.docs.map(d=>({id:d.id,_db:'db2',...d.data()})));
                 allM.sort((a,b)=>(a.date?.seconds||0)-(b.date?.seconds||0));
                 await autoGenerateUpcomingLineups(allM); await autoSimulateMatches(allM);
-                mc=allM; renderGrid(upcomingList(mc).slice(0,6),'home-upcoming'); renderGrid(finishedList(mc).slice(0,6),'home-grid'); applyFilter();
+                // Wynik po odświeżeniu zawsze pochodzi z aktualnego dokumentu Firebase.
+                const refreshed=await Promise.all(allM.map(async m=>{const db=m._db==='db2'&&window.db2?window.db2:window.db;try{const d=await db.collection('matches').doc(m.id).get();return d.exists?{id:d.id,_db:m._db,...d.data()}:m}catch(e){return m}}));
+                mc=refreshed; renderGrid(upcomingList(mc).slice(0,6),'home-upcoming'); renderGrid(finishedList(mc).slice(0,6),'home-grid'); applyFilter();
             }catch(e){console.error(e);c1.innerHTML='<p style="color:#ff6b6b;">Błąd bazy.</p>';}
         }
 
@@ -3557,22 +3559,30 @@ function pick(a,r){return a.length?a[Math.floor(r*a.length)%a.length]:null}
 function subs(st,side,r){const out=st[side].active.filter(p=>!st[side].red.has(String(p.player))),bench=st[side].bench;if(!out.length||!bench.length)return null;const po=pick(out,r),pi=bench.splice(Math.floor(r*bench.length)%bench.length,1)[0];if(!pi)return null;const i=st[side].active.findIndex(p=>String(p.player)===String(po.player));if(i>=0)st[side].active[i]=pi;return{playerOut:po.player,playerIn:pi.player}}
 function goalTooSoon(st,min){
     const n=Number(min);
-    return (st.goalMinutes||[]).some(x=>Math.abs(Number(x)-n)<11);
+    // Realistyczny odstęp między golami: minimum 10 minut.
+    return (st.goalMinutes||[]).some(x=>Math.abs(Number(x)-n)<10);
 }
 function registerGoal(st,min){if(!st.goalMinutes)st.goalMinutes=[];st.goalMinutes.push(Number(min));}
 function goalEventBlocked(st,min){const n=Number(min);return st.blockedGoalMinutes?.has(n)||goalTooSoon(st,n)}
-function blockGoalMinute(st,min){if(!st.blockedGoalMinutes)st.blockedGoalMinutes=new Set();st.blockedGoalMinutes.add(Number(min));}
+function eventBlocked(st,min){
+    const n=Number(min);
+    // Wszystkie sytuacje meczowe mają odstęp — nie robimy kilku zdarzeń
+    // w tej samej minucie ani serii zdarzeń minuta po minucie.
+    return st.eventMinutes?.some(x=>Math.abs(Number(x)-n)<4);
+}
+function blockEventMinute(st,min){if(!st.eventMinutes)st.eventMinutes=[];st.eventMinutes.push(Number(min));}
+function blockGoalMinute(st,min){if(!st.blockedGoalMinutes)st.blockedGoalMinutes=new Set();st.blockedGoalMinutes.add(Number(min));blockEventMinute(st,min);}
 function minuteEvents(m,min,st){const out=[];if(min===45)return out;const id=m.id;const seed=matchSeed(m);
-if(min>=55&&min<=82)['home','away'].forEach((side,i)=>{const r=rnd(id,min,'sub'+i);if(r<.035){const x=subs(st,side,rnd(id,min,'subpick'+i));if(x)out.push({minute:min,type:'sub',team:side==='home'?m.homeTeam:m.awayTeam,side,...x})}});
-['home','away'].forEach((side,i)=>{const r=rnd(id,min,'event'+i),a=st[side].active.filter(p=>!st[side].red.has(String(p.player)));if(!a.length)return;const team=side==='home'?m.homeTeam:m.awayTeam;
-const goalCut=0.008*matchGoalFactor(m,side)+matchGoalBias(m,side);
-const ownGoalCut=goalCut+0.0012*matchGoalFactor(m,side);
+if(min>=55&&min<=82&&!eventBlocked(st,min))['home','away'].forEach((side,i)=>{const r=rnd(id,min,'sub'+i);if(r<.025&&!eventBlocked(st,min)){const x=subs(st,side,rnd(id,min,'subpick'+i));if(x){out.push({minute:min,type:'sub',team:side==='home'?m.homeTeam:m.awayTeam,side,...x});blockEventMinute(st,min)}}});
+['home','away'].forEach((side,i)=>{const r=rnd(id,min,'event'+i),a=st[side].active.filter(p=>!st[side].red.has(String(p.player)));if(!a.length||eventBlocked(st,min))return;const team=side==='home'?m.homeTeam:m.awayTeam;
+const goalCut=0.0060*matchGoalFactor(m,side)+matchGoalBias(m,side);
+const ownGoalCut=goalCut+0.0010*matchGoalFactor(m,side);
 if(r<goalCut&&!goalEventBlocked(st,min)){const p=pick(a,rnd(id,min,'goal'+i)),ap=a.filter(x=>x.player!==p.player),as=ap.length&&rnd(id,min,'assist'+i)<.68?pick(ap,rnd(id,min,'assistpick'+i)):null;out.push({minute:min,type:'goal',team,side,player:p.player,assist:as?.player||''});registerGoal(st,min);blockGoalMinute(st,min)}
 else if(r<ownGoalCut&&!goalEventBlocked(st,min)){const p=pick(a,rnd(id,min,'og'+i));out.push({minute:min,type:'own_goal',team:side==='home'?m.awayTeam:m.homeTeam,side:side==='home'?'away':'home',creditedSide:side,player:p.player});registerGoal(st,min);blockGoalMinute(st,min)}
-else if(r<.0155){const p=pick(a,rnd(id,min,'yellow'+i));out.push({minute:min,type:'yellow',team,side,player:p.player})}
-else if(r<.0158){const p=pick(a,rnd(id,min,'red'+i));st[side].red.add(String(p.player));st[side].active=st[side].active.filter(x=>x.player!==p.player);out.push({minute:min,type:'red',team,side,player:p.player})}
-else if(r<.0227&&!goalEventBlocked(st,min)){const p=pick(a,rnd(id,min,'cancel'+i));out.push({minute:min,type:'goal_cancelled',team,side,player:p.player,note:'Gol anulowany po analizie sytuacji'});blockGoalMinute(st,min)}
-else if(r<.0235&&!goalEventBlocked(st,min)){const p=pick(a,rnd(id,min,'pen'+i));out.push({minute:min,type:'penalty_missed',team,side,player:p.player});blockGoalMinute(st,min)}});return out}
+else if(r<.0150&&!eventBlocked(st,min)){const p=pick(a,rnd(id,min,'yellow'+i));out.push({minute:min,type:'yellow',team,side,player:p.player});blockEventMinute(st,min)}
+else if(r<.01525&&!eventBlocked(st,min)){const p=pick(a,rnd(id,min,'red'+i));st[side].red.add(String(p.player));st[side].active=st[side].active.filter(x=>x.player!==p.player);out.push({minute:min,type:'red',team,side,player:p.player});blockEventMinute(st,min)}
+else if(r<.0215&&!goalEventBlocked(st,min)&&!eventBlocked(st,min)){const p=pick(a,rnd(id,min,'cancel'+i));out.push({minute:min,type:'goal_cancelled',team,side,player:p.player,note:'Gol anulowany po analizie sytuacji'});blockGoalMinute(st,min)}
+else if(r<.0221&&!goalEventBlocked(st,min)&&!eventBlocked(st,min)){const p=pick(a,rnd(id,min,'pen'+i));out.push({minute:min,type:'penalty_missed',team,side,player:p.player});blockGoalMinute(st,min)}});return out}
 function plan(m,target){if(!m.lineupHome?.length&&!m.lineupAway?.length)return[];const st=state(m.lineupHome,m.lineupAway),out=[];for(let i=1;i<=Math.min(90,target);i++)out.push(...minuteEvents(m,i,st));return out}
 async function events(db,id){const s=await db.collection('matchEvents').where('matchId','==',id).get();return dedupeMatchEvents(s.docs.map(d=>({id:d.id,...d.data()})))}
 function score(ev){let h=0,a=0;dedupeMatchEvents(ev).forEach(e=>{if(e.type==='goal')e.side==='home'?h++:a++;else if(e.type==='own_goal')e.creditedSide==='home'?a++:h++});return[h,a]}
@@ -3583,7 +3593,7 @@ async function updateStats(db,m,ev){const goals=ev.filter(e=>e.type==='goal'),as
 async function simulate(m,now){if(!m||m.status==='finished')return false;const db=m._db==='db2'&&window.db2?window.db2:window.db,st=simState(m,now);if(st.phase==='upcoming')return false;if(!m.lineupHome?.length||!m.lineupAway?.length){const[hr,ar]=await Promise.all([getRosterForProtocol(m.homeTeam,db),getRosterForProtocol(m.awayTeam,db)]);await sideLineup(db,m,'home',hr);await sideLineup(db,m,'away',ar)}if(!m.lineupHome?.length&&!m.lineupAway?.length)return false;const old=await events(db,m.id);
 
 // Twarda ochrona symulacji: w jednym meczu tylko jeden automatyczny gol
-// może przypadać na daną minutę, a kolejne gole są odsuwane o co najmniej 5 minut.
+// może przypadać na daną minutę, a kolejne gole są odsuwane o co najmniej 10 minut.
 // Przy okazji usuwamy stare, automatyczne duplikaty minutowe, ale NIE ruszamy
 // ręcznie dodanych zdarzeń.
 const oldSimulationGoals=old.filter(e=>e.simulation===true&&(e.type==='goal'||e.type==='own_goal'));
@@ -3618,6 +3628,13 @@ st.goalMinutes=[...new Set(
         .map(e=>Number(e.minute))
         .filter(Number.isFinite)
 )];
+// Uwzględniamy także już zapisane zdarzenia, żeby nowe zdarzenie nie pojawiło
+// się np. minutę po żółtej kartce albo anulowanym golu po ponownym uruchomieniu.
+st.eventMinutes=[...new Set(
+    cleanedOld
+        .map(e=>Number(e.minute))
+        .filter(Number.isFinite)
+)];
 
 const keys=new Set(cleanedOld.map(e=>`${e.minute}|${e.type}|${e.side||''}|${e.player||''}|${e.playerOut||''}|${e.playerIn||''}`));
 const target=st.phase==='halftime'?45:st.minute;
@@ -3632,7 +3649,7 @@ for(const e of planned){
     if(isGoal){
         const minute=Number(e.minute);
         if(!Number.isFinite(minute)||acceptedGoalMinutes.has(minute)) continue;
-        if([...acceptedGoalMinutes].some(x=>Math.abs(Number(x)-minute)<6)) continue;
+        if([...acceptedGoalMinutes].some(x=>Math.abs(Number(x)-minute)<10)) continue;
         acceptedGoalMinutes.add(minute);
     }
     filteredPlanned.push(e);
@@ -3641,7 +3658,11 @@ for(const e of planned){
 const missing=filteredPlanned.filter(e=>!keys.has(`${e.minute}|${e.type}|${e.side||''}|${e.player||''}|${e.playerOut||''}|${e.playerIn||''}`));
 if(missing.length){
     const b=db.batch();
-    missing.forEach(e=>b.set(db.collection('matchEvents').doc(),{...e,matchId:m.id,simulation:true,createdAt:firebase.firestore.FieldValue.serverTimestamp()}));
+    missing.forEach(e=>{
+        const fp=eventFingerprint(e).replace(/[^a-zA-Z0-9|_-]/g,'_');
+        const docId='sim_'+String(m.id)+'_'+hash(fp).toString(36).replace('.','');
+        b.set(db.collection('matchEvents').doc(docId),{...e,matchId:m.id,simulation:true,simulationKey:fp,createdAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});
+    });
     await b.commit();
 }
 const all=cleanedOld.concat(missing),[sh,sa]=score(all);if(st.phase==='halftime'){await db.collection('matches').doc(m.id).update({status:'halftime',scoreHome:sh,scoreAway:sa,liveMinute:45,livePhase:'halftime',simulation:true});Object.assign(m,{status:'halftime',scoreHome:sh,scoreAway:sa,liveMinute:45});return true}if(st.phase==='first'||st.phase==='second'){await db.collection('matches').doc(m.id).update({status:'live',scoreHome:sh,scoreAway:sa,liveMinute:st.minute,livePhase:st.phase,simulation:true});Object.assign(m,{status:'live',scoreHome:sh,scoreAway:sa,liveMinute:st.minute});return true}await db.collection('matches').doc(m.id).update({status:'finished',scoreHome:sh,scoreAway:sa,liveMinute:90,livePhase:'finished',simulation:true,finishedAt:firebase.firestore.FieldValue.serverTimestamp()});Object.assign(m,{status:'finished',scoreHome:sh,scoreAway:sa,liveMinute:90});if(m.league&&m.league!=='friendly')await recalculateStandings(m.league);await updateStats(db,m,all);return true}
@@ -3650,7 +3671,11 @@ window.autoSimulateMatches=autoSimulateMatches;
 window.resetProtocolLineupsToAuto=async function(){if(!protocolState.match)return;const[h,a]=await Promise.all([getRosterForProtocol(protocolState.match.homeTeam,protocolState.db),getRosterForProtocol(protocolState.match.awayTeam,protocolState.db)]);renderProtocolPlayers('mp-home-players',h,buildAutomaticLineup(h));renderProtocolPlayers('mp-away-players',a,buildAutomaticLineup(a));protocolState.homeRoster=h;protocolState.awayRoster=a};
 window.clearProtocolLineups=function(){renderProtocolPlayers('mp-home-players',protocolState.homeRoster,[]);renderProtocolPlayers('mp-away-players',protocolState.awayRoster,[])};
 const oldLoad=window.loadMatchProtocol;window.loadMatchProtocol=async function(){if(typeof oldLoad==='function')await oldLoad();const x=document.getElementById('mp-manual-toolbar');if(x)x.style.display='flex'};
-async function tick(){if(busy)return;try{const[s1,s2]=await Promise.all([window.db.collection('matches').orderBy('date','asc').limit(8300).get(),window.db2?window.db2.collection('matches').orderBy('date','asc').limit(8300).get().catch(()=>null):Promise.resolve(null)]);let all=s1.docs.map(d=>({id:d.id,_db:'db1',...d.data()}));if(s2)all=all.concat(s2.docs.map(d=>({id:d.id,_db:'db2',...d.data()})));await autoGenerateUpcomingLineups(all);await autoSimulateMatches(all);mc=all;applyFilter()}catch(e){console.error('Automatyka meczów',e)}}
+async function tick(){if(busy)return;try{const[s1,s2]=await Promise.all([window.db.collection('matches').orderBy('date','asc').limit(8300).get(),window.db2?window.db2.collection('matches').orderBy('date','asc').limit(8300).get().catch(()=>null):Promise.resolve(null)]);let all=s1.docs.map(d=>({id:d.id,_db:'db1',...d.data()}));if(s2)all=all.concat(s2.docs.map(d=>({id:d.id,_db:'db2',...d.data()})));await autoGenerateUpcomingLineups(all);await autoSimulateMatches(all);
+// Po symulacji pobieramy zapisane wyniki ponownie. Dzięki temu UI i Firebase
+// zawsze pokazują ten sam wynik, także po odświeżeniu strony.
+const refreshed=await Promise.all(all.map(async m=>{const db=m._db==='db2'&&window.db2?window.db2:window.db;try{const d=await db.collection('matches').doc(m.id).get();return d.exists?{id:d.id,_db:m._db,...d.data()}:m}catch(e){return m}}));
+mc=refreshed;applyFilter()}catch(e){console.error('Automatyka meczów',e)}}
 function start(){tick();if(timer)clearInterval(timer);timer=setInterval(tick,60000);setInterval(()=>{if(Array.isArray(mc)&&mc.some(matchIsLive)){mc.forEach(m=>{if(matchIsLive(m)){const st=simState(m,getServerNow());m.status=st.phase==='halftime'?'halftime':st.phase==='finished'?'finished':'live';m.liveMinute=st.minute}});applyFilter()}},1000)}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start);else start();
 })();
