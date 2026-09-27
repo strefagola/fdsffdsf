@@ -3725,25 +3725,41 @@ function matchGoalPlan(m){
 
     const n=sideQueue.length;
     if(!n)return [];
+
+    // Minuty goli są losowane jako nieregularny rozkład odstępów.
+    // Nadal obowiązuje minimum 10 minut, ale nie ma już schematu 10,20,30,40...
     const minutes=[];
-    for(let i=0;i<n;i++){
-        let candidate=6+Math.floor(hash(seed+'|goal-minute|'+i)*83); // 6..88
-        let found=null;
-        for(let step=0;step<90;step++){
-            const tries=[candidate+step,candidate-step];
-            for(const x of tries){
-                const minute=Math.max(6,Math.min(88,x));
-                if(!minutes.some(y=>Math.abs(y-minute)<10)){found=minute;break;}
-            }
-            if(found!==null)break;
+    const start=6+Math.floor(hash(seed+'|goal-start')*11); // 6..16
+    if(n===1){
+        minutes.push(start+Math.floor(hash(seed+'|goal-single')*(88-start+1)));
+    }else{
+        const gapsCount=n-1;
+        const minSpan=gapsCount*10;
+        const availableSpan=Math.max(minSpan,88-start);
+        let extra=Math.max(0,availableSpan-minSpan);
+        const extras=new Array(gapsCount).fill(0);
+
+        // Rozdzielamy dodatkowe minuty deterministycznie i nierównomiernie między przerwy.
+        // Dzięki temu odstępy są np. 11/16/12/19/10 zamiast stale po 10.
+        const order=Array.from({length:gapsCount},(_,i)=>i)
+            .sort((a,b)=>hash(seed+'|gap-order|'+a)-hash(seed+'|gap-order|'+b));
+        let cursor=0;
+        while(extra>0){
+            const idx=order[cursor%order.length];
+            const burst=1+Math.floor(hash(seed+'|gap-extra|'+cursor+'|'+idx)*3);
+            const add=Math.min(burst,extra);
+            extras[idx]+=add;
+            extra-=add;
+            cursor++;
         }
-        if(found===null){
-            // Awaryjny rozkład, który również zachowuje 10-minutowy odstęp.
-            found=6+i*12;
+
+        let minute=start;
+        minutes.push(minute);
+        for(let i=0;i<gapsCount;i++){
+            minute+=10+extras[i];
+            minutes.push(Math.min(88,minute));
         }
-        minutes.push(found);
     }
-    minutes.sort((a,b)=>a-b);
 
     const plan=minutes.map((minute,i)=>({minute,side:sideQueue[i].side,type:'goal'}));
 
