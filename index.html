@@ -3653,9 +3653,117 @@ function rnd(id,min,slot){return hash(id+'|'+min+'|'+slot)}
 function matchSeed(m){return String(m.id||'')+'|'+String(m.date?.toDate?m.date.toDate().toISOString():m.date||'')+'|'+String(m.homeTeam||'')+'|'+String(m.awayTeam||'')}
 function matchGoalFactor(m,side){const base=hash(matchSeed(m)+'|goal-factor|'+side);return 0.72+base*0.58}
 function matchGoalBias(m,side){return (hash(matchSeed(m)+'|goal-bias|'+side)-0.5)*0.0022}
+
+// Każdy mecz dostaje własny, deterministyczny profil wyniku.
+// Dzięki temu po odświeżeniu nadal jest ten sam wynik, ale kolejne mecze
+// nie wpadają ciągle w ten sam schemat 1:0 / 1:1 / 2:1.
+function matchScoreline(m){
+    const seed=matchSeed(m);
+
+    // Zróżnicowany, ale nadal realistyczny zestaw wyników.
+    // Łączna liczba goli NIGDY nie przekracza 7.
+    // Każdy wynik ma własną wagę — wyższe wyniki są rzadsze.
+    const scorelines=[
+        [0,0],[1,0],[0,1],[1,1],
+        [2,0],[0,2],[2,1],[1,2],[2,2],
+        [3,0],[0,3],[3,1],[1,3],[3,2],[2,3],
+        [4,0],[0,4],[4,1],[1,4],[4,2],[2,4],[3,3],
+        [5,0],[0,5],[5,1],[1,5],[5,2],[2,5],[4,3],[3,4],
+        [6,0],[0,6],[6,1],[1,6],[5,3],[3,5],[4,4],
+        [7,0],[0,7],[6,2],[2,6],[5,4],[4,5]
+    ];
+    const weights=[
+        10,9,9,11,
+        8,8,10,10,8,
+        5,5,8,8,7,7,
+        3,3,6,6,4,4,5,
+        2,2,4,4,2.5,2.5,3.5,3.5,
+        0.8,0.8,1.4,1.4,1.2,1.2,1.2,
+        0.15,0.15,0.25,0.25,0.35,0.35
+    ];
+
+    let totalWeight=0;
+    for(const w of weights) totalWeight+=w;
+    let pickPoint=hash(seed+'|scoreline-pick')*totalWeight;
+    let index=0;
+    for(;index<weights.length;index++){
+        pickPoint-=weights[index];
+        if(pickPoint<0)break;
+    }
+    if(index>=scorelines.length)index=scorelines.length-1;
+
+    let [home,away]=scorelines[index];
+
+    // Lekka przewaga gospodarza, ale tylko przez wybór alternatywnego
+    // wyniku o podobnym poziomie goli. Dzięki temu nie ma ciągle 1:0/2:1.
+    const homeBias=hash(seed+'|home-bias');
+    if(homeBias<0.20){
+        const reverse=[away,home];
+        if(hash(seed+'|reverse-check')<0.42 && home!==away){
+            [home,away]=reverse;
+        }
+    }
+
+    // Twardy limit bezpieczeństwa: maksymalnie 7 goli łącznie.
+    if(home+away>7){
+        const overflow=home+away-7;
+        if(home>=away) home=Math.max(0,home-overflow);
+        else away=Math.max(0,away-overflow);
+    }
+    return [home,away];
+}
+
+function matchGoalPlan(m){
+    const seed=matchSeed(m);
+    const [homeGoals,awayGoals]=matchScoreline(m);
+    const sideQueue=[];
+    for(let i=0;i<homeGoals;i++)sideQueue.push({side:'home',idx:i});
+    for(let i=0;i<awayGoals;i++)sideQueue.push({side:'away',idx:i});
+
+    // Deterministyczne przetasowanie kolejności goli dla konkretnego meczu.
+    sideQueue.sort((a,b)=>hash(seed+'|goal-side|'+a.side+'|'+a.idx)-hash(seed+'|goal-side|'+b.side+'|'+b.idx));
+
+    const n=sideQueue.length;
+    if(!n)return [];
+    const minutes=[];
+    for(let i=0;i<n;i++){
+        let candidate=6+Math.floor(hash(seed+'|goal-minute|'+i)*83); // 6..88
+        let found=null;
+        for(let step=0;step<90;step++){
+            const tries=[candidate+step,candidate-step];
+            for(const x of tries){
+                const minute=Math.max(6,Math.min(88,x));
+                if(!minutes.some(y=>Math.abs(y-minute)<10)){found=minute;break;}
+            }
+            if(found!==null)break;
+        }
+        if(found===null){
+            // Awaryjny rozkład, który również zachowuje 10-minutowy odstęp.
+            found=6+i*12;
+        }
+        minutes.push(found);
+    }
+    minutes.sort((a,b)=>a-b);
+
+    const plan=minutes.map((minute,i)=>({minute,side:sideQueue[i].side,type:'goal'}));
+
+    // Samobójczy gol może wystąpić wyjątkowo rzadko (ok. 1.5% spotkań),
+    // ale nadal jest częścią wcześniej ustalonego wyniku.
+    if(plan.length && hash(seed+'|own-goal')<0.015){
+        const eligible=plan.filter(g=>g.side==='home'||g.side==='away');
+        const chosen=eligible.length?eligible[Math.floor(hash(seed+'|own-goal-pick')*eligible.length)%eligible.length]:null;
+        if(chosen){
+            const credited=chosen.side;
+            chosen.type='own_goal';
+            chosen.side=credited==='home'?'away':'home';
+            chosen.creditedSide=credited;
+        }
+    }
+    return plan;
+}
 function simState(m,now){const d=protocolMatchDate(m);if(!d)return{phase:'upcoming',minute:0};const e=now-d;if(e<0)return{phase:'upcoming',minute:0};if(e<HALF)return{phase:'first',minute:Math.min(45,Math.floor(e/60000)+1)};if(e<HALF+BREAK)return{phase:'halftime',minute:45};if(e<FULL)return{phase:'second',minute:Math.min(90,45+Math.floor((e-HALF-BREAK)/60000)+1)};return{phase:'finished',minute:90}}
 function role(lineup,r){return(lineup||[]).filter(x=>x.role===r&&x.player).map(x=>({...x}))}
-function state(h,a){return{home:{active:role(h,'starter'),bench:role(h,'bench'),red:new Set()},away:{active:role(a,'starter'),bench:role(a,'bench'),red:new Set()},goalMinutes:[],blockedGoalMinutes:new Set()}}
+function state(h,a){return{home:{active:role(h,'starter'),bench:role(h,'bench'),red:new Set()},away:{active:role(a,'starter'),bench:role(a,'bench'),red:new Set()},goalMinutes:[],blockedGoalMinutes:new Set(),goalPlan:[],eventMinutes:[]}}
 function pick(a,r){return a.length?a[Math.floor(r*a.length)%a.length]:null}
 function subs(st,side,r){const out=st[side].active.filter(p=>!st[side].red.has(String(p.player))),bench=st[side].bench;if(!out.length||!bench.length)return null;const po=pick(out,r),pi=bench.splice(Math.floor(r*bench.length)%bench.length,1)[0];if(!pi)return null;const i=st[side].active.findIndex(p=>String(p.player)===String(po.player));if(i>=0)st[side].active[i]=pi;return{playerOut:po.player,playerIn:pi.player}}
 function goalTooSoon(st,min){
@@ -3674,17 +3782,28 @@ function eventBlocked(st,min){
 function blockEventMinute(st,min){if(!st.eventMinutes)st.eventMinutes=[];st.eventMinutes.push(Number(min));}
 function blockGoalMinute(st,min){if(!st.blockedGoalMinutes)st.blockedGoalMinutes=new Set();st.blockedGoalMinutes.add(Number(min));blockEventMinute(st,min);}
 function minuteEvents(m,min,st){const out=[];if(min===45)return out;const id=m.id;const seed=matchSeed(m);
-if(min>=55&&min<=82&&!eventBlocked(st,min))['home','away'].forEach((side,i)=>{const r=rnd(id,min,'sub'+i);if(r<.025&&!eventBlocked(st,min)){const x=subs(st,side,rnd(id,min,'subpick'+i));if(x){out.push({minute:min,type:'sub',team:side==='home'?m.homeTeam:m.awayTeam,side,...x});blockEventMinute(st,min)}}});
-['home','away'].forEach((side,i)=>{const r=rnd(id,min,'event'+i),a=st[side].active.filter(p=>!st[side].red.has(String(p.player)));if(!a.length||eventBlocked(st,min))return;const team=side==='home'?m.homeTeam:m.awayTeam;
-const goalCut=0.0070*matchGoalFactor(m,side)+matchGoalBias(m,side);
-const ownGoalCut=goalCut+0.0010*matchGoalFactor(m,side);
-if(r<goalCut&&!goalEventBlocked(st,min)){const p=pick(a,rnd(id,min,'goal'+i)),ap=a.filter(x=>x.player!==p.player),as=ap.length&&rnd(id,min,'assist'+i)<.68?pick(ap,rnd(id,min,'assistpick'+i)):null;out.push({minute:min,type:'goal',team,side,player:p.player,assist:as?.player||''});registerGoal(st,min);blockGoalMinute(st,min)}
-else if(r<ownGoalCut&&!goalEventBlocked(st,min)){const p=pick(a,rnd(id,min,'og'+i));out.push({minute:min,type:'own_goal',team:side==='home'?m.awayTeam:m.homeTeam,side:side==='home'?'away':'home',creditedSide:side,player:p.player});registerGoal(st,min);blockGoalMinute(st,min)}
-else if(r<.0085&&!eventBlocked(st,min)){const p=pick(a,rnd(id,min,'yellow'+i));out.push({minute:min,type:'yellow',team,side,player:p.player});blockEventMinute(st,min)}
-else if(r<.0088&&!eventBlocked(st,min)){const p=pick(a,rnd(id,min,'red'+i));st[side].red.add(String(p.player));st[side].active=st[side].active.filter(x=>x.player!==p.player);out.push({minute:min,type:'red',team,side,player:p.player});blockEventMinute(st,min)}
-else if(r<.0120&&!goalEventBlocked(st,min)&&!eventBlocked(st,min)){const p=pick(a,rnd(id,min,'cancel'+i));out.push({minute:min,type:'goal_cancelled',team,side,player:p.player,note:'Gol anulowany po analizie sytuacji'});blockGoalMinute(st,min)}
-else if(r<.0130&&!goalEventBlocked(st,min)&&!eventBlocked(st,min)){const p=pick(a,rnd(id,min,'pen'+i));out.push({minute:min,type:'penalty_missed',team,side,player:p.player});blockGoalMinute(st,min)}});return out}
-function plan(m,target){if(!m.lineupHome?.length&&!m.lineupAway?.length)return[];const st=state(m.lineupHome,m.lineupAway),out=[];for(let i=1;i<=Math.min(90,target);i++)out.push(...minuteEvents(m,i,st));return out}
+const plannedGoal=st.goalPlan.find(g=>Number(g.minute)===Number(min));
+const hasPlannedGoal=!!plannedGoal;
+if(min>=55&&min<=82&&!hasPlannedGoal&&!eventBlocked(st,min))['home','away'].forEach((side,i)=>{const r=rnd(id,min,'sub'+i);if(r<.025&&!eventBlocked(st,min)){const x=subs(st,side,rnd(id,min,'subpick'+i));if(x){out.push({minute:min,type:'sub',team:side==='home'?m.homeTeam:m.awayTeam,side,...x});blockEventMinute(st,min)}}});
+['home','away'].forEach((side,i)=>{const a=st[side].active.filter(p=>!st[side].red.has(String(p.player)));if(!a.length)return;const team=side==='home'?m.homeTeam:m.awayTeam;
+if(plannedGoal&&plannedGoal.side===side&&!goalEventBlocked(st,min)){
+    const p=pick(a,rnd(id,min,'goal'+i));
+    const ap=a.filter(x=>String(x.player)!==String(p?.player));
+    const as=ap.length&&rnd(id,min,'assist'+i)<.68?pick(ap,rnd(id,min,'assistpick'+i)):null;
+    if(plannedGoal.type==='own_goal'){
+        out.push({minute:min,type:'own_goal',team:side==='home'?m.awayTeam:m.homeTeam,side,creditedSide:plannedGoal.creditedSide,player:p.player});
+    }else{
+        out.push({minute:min,type:'goal',team,side,player:p.player,assist:as?.player||''});
+    }
+    registerGoal(st,min);blockGoalMinute(st,min);return;
+}
+if(hasPlannedGoal||eventBlocked(st,min))return;
+const r=rnd(id,min,'event'+i);
+if(r<.0060){const p=pick(a,rnd(id,min,'yellow'+i));out.push({minute:min,type:'yellow',team,side,player:p.player});blockEventMinute(st,min)}
+else if(r<.00615){const p=pick(a,rnd(id,min,'red'+i));st[side].red.add(String(p.player));st[side].active=st[side].active.filter(x=>x.player!==p.player);out.push({minute:min,type:'red',team,side,player:p.player});blockEventMinute(st,min)}
+else if(r<.0070){const p=pick(a,rnd(id,min,'cancel'+i));out.push({minute:min,type:'goal_cancelled',team,side,player:p.player,note:'Gol anulowany po analizie sytuacji'});blockEventMinute(st,min)}
+else if(r<.0075){const p=pick(a,rnd(id,min,'pen'+i));out.push({minute:min,type:'penalty_missed',team,side,player:p.player});blockEventMinute(st,min)}});return out}
+function plan(m,target){if(!m.lineupHome?.length&&!m.lineupAway?.length)return[];const st=state(m.lineupHome,m.lineupAway);st.goalPlan=matchGoalPlan(m);const out=[];for(let i=1;i<=Math.min(90,target);i++)out.push(...minuteEvents(m,i,st));return out}
 function normalizeEventSpacing(rows){
  const priority={goal:0,own_goal:1,red:2,yellow:3,goal_cancelled:4,penalty_missed:5,sub:6,note:7};
  const input=dedupeMatchEvents(rows||[])
