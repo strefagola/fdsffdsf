@@ -2309,7 +2309,7 @@ async function sendContact(){
                 refs.slice(i,i+450).forEach(ref=>batch.delete(ref));
                 await batch.commit();
             }
-            invalidateMatchEventsCache(id);
+            window.invalidateMatchEventsCache(id);
             simulationMinuteCache.delete(matchCacheKey(dbase,id));
             return matchData;
         }
@@ -2722,7 +2722,7 @@ async function sendContact(){
         }
 
         async function loadMatchEventOptions(){const el=document.getElementById('e-match');if(!el||!window.db)return;try{const snap=await window.db.collection('matches').orderBy('date','desc').limit(8300).get();el.innerHTML=snap.docs.map(d=>{const m=d.data();return `<option value="${d.id}">${m.homeTeam} vs ${m.awayTeam} — ${m.date?fmtFinished(m.date):''}</option>`}).join('');}catch(e){}}
-async function saveMatchEvent(){if(!user)return;const matchId=document.getElementById('e-match').value;if(!matchId)return;const data={matchId,minute:Number(document.getElementById('e-minute').value)||0,type:document.getElementById('e-type').value,player:document.getElementById('e-player').value.trim(),team:document.getElementById('e-team').value.trim(),penalty:document.getElementById('e-penalty').checked,assist:document.getElementById('e-assist').value.trim(),createdAt:firebase.firestore.FieldValue.serverTimestamp()};try{await window.db.collection('matchEvents').add(data);invalidateMatchEventsCache(matchId);['e-minute','e-player','e-team','e-assist'].forEach(id=>document.getElementById(id).value='');document.getElementById('e-penalty').checked=false;alert('Wydarzenie dodane.');}catch(e){alert('Błąd zapisu wydarzenia.');}}
+async function saveMatchEvent(){if(!user)return;const matchId=document.getElementById('e-match').value;if(!matchId)return;const data={matchId,minute:Number(document.getElementById('e-minute').value)||0,type:document.getElementById('e-type').value,player:document.getElementById('e-player').value.trim(),team:document.getElementById('e-team').value.trim(),penalty:document.getElementById('e-penalty').checked,assist:document.getElementById('e-assist').value.trim(),createdAt:firebase.firestore.FieldValue.serverTimestamp()};try{await window.db.collection('matchEvents').add(data);window.invalidateMatchEventsCache(matchId);['e-minute','e-player','e-team','e-assist'].forEach(id=>document.getElementById(id).value='');document.getElementById('e-penalty').checked=false;alert('Wydarzenie dodane.');}catch(e){alert('Błąd zapisu wydarzenia.');}}
 async function saveRosterPlayer(){
  if(!user) return; const id=document.getElementById('r-id').value; const data={team:document.getElementById('r-team').value.trim(),player:document.getElementById('r-player').value.trim(),number:Number(document.getElementById('r-number').value)||'',position:document.getElementById('r-position').value,status:document.getElementById('r-status').value,injury:document.getElementById('r-injury').value.trim(),updatedAt:firebase.firestore.FieldValue.serverTimestamp()};
  if(!data.team||!data.player){alert('Podaj klub i zawodnika.');return;} try{const ref=window.db.collection('rosters'); if(id) await ref.doc(id).update(data); else await ref.add(data); clearRosterForm(); loadAdminRoster(); loadClubs();}catch(e){alert('Błąd zapisu kadry.');}
@@ -2983,7 +2983,7 @@ async function loadProtocolEvents(){
  const el=document.getElementById('mp-events-list');if(!el||!protocolState.match||!protocolState.db)return;
  try{const snap=await protocolState.db.collection('matchEvents').where('matchId','==',protocolState.match.id).get();const rows=dedupeMatchEvents(snap.docs.map(d=>({id:d.id,...d.data()}))).sort((a,b)=>(a.minute||0)-(b.minute||0));el.innerHTML=rows.length?rows.map(e=>`<div class="mp-event-row"><div class="mp-event-minute">${phEsc(e.minute||0)}'</div><div class="mp-event-main"><b>${protocolEventLabel(e)}</b><span>${protocolEventDesc(e)}</span></div><div class="mp-event-team">${phEsc(e.team||'')}</div><button class="mp-event-delete" onclick="deleteProtocolEvent('${e.id}')" title="Usuń"><i class="fa-solid fa-trash"></i></button></div>`).join(''):'<div class="mp-empty">Nie dodano jeszcze żadnych sytuacji meczowych.</div>';}catch(e){console.error(e);el.innerHTML='<div class="mp-empty">Nie udało się pobrać wydarzeń.</div>';}
 }
-async function deleteProtocolEvent(id){if(!protocolState.db||!confirm('Usunąć to wydarzenie?'))return;await protocolState.db.collection('matchEvents').doc(id).delete();if(protocolState.match?.id)invalidateMatchEventsCache(protocolState.match.id);loadProtocolEvents();}
+async function deleteProtocolEvent(id){if(!protocolState.db||!confirm('Usunąć to wydarzenie?'))return;await protocolState.db.collection('matchEvents').doc(id).delete();if(protocolState.match?.id)window.invalidateMatchEventsCache(protocolState.match.id);loadProtocolEvents();}
 function renderPublicLineup(title,lineup){const starters=(lineup||[]).filter(x=>x.role==='starter'),bench=(lineup||[]).filter(x=>x.role==='bench');const rows=a=>a.length?a.map(x=>`<div class="detail-player"><span>${phEsc(x.number||'—')}</span><b>${phEsc(x.player)}</b><small>${phEsc(x.position||'')}</small></div>`).join(''):'<div class="detail-empty">Brak danych</div>';return `<div class="detail-lineup-team"><h4>${phEsc(title)}</h4><div class="detail-label">WYJŚCIOWY SKŁAD</div>${rows(starters)}<div class="detail-label detail-bench-label">REZERWOWI</div>${rows(bench)}</div>`;}
 async function openMatchDetails(id,dbName){
  const source=String(dbName||'db1');
@@ -3009,7 +3009,7 @@ async function openMatchDetails(id,dbName){
   // matchEvents służy wyłącznie do pokazania przebiegu meczu i NIE może
   // nadpisywać zapisanego wyniku. Dzięki temu lista meczów i szczegóły
   // korzystają z dokładnie tego samego wyniku z jednej bazy Firestore.
-  const ev=await events(db,String(id));
+  const ev=await window.events(db,String(id));
   const score=matchIsUpcoming(m)?'<span class="detail-vs">VS</span>':`<span class="detail-score">${phEsc(m.scoreHome??'-')} : ${phEsc(m.scoreAway??'-')}</span>`;
   document.getElementById('match-detail-body').innerHTML=`<div class="detail-match-head"><div class="detail-league">${phEsc(matchCompetitionLabel(m))}</div><div class="detail-teams"><div>${crestImg(m.homeTeam)}<b>${phEsc(m.homeTeam)}</b></div>${score}<div>${crestImg(m.awayTeam)}<b>${phEsc(m.awayTeam)}</b></div></div><div class="detail-date">${phEsc(m.date?fmtFinished(m.date):'')}</div></div><div class="detail-section"><div class="detail-section-head"><span>PRZEBIEG MECZU</span><h3>Sytuacje meczowe</h3></div><div class="detail-events">${ev.length?ev.map(e=>`<div class="detail-event"><time>${phEsc(e.minute||0)}'</time><div><b>${protocolEventLabel(e)}</b><span>${protocolEventDesc(e)}</span></div><small>${phEsc(e.team||'')}</small></div>`).join(''):'<div class="detail-empty">Brak szczegółowych wydarzeń.</div>'}</div></div><div class="detail-section"><div class="detail-section-head"><span>SKŁADY</span><h3>Wyjściowe jedenastki i ławki</h3></div><div class="detail-lineups">${renderPublicLineup(m.homeTeam,m.lineupHome||[])}${renderPublicLineup(m.awayTeam,m.lineupAway||[])}</div></div>`;
   document.getElementById('match-detail-modal').classList.add('active');
@@ -3878,6 +3878,8 @@ async function autoSimulateMatches(matches){
  }finally{busy=false;}
 }
 window.autoSimulateMatches=autoSimulateMatches;
+window.events=events;
+window.invalidateMatchEventsCache=invalidateMatchEventsCache;
 window.resetProtocolLineupsToAuto=async function(){if(!protocolState.match)return;const[h,a]=await Promise.all([getRosterForProtocol(protocolState.match.homeTeam,protocolState.db),getRosterForProtocol(protocolState.match.awayTeam,protocolState.db)]);renderProtocolPlayers('mp-home-players',h,buildAutomaticLineup(h));renderProtocolPlayers('mp-away-players',a,buildAutomaticLineup(a));protocolState.homeRoster=h;protocolState.awayRoster=a};
 window.clearProtocolLineups=function(){renderProtocolPlayers('mp-home-players',protocolState.homeRoster,[]);renderProtocolPlayers('mp-away-players',protocolState.awayRoster,[])};
 const oldLoad=window.loadMatchProtocol;window.loadMatchProtocol=async function(){if(typeof oldLoad==='function')await oldLoad();const x=document.getElementById('mp-manual-toolbar');if(x)x.style.display='flex'};
