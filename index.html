@@ -3738,20 +3738,25 @@ function matchGoalPlan(m){
     if(!n)return [];
 
     // Minuty goli są losowane jako nieregularny rozkład odstępów.
-    // Nadal obowiązuje minimum 10 minut, ale nie ma już schematu 10,20,30,40...
+    // Minimum 10 minut nadal obowiązuje, ale ostatni gol nie jest już
+    // sztucznie ustawiany na 88'.
     const minutes=[];
     const start=6+Math.floor(hash(seed+'|goal-start')*11); // 6..16
     if(n===1){
-        minutes.push(start+Math.floor(hash(seed+'|goal-single')*(88-start+1)));
+        // Jeden gol może wypaść w dowolnym momencie, również późno.
+        minutes.push(start+Math.floor(hash(seed+'|goal-single')*(90-start+1)));
     }else{
         const gapsCount=n-1;
         const minSpan=gapsCount*10;
-        const availableSpan=Math.max(minSpan,88-start);
-        let extra=Math.max(0,availableSpan-minSpan);
+        const earliestEnd=start+minSpan;
+        // Losowy koniec 60..90. Wcześniej twarde 88 powodowało, że
+        // przy wielu golach ostatni praktycznie zawsze był w 88'.
+        const randomEnd=60+Math.floor(hash(seed+'|goal-end')*31);
+        const targetEnd=Math.min(90,Math.max(earliestEnd,randomEnd));
+        let extra=Math.max(0,targetEnd-earliestEnd);
         const extras=new Array(gapsCount).fill(0);
 
         // Rozdzielamy dodatkowe minuty deterministycznie i nierównomiernie między przerwy.
-        // Dzięki temu odstępy są np. 11/16/12/19/10 zamiast stale po 10.
         const order=Array.from({length:gapsCount},(_,i)=>i)
             .sort((a,b)=>hash(seed+'|gap-order|'+a)-hash(seed+'|gap-order|'+b));
         let cursor=0;
@@ -3768,7 +3773,7 @@ function matchGoalPlan(m){
         minutes.push(minute);
         for(let i=0;i<gapsCount;i++){
             minute+=10+extras[i];
-            minutes.push(Math.min(88,minute));
+            minutes.push(Math.min(90,minute));
         }
     }
 
