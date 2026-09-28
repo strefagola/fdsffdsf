@@ -503,6 +503,50 @@ nav .tab{height:42px!important;margin:auto 2px!important;padding:0 14px!importan
                 </div>
             </div>
 
+            <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:1rem;" class="anim d1">
+                <label for="match-league-filter" style="font-size:.72rem; font-weight:700; color:var(--muted);">ROZGRYWKI:</label>
+                <select id="match-league-filter" onchange="filterMSelect(this.value)" style="min-width:220px; padding:9px 12px; border-radius:10px; background:rgba(255,255,255,.05); color:inherit; border:1px solid var(--border); font-weight:700;">
+                    <option value="all">Wszystkie ligi</option>
+                    <option value="liga1">Liga 1</option>
+                    <option value="liga2">2 liga</option>
+                    <option value="okr_jaroslaw">Okr. Jarosław</option>
+                    <option value="okr_krosno">Okr. Krosno</option>
+                    <option value="okr_rzeszow">Okr. Rzeszów</option>
+                    <option value="okr_debica">Okr. Dębica</option>
+                    <option value="okr_stalowa">Okr. Stalowa Wola</option>
+                    <option value="a_przeworsk">A Klasa Przeworsk</option>
+                    <option value="a_jaroslaw">A Klasa Jarosław</option>
+                    <option value="a_rzeszow">A Klasa Rzeszów</option>
+                    <option value="a_debica">A Klasa Dębica</option>
+                    <option value="a_krosno_1">A Klasa Krosno I</option>
+                    <option value="a_krosno_2">A Klasa Krosno II</option>
+                    <option value="a_krosno_3">A Klasa Krosno III</option>
+                    <option value="a_lancut">A Klasa Łańcut</option>
+                    <option value="a_mielec">A Klasa Mielec</option>
+                    <option value="a_stalowa_1">A Klasa Stalowa Wola I</option>
+                    <option value="a_stalowa_2">A Klasa Stalowa Wola II</option>
+                    <option value="b_przeworsk">B Klasa Przeworsk</option>
+                    <option value="b_jaroslaw">B Klasa Jarosław</option>
+                    <option value="b_rzeszow">B Klasa Rzeszów</option>
+                    <option value="b_debica_1">B Klasa Dębica I</option>
+                    <option value="b_debica_2">B Klasa Dębica II</option>
+                    <option value="b_krosno_1">B Klasa Krosno I</option>
+                    <option value="b_krosno_2">B Klasa Krosno II</option>
+                    <option value="b_krosno_3">B Klasa Krosno III</option>
+                    <option value="b_krosno_4">B Klasa Krosno IV</option>
+                    <option value="b_krosno_5">B Klasa Krosno V</option>
+                    <option value="b_lancut_1">B Klasa Łańcut I</option>
+                    <option value="b_lancut_2">B Klasa Łańcut II</option>
+                    <option value="b_mielec_1">B Klasa Mielec I</option>
+                    <option value="b_mielec_2">B Klasa Mielec II</option>
+                    <option value="b_kolbuszowa">B Klasa Kolbuszowa</option>
+                    <option value="b_stalowa_1">B Klasa Stalowa Wola I</option>
+                    <option value="b_stalowa_2">B Klasa Stalowa Wola II</option>
+                    <option value="b_stalowa_3">B Klasa Stalowa Wola III</option>
+                    <option value="friendly">Mecze towarzyskie</option>
+                </select>
+            </div>
+
             <div style="display:flex; gap:10px; margin-bottom:1.5rem;" class="anim d1">
                 <button class="btn-sm" id="btn-match-all" onclick="setMatchType('all')" style="background:var(--green); color:var(--navy); font-weight:700; padding:8px 16px; border-radius:10px;">Wszystkie Mecze</button>
                 <button class="btn-sm" id="btn-match-up" onclick="setMatchType('upcoming')" style="background:rgba(255,255,255,0.05); color:var(--muted); font-weight:700; padding:8px 16px; border-radius:10px;"><i class="fa-regular fa-clock"></i> Nadchodzące</button>
@@ -1435,7 +1479,22 @@ Adam Wiśniewski | 1 | Bramkarz | Zawieszony | 2 mecze"></textarea>
         function filterM(league,btn){
             curFilter=league;
             document.querySelectorAll('#matches-sub .sub-tab').forEach(b=>b.classList.remove('active'));
-            btn.classList.add('active');
+            if(btn) btn.classList.add('active');
+            const select=document.getElementById('match-league-filter');
+            if(select) select.value=league;
+            applyFilter();
+        }
+
+        function filterMSelect(league){
+            curFilter=league || 'all';
+            document.querySelectorAll('#matches-sub .sub-tab').forEach(b=>b.classList.remove('active'));
+            const matchBtn=Array.from(document.querySelectorAll('#matches-sub .sub-tab')).find(b=>{
+                const oc=b.getAttribute('onclick')||'';
+                return oc.includes("filterM('" + curFilter + "'");
+            });
+            if(matchBtn) matchBtn.classList.add('active');
+            const select=document.getElementById('match-league-filter');
+            if(select) select.value=curFilter;
             applyFilter();
         }
 
@@ -3611,6 +3670,10 @@ main{margin-top:0!important;padding-top:16px!important}
 <style id="mass-match-automation-style">
 .mp-manual-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:12px;padding:12px 14px;background:#f5f9fc;border:1px solid #dce7ef;border-radius:11px}.mp-manual-toolbar b{display:block;font-size:.68rem;letter-spacing:1px;color:#31536b}.mp-manual-toolbar small{display:block;color:#7b8b98;font-size:.65rem;margin-top:2px}.mp-manual-actions{display:flex;gap:6px;flex-wrap:wrap}.mp-manual-actions .btn-sm{border:1px solid #dce5ec;background:#fff}.live-score{border-color:#ef4444!important;box-shadow:0 0 0 2px rgba(239,68,68,.08)}.live-date{color:#ef4444!important;font-weight:800}.match-vs-text{color:var(--muted)}
 @media(max-width:700px){.mp-manual-toolbar{align-items:flex-start;flex-direction:column}.mp-manual-actions{width:100%}.mp-manual-actions .btn-sm{flex:1}}
+<style>
+#match-league-filter{background:rgba(255,255,255,.05);color:var(--text);border:1px solid var(--border);outline:none}
+#match-league-filter option{background:#102033;color:#fff}
+@media(max-width:700px){#match-league-filter{width:100%;min-width:0}}
 </style>
 <script id="mass-match-automation">
 (function(){
