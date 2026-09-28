@@ -456,8 +456,6 @@ nav .tab{height:42px!important;margin:auto 2px!important;padding:0 14px!importan
             <div class="sub-nav-container anim" id="matches-sub">
                 <div class="group-toggle">
                     <button class="grp-tab active" onclick="switchGroup('matches', 'okr', this)">Liga 1 & Okręgowe</button>
-                    <button class="grp-tab" onclick="switchGroup('matches', 'a', this)">A Klasy</button>
-                    <button class="grp-tab" onclick="switchGroup('matches', 'b', this)">B Klasy</button>
                 </div>
                 <div class="sub-nav grp-okr">
                     <button class="sub-tab active" onclick="filterM('all',this)">Wszystkie Ligi</button>
@@ -468,39 +466,6 @@ nav .tab{height:42px!important;margin:auto 2px!important;padding:0 14px!importan
                     <button class="sub-tab" onclick="filterM('okr_debica',this)">Okr. Dębica</button>
                     <button class="sub-tab" onclick="filterM('okr_stalowa',this)">Okr. Stalowa Wola</button>
                 </div>
-                <div class="sub-nav grp-a" style="display:none; flex-wrap:wrap;">
-                    <button class="sub-tab" onclick="filterM('a_przeworsk',this)">A Klasa Przeworsk</button>
-                    <button class="sub-tab" onclick="filterM('a_jaroslaw',this)">A Klasa Jarosław</button>
-                    <button class="sub-tab" onclick="filterM('a_rzeszow',this)">A Klasa Rzeszów</button>
-                    <button class="sub-tab" onclick="filterM('a_debica',this)">A Klasa Dębica</button>
-                    <button class="sub-tab" onclick="filterM('a_krosno_1',this)">A Klasa Krosno I</button>
-                    <button class="sub-tab" onclick="filterM('a_krosno_2',this)">A Klasa Krosno II</button>
-                    <button class="sub-tab" onclick="filterM('a_krosno_3',this)">A Klasa Krosno III</button>
-                    <button class="sub-tab" onclick="filterM('a_lancut',this)">A Klasa Łańcut</button>
-                    <button class="sub-tab" onclick="filterM('a_mielec',this)">A Klasa Mielec</button>
-                    <button class="sub-tab" onclick="filterM('a_stalowa_1',this)">A Klasa Stalowa Wola I</button>
-                    <button class="sub-tab" onclick="filterM('a_stalowa_2',this)">A Klasa Stalowa Wola II</button>
-                </div>
-                <div class="sub-nav grp-b" style="display:none; flex-wrap:wrap;">
-                    <button class="sub-tab" onclick="filterM('b_przeworsk',this)">B Klasa Przeworsk</button>
-                    <button class="sub-tab" onclick="filterM('b_jaroslaw',this)">B Klasa Jarosław</button>
-                    <button class="sub-tab" onclick="filterM('b_rzeszow',this)">B Klasa Rzeszów</button>
-                    <button class="sub-tab" onclick="filterM('b_debica_1',this)">B Klasa Dębica I</button>
-                    <button class="sub-tab" onclick="filterM('b_debica_2',this)">B Klasa Dębica II</button>
-                    <button class="sub-tab" onclick="filterM('b_krosno_1',this)">B Klasa Krosno I</button>
-                    <button class="sub-tab" onclick="filterM('b_krosno_2',this)">B Klasa Krosno II</button>
-                    <button class="sub-tab" onclick="filterM('b_krosno_3',this)">B Klasa Krosno III</button>
-                    <button class="sub-tab" onclick="filterM('b_krosno_4',this)">B Klasa Krosno IV</button>
-                    <button class="sub-tab" onclick="filterM('b_krosno_5',this)">B Klasa Krosno V</button>
-                    <button class="sub-tab" onclick="filterM('b_lancut_1',this)">B Klasa Łańcut I</button>
-                    <button class="sub-tab" onclick="filterM('b_lancut_2',this)">B Klasa Łańcut II</button>
-                    <button class="sub-tab" onclick="filterM('b_mielec_1',this)">B Klasa Mielec I</button>
-                    <button class="sub-tab" onclick="filterM('b_mielec_2',this)">B Klasa Mielec II</button>
-                    <button class="sub-tab" onclick="filterM('b_kolbuszowa',this)">B Klasa Kolbuszowa</button>
-                    <button class="sub-tab" onclick="filterM('b_stalowa_1',this)">B Klasa Stalowa Wola I</button>
-                    <button class="sub-tab" onclick="filterM('b_stalowa_2',this)">B Klasa Stalowa Wola II</button>
-                    <button class="sub-tab" onclick="filterM('b_stalowa_3',this)">B Klasa Stalowa Wola III</button>
-                </div>
             </div>
 
             <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:1rem;" class="anim d1">
@@ -509,40 +474,22 @@ nav .tab{height:42px!important;margin:auto 2px!important;padding:0 14px!importan
                     <option value="all">Wszystkie ligi</option>
                     <option value="liga1">Liga 1</option>
                     <option value="liga2">2 liga</option>
-                    <option value="okr_jaroslaw">Okr. Jarosław</option>
-                    <option value="okr_krosno">Okr. Krosno</option>
-                    <option value="okr_rzeszow">Okr. Rzeszów</option>
-                    <option value="okr_debica">Okr. Dębica</option>
-                    <option value="okr_stalowa">Okr. Stalowa Wola</option>
-                    <option value="a_przeworsk">A Klasa Przeworsk</option>
-                    <option value="a_jaroslaw">A Klasa Jarosław</option>
-                    <option value="a_rzeszow">A Klasa Rzeszów</option>
-                    <option value="a_debica">A Klasa Dębica</option>
-                    <option value="a_krosno_1">A Klasa Krosno I</option>
-                    <option value="a_krosno_2">A Klasa Krosno II</option>
-                    <option value="a_krosno_3">A Klasa Krosno III</option>
-                    <option value="a_lancut">A Klasa Łańcut</option>
-                    <option value="a_mielec">A Klasa Mielec</option>
-                    <option value="a_stalowa_1">A Klasa Stalowa Wola I</option>
-                    <option value="a_stalowa_2">A Klasa Stalowa Wola II</option>
-                    <option value="b_przeworsk">B Klasa Przeworsk</option>
-                    <option value="b_jaroslaw">B Klasa Jarosław</option>
-                    <option value="b_rzeszow">B Klasa Rzeszów</option>
-                    <option value="b_debica_1">B Klasa Dębica I</option>
-                    <option value="b_debica_2">B Klasa Dębica II</option>
-                    <option value="b_krosno_1">B Klasa Krosno I</option>
-                    <option value="b_krosno_2">B Klasa Krosno II</option>
-                    <option value="b_krosno_3">B Klasa Krosno III</option>
-                    <option value="b_krosno_4">B Klasa Krosno IV</option>
-                    <option value="b_krosno_5">B Klasa Krosno V</option>
-                    <option value="b_lancut_1">B Klasa Łańcut I</option>
-                    <option value="b_lancut_2">B Klasa Łańcut II</option>
-                    <option value="b_mielec_1">B Klasa Mielec I</option>
-                    <option value="b_mielec_2">B Klasa Mielec II</option>
-                    <option value="b_kolbuszowa">B Klasa Kolbuszowa</option>
-                    <option value="b_stalowa_1">B Klasa Stalowa Wola I</option>
-                    <option value="b_stalowa_2">B Klasa Stalowa Wola II</option>
-                    <option value="b_stalowa_3">B Klasa Stalowa Wola III</option>
+                    <option value="okr_podkarpacka">Okręgowa Liga Podkarpacka</option>
+                    <option value="okr_pomorska">Okręgowa Liga Pomorska</option>
+                    <option value="okr_warminsko_mazurska">Okręgowa Liga Warmińsko-Mazurska</option>
+                    <option value="okr_slaska">Okręgowa Liga Śląska</option>
+                    <option value="okr_dolnoslaska">Okręgowa Liga Dolnośląska</option>
+                    <option value="okr_malopolska">Okręgowa Liga Małopolska</option>
+                    <option value="okr_mazowiecka">Okręgowa Liga Mazowiecka</option>
+                    <option value="okr_lubelska">Okręgowa Liga Lubelska</option>
+                    <option value="okr_lubuska">Okręgowa Liga Lubuska</option>
+                    <option value="okr_lodzkie">Okręgowa Liga Łódzka</option>
+                    <option value="okr_opolska">Okręgowa Liga Opolska</option>
+                    <option value="okr_podlaska">Okręgowa Liga Podlaska</option>
+                    <option value="okr_swietokrzyska">Okręgowa Liga Świętokrzyska</option>
+                    <option value="okr_wielkopolska">Okręgowa Liga Wielkopolska</option>
+                    <option value="okr_zachodniopomorska">Okręgowa Liga Zachodniopomorska</option>
+                    <option value="okr_kujawsko_pomorska">Okręgowa Liga Kujawsko-Pomorska</option>
                     <option value="friendly">Mecze towarzyskie</option>
                 </select>
             </div>
