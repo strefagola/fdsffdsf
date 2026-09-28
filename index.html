@@ -510,12 +510,15 @@ nav .tab{height:42px!important;margin:auto 2px!important;padding:0 14px!importan
         <section id="table" class="section">
             <div class="sub-nav-container anim" id="table-sub">
                 <div class="group-toggle">
-                    <button class="grp-tab active" onclick="switchGroup('table', 'okr', this)">Liga 1 & Okręgowe</button>
+                    <button class="grp-tab active" onclick="switchGroup('table', 'okr', this)">Liga 1–4 & Okręgowe</button>
                     <button class="grp-tab" onclick="switchGroup('table', 'a', this)">A Klasy</button>
                     <button class="grp-tab" onclick="switchGroup('table', 'b', this)">B Klasy</button>
                 </div>
                 <div class="sub-nav grp-okr">
                     <button class="sub-tab active" onclick="loadTable('liga1',this)">Liga 1</button>
+                    <button class="sub-tab" onclick="loadTable('liga2',this)">2 liga</button>
+                    <button class="sub-tab" onclick="loadTable('liga3',this)">3 liga</button>
+                    <button class="sub-tab" onclick="loadTable('liga4',this)">4 liga</button>
                     <button class="sub-tab" onclick="loadTable('okr_jaroslaw',this)">Okr. Jarosław</button>
                     <button class="sub-tab" onclick="loadTable('okr_krosno',this)">Okr. Krosno</button>
                     <button class="sub-tab" onclick="loadTable('okr_rzeszow',this)">Okr. Rzeszów</button>
@@ -567,12 +570,15 @@ nav .tab{height:42px!important;margin:auto 2px!important;padding:0 14px!importan
         <section id="stats" class="section">
             <div class="sub-nav-container anim" id="stats-sub">
                 <div class="group-toggle">
-                    <button class="grp-tab active" onclick="switchGroup('stats', 'okr', this)">Liga 1 & Okręgowe</button>
+                    <button class="grp-tab active" onclick="switchGroup('stats', 'okr', this)">Liga 1–4 & Okręgowe</button>
                     <button class="grp-tab" onclick="switchGroup('stats', 'a', this)">A Klasy</button>
                     <button class="grp-tab" onclick="switchGroup('stats', 'b', this)">B Klasy</button>
                 </div>
                 <div class="sub-nav grp-okr">
                     <button class="sub-tab active" onclick="loadStats('liga1',this)">Liga 1</button>
+                    <button class="sub-tab" onclick="loadStats('liga2',this)">2 liga</button>
+                    <button class="sub-tab" onclick="loadStats('liga3',this)">3 liga</button>
+                    <button class="sub-tab" onclick="loadStats('liga4',this)">4 liga</button>
                     <button class="sub-tab" onclick="loadStats('okr_jaroslaw',this)">Okr. Jarosław</button>
                     <button class="sub-tab" onclick="loadStats('okr_krosno',this)">Okr. Krosno</button>
                     <button class="sub-tab" onclick="loadStats('okr_rzeszow',this)">Okr. Rzeszów</button>
@@ -668,13 +674,16 @@ nav .tab{height:42px!important;margin:auto 2px!important;padding:0 14px!importan
 <section id="transfers" class="section">
             <div class="sub-nav-container anim" id="transfers-sub">
                 <div class="group-toggle">
-                    <button class="grp-tab active" onclick="switchGroup('transfers', 'okr', this)">Liga 1 & Okręgowe</button>
+                    <button class="grp-tab active" onclick="switchGroup('transfers', 'okr', this)">Liga 1–4 & Okręgowe</button>
                     <button class="grp-tab" onclick="switchGroup('transfers', 'a', this)">A Klasy</button>
                     <button class="grp-tab" onclick="switchGroup('transfers', 'b', this)">B Klasy</button>
                 </div>
                 <div class="sub-nav grp-okr">
                     <button class="sub-tab active" onclick="filterTransfers('all',this)">Wszystkie</button>
                     <button class="sub-tab" onclick="filterTransfers('liga1',this)">Liga 1</button>
+                    <button class="sub-tab" onclick="filterTransfers('liga2',this)">2 liga</button>
+                    <button class="sub-tab" onclick="filterTransfers('liga3',this)">3 liga</button>
+                    <button class="sub-tab" onclick="filterTransfers('liga4',this)">4 liga</button>
                     <button class="sub-tab" onclick="filterTransfers('okr_jaroslaw',this)">Okr. Jarosław</button>
                     <button class="sub-tab" onclick="filterTransfers('okr_krosno',this)">Okr. Krosno</button>
                     <button class="sub-tab" onclick="filterTransfers('okr_rzeszow',this)">Okr. Rzeszów</button>
