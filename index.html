@@ -3674,8 +3674,42 @@ const HALF=45*60*1000,BREAK=15*60*1000,FULL=HALF+BREAK+HALF;
 let busy=false,timer=null;
 // Symulacja produkcyjna działa po stronie Firebase Cloud Functions.
 // Przeglądarka tylko odczytuje stan, więc wyłączenie komputera nie zatrzymuje meczów.
-let serverSimulationActive=true;
-window.serverSimulationActive=true;
+// Tryb symulacji wybierany automatycznie:
+// jeśli Firebase Cloud Function naprawdę pracuje, przeglądarka tylko odczytuje stan;
+// jeśli funkcja nie została wdrożona / przestała działać, przeglądarka uruchamia bezpieczny fallback.
+let serverSimulationActive=false;
+window.serverSimulationActive=false;
+let serverSimulationCheckedAt=0;
+let serverSimulationCheckPromise=null;
+async function detectServerSimulation(){
+    const nowMs=Date.now();
+    if(serverSimulationCheckPromise)return serverSimulationCheckPromise;
+    if(nowMs-serverSimulationCheckedAt<90000)return serverSimulationActive;
+    serverSimulationCheckedAt=nowMs;
+    serverSimulationCheckPromise=(async()=>{
+        try{
+            const db=window.db;
+            if(!db){serverSimulationActive=false;window.serverSimulationActive=false;return false;}
+            const snap=await db.collection('system').doc('simulationMeta').get({source:'server'});
+            const data=snap.exists?snap.data():null;
+            const last=data?.lastRunAt;
+            const lastMs=last&&typeof last.toMillis==='function'?last.toMillis():0;
+            // Scheduler wykonuje funkcję co minutę. Tolerujemy kilka minut opóźnienia.
+            const alive=!!lastMs && (Date.now()-lastMs)<4*60*1000 && data?.online!==false;
+            serverSimulationActive=alive;
+            window.serverSimulationActive=alive;
+            return alive;
+        }catch(e){
+            // Brak dostępu do heartbeat nie może zablokować symulacji lokalnej.
+            serverSimulationActive=false;
+            window.serverSimulationActive=false;
+            return false;
+        }finally{
+            serverSimulationCheckPromise=null;
+        }
+    })();
+    return serverSimulationCheckPromise;
+}
 const simulationMinuteCache=window.simulationMinuteCache instanceof Map ? window.simulationMinuteCache : new Map();
 window.simulationMinuteCache=simulationMinuteCache;
 const matchEventsCache=window.matchEventsCache instanceof Map ? window.matchEventsCache : new Map();
@@ -4044,7 +4078,7 @@ await updateStats(db,m,all);
 return true;
 }
 async function autoSimulateMatches(matches){
- if(serverSimulationActive)return;
+ if(await detectServerSimulation())return;
  if(busy)return;
  if(Date.now()<quotaBlockedUntil)return;
  const now=getServerNow();
@@ -4081,7 +4115,7 @@ window.autoSimulateMatches=autoSimulateMatches;
 // spotkanie z przeszłą datą nie czeka do kolejnego pełnego przebiegu automatyki.
 let immediateSimulationQueue=Promise.resolve();
 async function queueMatchForSimulation(id, dbOverride){
-  if(serverSimulationActive)return;
+  if(await detectServerSimulation())return;
   const run=async()=>{
     if(!id || Date.now()<quotaBlockedUntil)return;
     const db=dbOverride || window.db;
@@ -4175,8 +4209,11 @@ function scheduleResume(reason){
   if(resumeTimer)clearTimeout(resumeTimer);
   resumeTimer=setTimeout(()=>resumeAutomation(reason),300);
 }
-function start(){
-  tick();
+async function start(){
+  // Najpierw sprawdzamy, czy działa serwerowa funkcja. Gdy nie działa,
+  // uruchamiamy automatyczny fallback w przeglądarce.
+  await detectServerSimulation();
+  await tick();
   if(timer)clearInterval(timer);
   timer=setInterval(tick,60000);
   setInterval(()=>{
