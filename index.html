@@ -454,12 +454,40 @@ nav .tab{height:42px!important;margin:auto 2px!important;padding:0 14px!importan
 </section>
 
         <section id="news" class="section">
-            <div class="hero anim" style="padding:2.5rem 0 1.8rem;">
+            <div class="hero news-hero anim" style="padding:2.5rem 0 1.8rem;">
                 <h1 style="font-size:2.2rem;">Aktualności <span>PlanetHC</span></h1>
                 <p>Najnowsze informacje, komunikaty i wiadomości redakcji.</p>
             </div>
+
+            <div class="news-tools anim d1">
+                <div class="news-search-wrap">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input id="news-search" type="search" placeholder="Szukaj po frazie, tytule lub treści..." oninput="filterNews()">
+                </div>
+                <label class="news-filter-field">
+                    <span>Data</span>
+                    <input id="news-date" type="date" onchange="filterNews()">
+                </label>
+                <label class="news-filter-field">
+                    <span>Kategoria</span>
+                    <select id="news-category" onchange="filterNews()">
+                        <option value="">Wszystkie kategorie</option>
+                    </select>
+                </label>
+                <button class="btn-sm news-clear-btn" type="button" onclick="clearNewsFilters()"><i class="fa-solid fa-xmark"></i> Wyczyść</button>
+            </div>
+
+            <div id="news-count" class="news-count anim d1"></div>
             <div id="news-grid" class="news-grid anim d1"></div>
         </section>
+
+        <div id="news-detail-modal" class="news-modal" aria-hidden="true">
+            <div class="news-modal-backdrop" onclick="closeNewsDetails()"></div>
+            <div class="news-modal-card" role="dialog" aria-modal="true" aria-labelledby="news-modal-title">
+                <button class="news-modal-close" type="button" onclick="closeNewsDetails()" aria-label="Zamknij"><i class="fa-solid fa-xmark"></i></button>
+                <div id="news-modal-body"></div>
+            </div>
+        </div>
 
         <section id="matches" class="section">
             <div class="sub-nav-container anim" id="matches-sub">
@@ -1796,32 +1824,108 @@ Adam Wiśniewski | 1 | Bramkarz | Zawieszony | 2 mecze"></textarea>
         /* Aktualności są ładowane z osobnego pliku aktualnosci.js.
            Plik aktualnosci.js musi znajdować się w tym samym folderze co ten HTML. */
 
+        let newsFilteredItems = [];
+
         function newsEscape(value){
             return String(value ?? '').replace(/[&<>"']/g, function(ch){
                 return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch];
             });
         }
 
-        function renderNews(){
+        function newsDateToInput(value){
+            const m=String(value||'').match(/^(\d{2})\.(\d{2})\.(\d{4})$/);
+            return m ? `${m[3]}-${m[2]}-${m[1]}` : '';
+        }
+
+        function newsGetItems(){
+            return Array.isArray(window.PLANETHC_NEWS)?window.PLANETHC_NEWS:[];
+        }
+
+        function newsPopulateCategories(items){
+            const sel=document.getElementById('news-category');
+            if(!sel)return;
+            const current=sel.value;
+            const cats=[...new Set(items.map(n=>String(n.category||'Aktualność').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pl'));
+            sel.innerHTML='<option value="">Wszystkie kategorie</option>'+cats.map(c=>`<option value="${newsEscape(c)}">${newsEscape(c)}</option>`).join('');
+            sel.value=cats.includes(current)?current:'';
+        }
+
+        function filterNews(){
+            const items=newsGetItems();
+            const q=(document.getElementById('news-search')?.value||'').trim().toLocaleLowerCase('pl-PL');
+            const date=document.getElementById('news-date')?.value||'';
+            const category=document.getElementById('news-category')?.value||'';
+            newsFilteredItems=items.filter((n)=>{
+                const hay=[n.title,n.lead,n.content,n.category,n.date].map(v=>String(v||'').toLocaleLowerCase('pl-PL')).join(' ');
+                const matchesQ=!q || hay.includes(q);
+                const matchesDate=!date || newsDateToInput(n.date)===date;
+                const matchesCategory=!category || String(n.category||'Aktualność')===category;
+                return matchesQ&&matchesDate&&matchesCategory;
+            });
+            renderNewsItems(newsFilteredItems);
+        }
+
+        function renderNewsItems(items){
             const c=document.getElementById('news-grid');
-            if(!c) return;
-            const items=Array.isArray(window.PLANETHC_NEWS)?window.PLANETHC_NEWS:[];
+            const count=document.getElementById('news-count');
+            if(!c)return;
+            if(count)count.innerHTML=`<span>${items.length}</span> ${items.length===1?'aktualność':'aktualności'}`;
             if(!items.length){
-                c.innerHTML='<div class="news-empty">Brak aktualności.</div>';
+                c.innerHTML='<div class="news-empty"><i class="fa-regular fa-newspaper"></i><strong>Nie znaleziono aktualności</strong><span>Spróbuj zmienić frazę, datę albo kategorię.</span></div>';
                 return;
             }
-            c.innerHTML=items.map(n=>`
-                <article class="news-card">
+            c.innerHTML=items.map((n,idx)=>`
+                <article class="news-card" tabindex="0" onclick="openNewsDetails(${idx})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openNewsDetails(${idx})}">
                     <div class="news-card-head">
                         <div class="news-meta"><span class="news-tag">${newsEscape(n.category||'Aktualność')}</span><span class="news-date"><i class="fa-regular fa-calendar"></i> ${newsEscape(n.date||'')}</span></div>
                         <h3>${newsEscape(n.title||'Bez tytułu')}</h3>
                     </div>
                     <div class="news-card-body">
                         ${n.lead?`<p class="news-lead">${newsEscape(n.lead)}</p>`:''}
-                        ${n.content?`<div class="news-content">${newsEscape(n.content)}</div>`:''}
+                        <div class="news-readmore"><span>Czytaj pełną treść</span><i class="fa-solid fa-arrow-right"></i></div>
                     </div>
                 </article>`).join('');
         }
+
+        function renderNews(){
+            const items=newsGetItems();
+            newsPopulateCategories(items);
+            filterNews();
+        }
+
+        function openNewsDetails(index){
+            const n=newsFilteredItems[index];
+            if(!n)return;
+            const modal=document.getElementById('news-detail-modal');
+            const body=document.getElementById('news-modal-body');
+            if(!modal||!body)return;
+            body.innerHTML=`
+                <div class="news-modal-meta"><span class="news-tag">${newsEscape(n.category||'Aktualność')}</span><span class="news-date"><i class="fa-regular fa-calendar"></i> ${newsEscape(n.date||'')}</span></div>
+                <h2 id="news-modal-title">${newsEscape(n.title||'Bez tytułu')}</h2>
+                ${n.lead?`<p class="news-modal-lead">${newsEscape(n.lead)}</p>`:''}
+                <div class="news-modal-content">${newsEscape(n.content||'').replace(/\n/g,'<br>')}</div>`;
+            modal.classList.add('active');
+            modal.setAttribute('aria-hidden','false');
+            document.body.classList.add('news-modal-open');
+        }
+
+        function closeNewsDetails(){
+            const modal=document.getElementById('news-detail-modal');
+            if(!modal)return;
+            modal.classList.remove('active');
+            modal.setAttribute('aria-hidden','true');
+            document.body.classList.remove('news-modal-open');
+        }
+
+        function clearNewsFilters(){
+            const q=document.getElementById('news-search'),d=document.getElementById('news-date'),c=document.getElementById('news-category');
+            if(q)q.value='';
+            if(d)d.value='';
+            if(c)c.value='';
+            filterNews();
+        }
+
+        document.addEventListener('keydown',e=>{if(e.key==='Escape')closeNewsDetails();});
 
         let postsCache = [];
 
@@ -4313,7 +4417,8 @@ main{max-width:1280px!important;margin:0 auto!important;padding:18px 18px 48px!i
 @media(max-width:600px){.logo-wrap{min-width:115px!important}.logo-text{font-size:1.05rem!important}.tabs{max-width:calc(100vw - 125px)!important}.tab{padding:0 10px!important}.hero{padding:22px!important}.hero h1{font-size:1.55rem!important}.home-section h2{font-size:.9rem!important}}
 </style>
 <style id="planethc-news-style">
-.news-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:14px}.news-card{background:#fff;border:1px solid #dfe6ed;border-radius:8px;overflow:hidden;box-shadow:0 3px 12px rgba(20,40,60,.05);transition:transform .18s,box-shadow .18s,border-color .18s}.news-card:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(20,40,60,.09);border-color:#c8d8e5}.news-card-head{padding:15px 16px 11px;border-bottom:1px solid #edf1f4;background:#f9fbfd}.news-meta{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:8px}.news-tag{color:var(--green);font-size:.57rem;letter-spacing:1.2px;font-weight:900;text-transform:uppercase}.news-date{color:var(--muted);font-size:.64rem}.news-card h3{margin:0;color:var(--text,#17222d);font-size:1.03rem;line-height:1.25}.news-card-body{padding:15px 16px 16px}.news-lead{margin:0;color:#5f6e7b;font-size:.78rem;line-height:1.6;font-weight:600}.news-content{margin-top:11px;color:#596876;font-size:.78rem;line-height:1.7;white-space:pre-line}.news-empty{padding:2rem;text-align:center;color:var(--muted);border:1px dashed var(--border);border-radius:8px}@media(max-width:600px){.news-grid{grid-template-columns:1fr}.news-card h3{font-size:.98rem}}
+#news .news-hero h1{color:#17222d!important;text-shadow:none!important}#news .news-hero h1 span{color:#0b78c8!important}#news .news-hero p{color:#657484!important}
+.news-tools{display:grid;grid-template-columns:minmax(260px,1fr) 170px 190px auto;gap:10px;align-items:end;margin:0 0 12px;padding:12px;background:rgba(255,255,255,.82);border:1px solid #dfe6ed;border-radius:10px;box-shadow:0 4px 18px rgba(20,40,60,.045)}.news-search-wrap{position:relative}.news-search-wrap i{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:#8a98a6;font-size:.78rem}.news-search-wrap input,.news-filter-field input,.news-filter-field select{width:100%;height:40px;border:1px solid #d7e0e8;border-radius:8px;background:#fff;color:#17222d;padding:0 12px;font:inherit;font-size:.78rem;outline:none}.news-search-wrap input{padding-left:34px}.news-search-wrap input:focus,.news-filter-field input:focus,.news-filter-field select:focus{border-color:#4d9bd1;box-shadow:0 0 0 3px rgba(77,155,209,.1)}.news-filter-field{display:flex;flex-direction:column;gap:5px}.news-filter-field span{font-size:.58rem;text-transform:uppercase;letter-spacing:1px;font-weight:800;color:#71808f}.news-clear-btn{height:40px;white-space:nowrap}.news-count{margin:0 2px 10px;color:#788795;font-size:.68rem}.news-count span{font-weight:800;color:#0b78c8}.news-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:14px}.news-card{background:#fff;border:1px solid #dfe6ed;border-radius:10px;overflow:hidden;box-shadow:0 3px 12px rgba(20,40,60,.05);transition:transform .18s,box-shadow .18s,border-color .18s;cursor:pointer;outline:none}.news-card:hover,.news-card:focus{transform:translateY(-2px);box-shadow:0 9px 26px rgba(20,40,60,.1);border-color:#bfd3e1}.news-card-head{padding:15px 16px 12px;border-bottom:1px solid #edf1f4;background:#f9fbfd}.news-meta,.news-modal-meta{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:8px}.news-tag{color:#0b78c8;font-size:.57rem;letter-spacing:1.2px;font-weight:900;text-transform:uppercase}.news-date{color:#748393;font-size:.64rem}.news-card h3{margin:0;color:#17222d;font-size:1.03rem;line-height:1.3}.news-card-body{padding:15px 16px 16px}.news-lead{margin:0;color:#5f6e7b;font-size:.78rem;line-height:1.6;font-weight:600;min-height:2.5em}.news-readmore{display:flex;justify-content:space-between;align-items:center;margin-top:14px;padding-top:11px;border-top:1px solid #edf1f4;color:#0b78c8;font-size:.7rem;font-weight:800}.news-readmore i{transition:transform .18s}.news-card:hover .news-readmore i,.news-card:focus .news-readmore i{transform:translateX(3px)}.news-empty{grid-column:1/-1;display:flex;flex-direction:column;align-items:center;gap:7px;padding:42px 20px;text-align:center;color:#6f7f8d;border:1px dashed #cfdbe4;border-radius:10px;background:#fff}.news-empty i{font-size:1.25rem;color:#8aa0b2}.news-empty strong{color:#263442;font-size:.9rem}.news-empty span{font-size:.72rem}.news-modal{position:fixed;inset:0;z-index:9999;display:none;align-items:center;justify-content:center;padding:20px}.news-modal.active{display:flex}.news-modal-backdrop{position:absolute;inset:0;background:rgba(15,26,38,.56);backdrop-filter:blur(3px)}.news-modal-card{position:relative;z-index:1;width:min(760px,100%);max-height:calc(100vh - 40px);overflow:auto;background:#fff;border:1px solid #dce5ec;border-radius:14px;box-shadow:0 20px 60px rgba(8,24,38,.24);padding:28px 30px}.news-modal-close{position:absolute;right:14px;top:14px;width:34px;height:34px;border:1px solid #dde6ed;border-radius:50%;background:#f7fafc;color:#667787;cursor:pointer}.news-modal-close:hover{background:#eef4f8;color:#17222d}.news-modal-meta{padding-right:40px}.news-modal-card h2{margin:4px 0 12px;color:#17222d;font-size:1.5rem;line-height:1.25}.news-modal-lead{margin:0 0 18px;color:#556675;font-size:.88rem;line-height:1.65;font-weight:700}.news-modal-content{color:#4f6070;font-size:.86rem;line-height:1.85;white-space:normal}.news-modal-open{overflow:hidden}@media(max-width:850px){.news-tools{grid-template-columns:1fr 1fr}.news-search-wrap{grid-column:1/-1}.news-clear-btn{width:100%}}@media(max-width:600px){.news-tools{grid-template-columns:1fr}.news-grid{grid-template-columns:1fr}.news-card h3{font-size:.98rem}.news-modal{padding:10px}.news-modal-card{max-height:calc(100vh - 20px);padding:23px 20px}.news-modal-card h2{font-size:1.25rem}.news-modal-meta{padding-right:34px}}
 </style>
 <script id="planethc-final-ui">
 (function(){
