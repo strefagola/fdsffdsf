@@ -1092,6 +1092,9 @@ Adam Wiśniewski | 1 | Bramkarz | Zawieszony | 2 mecze"></textarea>
     };
     </script>
 
+    <!-- Własne aktualności: edytuj tylko plik aktualnosci.js -->
+    <script src="aktualnosci.js"></script>
+
     <script>
         // PAMIĘTAJ: Aby dane A-klas i B-klas zapisywały się w drugiej bazie danych Firebase, 
         // musisz w pliku firebase-config.js zdefiniować zmienną window.db2!
@@ -1790,28 +1793,8 @@ Adam Wiśniewski | 1 | Bramkarz | Zawieszony | 2 mecze"></textarea>
             }).join('');
         }
 
-        /* =========================================================
-           AKTUALNOŚCI — DODAWANE RĘCZNIE TYLKO W TYM MIEJSCU
-           Najnowszą aktualność dodaj na GÓRZE tablicy.
-
-           WZÓR:
-           {
-             date: '30.09.2026',
-             category: 'PlanetHC',
-             title: 'Tytuł aktualności',
-             lead: 'Krótki opis widoczny na karcie.',
-             content: 'Pełna treść aktualności.\nMożesz używać kolejnych linii.'
-           },
-           ========================================================= */
-        const PLANETHC_NEWS = [
-            {
-                date: '30.09.2026',
-                category: 'Przykład',
-                title: 'Nowa aktualność — usuń ten wpis',
-                lead: 'To jest wzór, według którego dodajesz własne wiadomości.',
-                content: 'Tutaj wpisz pełną treść aktualności.\n\nNową aktualność dodaj jako kolejny obiekt na górze tablicy PLANETHC_NEWS.'
-            }
-        ];
+        /* Aktualności są ładowane z osobnego pliku aktualnosci.js.
+           Plik aktualnosci.js musi znajdować się w tym samym folderze co ten HTML. */
 
         function newsEscape(value){
             return String(value ?? '').replace(/[&<>"']/g, function(ch){
@@ -1822,7 +1805,7 @@ Adam Wiśniewski | 1 | Bramkarz | Zawieszony | 2 mecze"></textarea>
         function renderNews(){
             const c=document.getElementById('news-grid');
             if(!c) return;
-            const items=Array.isArray(PLANETHC_NEWS)?PLANETHC_NEWS:[];
+            const items=Array.isArray(window.PLANETHC_NEWS)?window.PLANETHC_NEWS:[];
             if(!items.length){
                 c.innerHTML='<div class="news-empty">Brak aktualności.</div>';
                 return;
