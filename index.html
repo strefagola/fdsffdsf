@@ -362,6 +362,7 @@ nav .tab{height:42px!important;margin:auto 2px!important;padding:0 14px!importan
         <div id="server-clock" aria-live="polite"><span id="server-clock-date">--.--.----</span><b id="server-clock-time">--:--:--</b><small id="server-clock-status">Synchronizacja czasu serwera…</small></div>
         <div class="tabs">
             <button class="tab active" onclick="go('home')">Start</button>
+            <button class="tab" onclick="go('news')">Aktualności</button>
             <button class="tab" onclick="go('matches')">Rozgrywki</button>
             <button class="tab" onclick="go('table')">Tabela</button>
             <button class="tab" onclick="go('stats')">Statystyki</button>
@@ -451,6 +452,14 @@ nav .tab{height:42px!important;margin:auto 2px!important;padding:0 14px!importan
     </div>
   </div>
 </section>
+
+        <section id="news" class="section">
+            <div class="hero anim" style="padding:2.5rem 0 1.8rem;">
+                <h1 style="font-size:2.2rem;">Aktualności <span>PlanetHC</span></h1>
+                <p>Najnowsze informacje, komunikaty i wiadomości redakcji.</p>
+            </div>
+            <div id="news-grid" class="news-grid anim d1"></div>
+        </section>
 
         <section id="matches" class="section">
             <div class="sub-nav-container anim" id="matches-sub">
@@ -1137,7 +1146,7 @@ Adam Wiśniewski | 1 | Bramkarz | Zawieszony | 2 mecze"></textarea>
         }
 
         const sectionLoaded = {
-            home:false, matches:false, table:false, stats:false, transfers:false, posts:false
+            home:false, news:false, matches:false, table:false, stats:false, transfers:false, posts:false
         };
 
         function go(id){
@@ -1174,6 +1183,10 @@ Adam Wiśniewski | 1 | Bramkarz | Zawieszony | 2 mecze"></textarea>
             if(id==='home' && !sectionLoaded.home){
                 sectionLoaded.home=true;
                 Promise.allSettled([refreshMatches(),loadHomeTable()]);
+            }
+            if(id==='news' && !sectionLoaded.news){
+                sectionLoaded.news=true;
+                renderNews();
             }
             if(id==='clubs') loadClubs();
             if(id==='matches' && !sectionLoaded.matches){
@@ -1775,6 +1788,56 @@ Adam Wiśniewski | 1 | Bramkarz | Zawieszony | 2 mecze"></textarea>
                     ${t.fee ? `<div style="color:var(--gold);font-weight:700;margin-top:0.7rem;font-size:0.82rem;text-align:center;">${t.fee}</div>` : ''}
                 </div>`;
             }).join('');
+        }
+
+        /* =========================================================
+           AKTUALNOŚCI — DODAWANE RĘCZNIE TYLKO W TYM MIEJSCU
+           Najnowszą aktualność dodaj na GÓRZE tablicy.
+
+           WZÓR:
+           {
+             date: '30.09.2026',
+             category: 'PlanetHC',
+             title: 'Tytuł aktualności',
+             lead: 'Krótki opis widoczny na karcie.',
+             content: 'Pełna treść aktualności.\nMożesz używać kolejnych linii.'
+           },
+           ========================================================= */
+        const PLANETHC_NEWS = [
+            {
+                date: '30.09.2026',
+                category: 'Przykład',
+                title: 'Nowa aktualność — usuń ten wpis',
+                lead: 'To jest wzór, według którego dodajesz własne wiadomości.',
+                content: 'Tutaj wpisz pełną treść aktualności.\n\nNową aktualność dodaj jako kolejny obiekt na górze tablicy PLANETHC_NEWS.'
+            }
+        ];
+
+        function newsEscape(value){
+            return String(value ?? '').replace(/[&<>"']/g, function(ch){
+                return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch];
+            });
+        }
+
+        function renderNews(){
+            const c=document.getElementById('news-grid');
+            if(!c) return;
+            const items=Array.isArray(PLANETHC_NEWS)?PLANETHC_NEWS:[];
+            if(!items.length){
+                c.innerHTML='<div class="news-empty">Brak aktualności.</div>';
+                return;
+            }
+            c.innerHTML=items.map(n=>`
+                <article class="news-card">
+                    <div class="news-card-head">
+                        <div class="news-meta"><span class="news-tag">${newsEscape(n.category||'Aktualność')}</span><span class="news-date"><i class="fa-regular fa-calendar"></i> ${newsEscape(n.date||'')}</span></div>
+                        <h3>${newsEscape(n.title||'Bez tytułu')}</h3>
+                    </div>
+                    <div class="news-card-body">
+                        ${n.lead?`<p class="news-lead">${newsEscape(n.lead)}</p>`:''}
+                        ${n.content?`<div class="news-content">${newsEscape(n.content)}</div>`:''}
+                    </div>
+                </article>`).join('');
         }
 
         let postsCache = [];
@@ -4266,9 +4329,12 @@ main{max-width:1280px!important;margin:0 auto!important;padding:18px 18px 48px!i
 @media(max-width:999px){nav{position:sticky!important}.logo-wrap{min-width:150px!important}.tabs{overflow-x:auto!important}.tab{padding:0 11px!important;font-size:.68rem!important}main{padding:10px 8px 35px!important}#home .stats-row{grid-template-columns:repeat(2,1fr)!important}.stat-item:nth-child(2){border-right:0}.stat-item:nth-child(-n+2){border-bottom:1px solid var(--fs-line)}}
 @media(max-width:600px){.logo-wrap{min-width:115px!important}.logo-text{font-size:1.05rem!important}.tabs{max-width:calc(100vw - 125px)!important}.tab{padding:0 10px!important}.hero{padding:22px!important}.hero h1{font-size:1.55rem!important}.home-section h2{font-size:.9rem!important}}
 </style>
+<style id="planethc-news-style">
+.news-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:14px}.news-card{background:#fff;border:1px solid #dfe6ed;border-radius:8px;overflow:hidden;box-shadow:0 3px 12px rgba(20,40,60,.05);transition:transform .18s,box-shadow .18s,border-color .18s}.news-card:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(20,40,60,.09);border-color:#c8d8e5}.news-card-head{padding:15px 16px 11px;border-bottom:1px solid #edf1f4;background:#f9fbfd}.news-meta{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:8px}.news-tag{color:var(--green);font-size:.57rem;letter-spacing:1.2px;font-weight:900;text-transform:uppercase}.news-date{color:var(--muted);font-size:.64rem}.news-card h3{margin:0;color:var(--text,#17222d);font-size:1.03rem;line-height:1.25}.news-card-body{padding:15px 16px 16px}.news-lead{margin:0;color:#5f6e7b;font-size:.78rem;line-height:1.6;font-weight:600}.news-content{margin-top:11px;color:#596876;font-size:.78rem;line-height:1.7;white-space:pre-line}.news-empty{padding:2rem;text-align:center;color:var(--muted);border:1px dashed var(--border);border-radius:8px}@media(max-width:600px){.news-grid{grid-template-columns:1fr}.news-card h3{font-size:.98rem}}
+</style>
 <script id="planethc-final-ui">
 (function(){
- const navLabels={home:'Przegląd',matches:'Wyniki',table:'Tabele',stats:'Statystyki',clubs:'Kluby',transfers:'Transfery',posts:'Aktualności'};
+ const navLabels={home:'Przegląd',news:'Aktualności',matches:'Wyniki',table:'Tabele',stats:'Statystyki',clubs:'Kluby',transfers:'Transfery',posts:'Aktualności'};
  function clean(){
    document.querySelectorAll('nav .tab').forEach(b=>{const m=b.getAttribute('onclick')||'';const x=m.match(/go\('([^']+)'\)/);if(!x)return;const id=x[1];if(id==='streams'){b.remove();return} if(navLabels[id])b.textContent=navLabels[id];});
    const s=document.getElementById('streams');if(s)s.remove();
