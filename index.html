@@ -960,6 +960,22 @@ Drugi Klub vs Trzeci Klub, 2026-09-15, 19:30" style="min-height:120px;width:100%
                             <button class="btn-sm" onclick="clearTF()" style="width:100%;margin-top:10px;border:1px solid var(--border);">Wyczyść</button>
                         </div>
                         <div class="card" style="margin-bottom:2rem;">
+                            <h3 style="font-size:0.75rem;color:var(--green);margin-bottom:0.7rem;text-transform:uppercase;letter-spacing:1.2px;">Masowa aktualizacja herbów klubów</h3>
+                            <p style="font-size:0.72rem;color:var(--muted);margin-bottom:1rem;">Wybierz konkretną ligę, a następnie wklej same linki do herbów — system odczyta nazwę klubu z linku (np. <strong>blyskawica-wieruszow-cutout.png</strong>) i wyszuka ten klub <strong>tylko w wybranej lidze</strong>. Możesz też nadal używać formatów <strong>Nazwa klubu | link</strong> oraz <strong>Liga | Nazwa klubu | link</strong>.</p>
+                            <select id="bulk-crest-league" style="margin-bottom:8px;"></select>
+                            <textarea id="bulk-crest-lines" placeholder="Błyskawica Wieruszów | https://i.postimg.cc/Wzw46DHh/blyskawica-wieruszow-cutout.png
+Czarni Pruszcz | https://i.postimg.cc/wMpvm5FG/czarni-pruszcz-cutout.png
+Grom Wolsztyn | https://i.postimg.cc/dVth6BvP/grom-wolsztyn-cutout.png
+
+Lub z podaniem ligi:
+Liga 1 | Klub Przykładowy | https://example.com/herb.png" style="min-height:180px;width:100%;resize:vertical;"></textarea>
+                            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;">
+                                <button type="button" class="btn" onclick="bulkUpdateClubCrests()"><i class="fa-solid fa-shield-halved"></i> Aktualizuj herby masowo</button>
+                                <button type="button" class="btn-sm" onclick="clearBulkCrests()" style="border:1px solid var(--border);">Wyczyść</button>
+                            </div>
+                            <div id="bulk-crest-status" style="font-size:0.72rem;color:var(--muted);margin-top:8px;"></div>
+                        </div>
+                        <div class="card" style="margin-bottom:2rem;">
                             <h3 style="font-size:0.75rem;color:var(--green);margin-bottom:0.7rem;text-transform:uppercase;letter-spacing:1.2px;">Szybkie masowe dodawanie drużyn</h3>
                             <p style="font-size:0.72rem;color:var(--muted);margin-bottom:1rem;">Wzór: <strong>Nazwa klubu, link do herbu, automatycznie</strong> albo <strong>Nazwa klubu, link do herbu, ręcznie, M, Pkt, Bilans</strong>. Jedna drużyna = jedna linia.</p>
                             <select id="tb-league"></select>
@@ -2613,6 +2629,150 @@ async function sendContact(){
         }
         function clearMF(){document.getElementById('m-id').value=''; document.getElementById('m-db').value='';['m-home','m-away','m-sh','m-sa','m-date'].forEach(i=>document.getElementById(i).value='');}
 
+        function normalizeCrestTeamName(value){
+            return String(value||'').trim().toLowerCase()
+                .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+                .replace(/[ł]/g,'l')
+                .replace(/[^a-z0-9]+/g,' ')
+                .replace(/\s+/g,' ').trim();
+        }
+
+        function resolveCrestLeague(value){
+            const raw=String(value||'').trim();
+            if(!raw)return '';
+            if(L[raw])return raw;
+            const norm=normalizeCrestTeamName(raw);
+            return Object.keys(L).find(k=>normalizeCrestTeamName(L[k])===norm) || '';
+        }
+
+        function parseBulkCrestLines(raw){
+            const result=[], errors=[];
+            String(raw||'').split(/\r?\n/).map(x=>x.trim()).filter(Boolean).forEach((line,i)=>{
+                let parts=line.includes('|') ? line.split('|').map(x=>x.trim()) : line.split(/\t+/).map(x=>x.trim());
+                if(parts.length===1 && /^https?:\/\//i.test(parts[0])){
+                    result.push({league:'',team:'',url:parts[0],line:i+1,infer:true});
+                    return;
+                }
+                if(parts.length<2){ errors.push(`Linia ${i+1}: użyj „Nazwa klubu | URL” albo wklej sam link`); return; }
+                let league='',team='',url='';
+                if(parts.length>=3){
+                    league=resolveCrestLeague(parts[0]);
+                    team=parts[1]||'';
+                    url=parts.slice(2).join('|').trim();
+                    if(!league) {
+                        // Gdy pierwszy element nie jest rozpoznawalną ligą, potraktuj całość jako „klub | URL”.
+                        team=parts[0]||'';
+                        url=parts.slice(1).join('|').trim();
+                        league='';
+                    }
+                }else{
+                    team=parts[0]||'';
+                    url=parts[1]||'';
+                }
+                if(!team){errors.push(`Linia ${i+1}: brak nazwy klubu.`);return;}
+                if(!/^https?:\/\//i.test(url)){errors.push(`Linia ${i+1}: link herbu musi zaczynać się od http:// lub https://`);return;}
+                result.push({league,team,url,line:i+1});
+            });
+            return {result,errors};
+        }
+
+        function clearBulkCrests(){
+            const input=document.getElementById('bulk-crest-lines');
+            const status=document.getElementById('bulk-crest-status');
+            if(input)input.value='';
+            const leagueSelect=document.getElementById('bulk-crest-league');
+            if(leagueSelect)leagueSelect.value='';
+            if(status)status.textContent='';
+        }
+
+        async function bulkUpdateClubCrests(){
+            if(!user){alert('Zaloguj się jako administrator.');return;}
+            const input=document.getElementById('bulk-crest-lines');
+            const status=document.getElementById('bulk-crest-status');
+            if(!input||!status)return;
+            const parsed=parseBulkCrestLines(input.value);
+            if(!parsed.result.length){
+                status.textContent=parsed.errors.join(' ')||'Brak danych do aktualizacji.';
+                status.style.color='#dc2626';
+                return;
+            }
+
+            const selectedLeague=(document.getElementById('bulk-crest-league')?.value||'').trim();
+            status.textContent=selectedLeague ? `Szukam klubów tylko w: ${L[selectedLeague]||selectedLeague}...` : 'Sprawdzam kluby we wszystkich rozgrywkach...';
+            status.style.color='var(--muted)';
+            try{
+                const leagues=selectedLeague ? [selectedLeague] : Object.keys(L);
+                const docs=await Promise.all(leagues.map(async league=>{
+                    const dbase=getDB(league);
+                    const ref=dbase.collection('standings').doc(league);
+                    const snap=await ref.get();
+                    return {league,dbase,ref,snap,teams:snap.exists&&Array.isArray(snap.data().teams)?[...snap.data().teams]:[]};
+                }));
+
+                let updated=0, notFound=0, duplicateTargets=0;
+                const matchedLines=new Set();
+                const changed=[];
+
+                for(const item of parsed.result){
+                    let target=normalizeCrestTeamName(item.team);
+                    if(!target && item.infer){
+                        try{
+                            const u=new URL(item.url);
+                            let slug=decodeURIComponent((u.pathname.split('/').pop()||'').replace(/\.[a-z0-9]+$/i,'')).replace(/[-_]+cutout$/i,'').replace(/[-_]+/g,' ');
+                            target=normalizeCrestTeamName(slug);
+                        }catch(e){}
+                    }
+                    if(!target){notFound++;continue;}
+                    const effectiveLeague=item.league||selectedLeague||'';
+                    let matchedForLine=0;
+                    for(const doc of docs){
+                        if(effectiveLeague && doc.league!==effectiveLeague)continue;
+                        for(let i=0;i<doc.teams.length;i++){
+                            const t=doc.teams[i];
+                            if(normalizeCrestTeamName(t.name)!==target)continue;
+                            if(t.crest===item.url)continue;
+                            doc.teams[i]={...t,crest:item.url};
+                            updated++; matchedForLine++;
+                            changed.push(`${doc.league}: ${t.name}`);
+                        }
+                    }
+                    if(matchedForLine){
+                        matchedLines.add(item.line);
+                        if(matchedForLine>1)duplicateTargets += matchedForLine-1;
+                    }else notFound++;
+                }
+
+                // Zapisujemy maksymalnie po jednym dokumencie standings na ligę.
+                const writes=docs.filter(d=>d.snap.exists && d.teams.length);
+                const batch=getDB('liga1').batch();
+                let batchCount=0;
+                for(const doc of writes){
+                    const original=doc.snap.data().teams||[];
+                    const changedLeague=JSON.stringify(original)!==JSON.stringify(doc.teams);
+                    if(!changedLeague)continue;
+                    batch.set(doc.ref,{teams:doc.teams,updatedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});
+                    batchCount++;
+                }
+                if(batchCount)await batch.commit();
+
+                crestsCache={};
+                crestsLoadPromise=null;
+                await loadCrests(true);
+                try{loadAdminT();}catch(e){}
+                try{loadClubs();}catch(e){}
+                try{if(typeof applyFilter==='function')applyFilter();}catch(e){}
+
+                status.style.color='var(--green)';
+                status.textContent=`Zaktualizowano ${updated} herbów. Nie znaleziono: ${notFound}.`+(duplicateTargets?` Wiele dopasowań: ${duplicateTargets}.`:'')+(parsed.errors.length?` Błędy: ${parsed.errors.length}.`:'');
+                if(parsed.errors.length)console.warn('Masowa aktualizacja herbów:',parsed.errors);
+            }catch(e){
+                console.error('Masowa aktualizacja herbów',e);
+                status.style.color='#dc2626';
+                status.textContent='Błąd podczas masowej aktualizacji herbów.';
+                alert('Nie udało się zaktualizować herbów. Sprawdź konsolę.');
+            }
+        }
+
         async function saveTeam(){
             if(!user) return;
             const editId = document.getElementById('t-id').value;
@@ -3347,6 +3507,11 @@ function planetLeagueSelect(key){
 }
 document.addEventListener('DOMContentLoaded',()=>{
  document.querySelectorAll('select[id$="-league"]').forEach(sel=>{sel.innerHTML=PLANET_LEAGUES.map(x=>`<option value="${x[0]}">${x[1]}</option>`).join('');sel.value='liga1'});
+ const bulkLeague=document.getElementById('bulk-crest-league');
+ if(bulkLeague){
+   bulkLeague.innerHTML='<option value="">Wszystkie rozgrywki</option>'+PLANET_LEAGUES.map(x=>`<option value="${x[0]}">${x[1]}</option>`).join('');
+   bulkLeague.value='';
+ }
  planetLeagueSelect('liga1');
 });
 </script>
