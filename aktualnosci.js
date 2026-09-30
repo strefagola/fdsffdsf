@@ -15,5 +15,38 @@ window.PLANETHC_NEWS = [
            'Jesteśmy przekonani, że te trudne, lecz konieczne zmiany przełożą się na znacznie większe emocje, sprawiedliwą rywalizację i dalszy rozwój naszego środowiska sportowego.\n\n' +
            'Ze sportowym pozdrowieniem,\n' +
            'Przedstawiciele Lig PlanetHC'
+},
+
+{
+  date: '30.09.2026',
+  category: 'Zarząd',
+  title: 'Przełom w PlanetHC: Powstają Reprezentacje Wojewódzkie!',
+  lead: 'Przedstawiciele Lig PlanetHC oficjalnie ogłaszają duże zmiany w strukturze rozgrywek. Od listopada rusza projekt reprezentacji wojewódzkich oraz nowe turnieje pucharowe!',
+  image: 'https://twoja-strona.pl/plakat.png',
+  content: `Drodzy Zawodnicy i Kibice!
+
+Z wielką radością informujemy, że w odpowiedzi na Wasze liczne pomysły i propozycje, Przedstawiciele Lig PlanetHC podjęli decyzję o wprowadzeniu nowej inicjatywy. Od listopada tego roku oficjalnie uruchamiamy rozgrywki Reprezentacji Wojewódzkich!
+
+Co to oznacza w praktyce?
+Każde województwo zyska możliwość powoływania zawodników ze wszystkich drużyn ze swojego regionu – na zasadach analogicznych do reprezentacji krajowych. Reforma ta dotyczy wszystkich poziomów rozgrywkowych (1, 2, 3 oraz 4 Ligi), w których rywalizują zespoły m.in. z Małopolski, Podkarpacia i pozostałych rejonów. Dzięki temu zyskacie więcej emocjonujących meczów oraz unikalną szansę na wspólną grę z zawodnikami z całej swojej ligi.
+
+Nowe turnieje i format rozgrywek:
+W ramach projektu wprowadzamy specjalne turnieje pucharowe:
+• Puchar Wojewódzki
+• Puchar Krajowy
+• Puchar Mistrzów
+
+Do każdego z pucharów przypisana zostanie określona liczba miejsc. Przepustką do udziału w turniejach głównych będą eliminacje, a w kalendarzu przewidujemy również mecze barażowe oraz spotkania towarzyskie.
+
+Terminarz i plan na najbliższe miesiące:
+Spotkania reprezentacyjne będą odbywać się w wyznaczonych okienkach w następujących miesiącach: listopad, grudzień, luty, marzec, czerwiec oraz lipiec.
+
+• Listopad: przeznaczamy wyłącznie na mecze towarzyskie, aby sprawdzić system w praktyce i jak najlepiej go zoptymalizować.
+• Grudzień: wystartują oficjalne eliminacje do przyszłorocznego turnieju Puchar Wojewódzki.
+
+Więcej szczegółowych informacji oraz regulamin rozgrywek przedstawimy już bliżej listopada. 
+
+Pozdrawiamy,
+Przedstawiciele Lig PlanetHC`
  }
 ];
