@@ -2862,10 +2862,22 @@ async function getRosterForProtocol(team,sourceDb){
  }catch(e){console.error(e);return[];}
 }
 function protocolRoleFor(lineup,p){const x=(lineup||[]).find(v=>String(v.player||'')===String(p.player||''));return x?.role||'';}
+function lineupPositionRank(position){
+ const k=protocolPositionKey(position);
+ return k==='gk'?1:k==='def'?2:k==='mid'?3:k==='fwd'?4:5;
+}
+function sortLineupPlayers(list){
+ return [...(list||[])].sort((a,b)=>
+   lineupPositionRank(a?.position)-lineupPositionRank(b?.position)
+   || (Number(a?.number)||999)-(Number(b?.number)||999)
+   || String(a?.player||'').localeCompare(String(b?.player||''),'pl')
+ );
+}
 function renderProtocolPlayers(targetId,roster,lineup){
  const el=document.getElementById(targetId); if(!el)return;
  if(!roster.length){el.innerHTML='<div class="mp-empty">Brak zawodników w kadrze tego klubu. Dodaj ich wcześniej w zakładce „Składy”.</div>';return;}
- el.innerHTML=roster.map(p=>{const role=protocolRoleFor(lineup,p);return `<div class="mp-player-row"><div class="mp-player-meta"><span class="mp-number">${phEsc(p.number||'—')}</span><div><b>${phEsc(p.player)}</b><small>${phEsc(p.position||'')}</small></div></div><select class="mp-role" data-player="${phEsc(p.player)}" data-number="${phEsc(p.number||'')}" data-position="${phEsc(p.position||'')}"><option value="" ${!role?'selected':''}>Poza kadrą</option><option value="starter" ${role==='starter'?'selected':''}>Wyjściowy skład</option><option value="bench" ${role==='bench'?'selected':''}>Rezerwowy</option></select></div>`}).join('');
+ const sortedRoster=sortLineupPlayers(roster);
+ el.innerHTML=sortedRoster.map(p=>{const role=protocolRoleFor(lineup,p);return `<div class="mp-player-row"><div class="mp-player-meta"><span class="mp-number">${phEsc(p.number||'—')}</span><div><b>${phEsc(p.player)}</b><small>${phEsc(p.position||'')}</small></div></div><select class="mp-role" data-player="${phEsc(p.player)}" data-number="${phEsc(p.number||'')}" data-position="${phEsc(p.position||'')}"><option value="" ${!role?'selected':''}>Poza kadrą</option><option value="starter" ${role==='starter'?'selected':''}>Wyjściowy skład</option><option value="bench" ${role==='bench'?'selected':''}>Rezerwowy</option></select></div>`}).join('');
 }
 function protocolMatchDate(m){
  if(!m||!m.date)return null;
@@ -3007,7 +3019,12 @@ async function loadProtocolEvents(){
  try{const snap=await protocolState.db.collection('matchEvents').where('matchId','==',protocolState.match.id).get();const rows=dedupeMatchEvents(snap.docs.map(d=>({id:d.id,...d.data()}))).sort((a,b)=>(a.minute||0)-(b.minute||0));el.innerHTML=rows.length?rows.map(e=>`<div class="mp-event-row"><div class="mp-event-minute">${phEsc(e.minute||0)}'</div><div class="mp-event-main"><b>${protocolEventLabel(e)}</b><span>${protocolEventDesc(e)}</span></div><div class="mp-event-team">${phEsc(e.team||'')}</div><button class="mp-event-delete" onclick="deleteProtocolEvent('${e.id}')" title="Usuń"><i class="fa-solid fa-trash"></i></button></div>`).join(''):'<div class="mp-empty">Nie dodano jeszcze żadnych sytuacji meczowych.</div>';}catch(e){console.error(e);el.innerHTML='<div class="mp-empty">Nie udało się pobrać wydarzeń.</div>';}
 }
 async function deleteProtocolEvent(id){if(!protocolState.db||!confirm('Usunąć to wydarzenie?'))return;await protocolState.db.collection('matchEvents').doc(id).delete();if(protocolState.match?.id)window.invalidateMatchEventsCache(protocolState.match.id);loadProtocolEvents();}
-function renderPublicLineup(title,lineup){const starters=(lineup||[]).filter(x=>x.role==='starter'),bench=(lineup||[]).filter(x=>x.role==='bench');const rows=a=>a.length?a.map(x=>`<div class="detail-player"><span>${phEsc(x.number||'—')}</span><b>${phEsc(x.player)}</b><small>${phEsc(x.position||'')}</small></div>`).join(''):'<div class="detail-empty">Brak danych</div>';return `<div class="detail-lineup-team"><h4>${phEsc(title)}</h4><div class="detail-label">WYJŚCIOWY SKŁAD</div>${rows(starters)}<div class="detail-label detail-bench-label">REZERWOWI</div>${rows(bench)}</div>`;}
+function renderPublicLineup(title,lineup){
+ const starters=sortLineupPlayers((lineup||[]).filter(x=>x.role==='starter'));
+ const bench=sortLineupPlayers((lineup||[]).filter(x=>x.role==='bench'));
+ const rows=a=>a.length?a.map(x=>`<div class="detail-player"><span>${phEsc(x.number||'—')}</span><b>${phEsc(x.player)}</b><small>${phEsc(x.position||'')}</small></div>`).join(''):'<div class="detail-empty">Brak danych</div>';
+ return `<div class="detail-lineup-team"><h4>${phEsc(title)}</h4><div class="detail-label">WYJŚCIOWY SKŁAD</div>${rows(starters)}<div class="detail-label detail-bench-label">REZERWOWI</div>${rows(bench)}</div>`;
+}
 async function openMatchDetails(id,dbName){
  const source=String(dbName||'db1');
  const db=source==='db2'&&window.db2?window.db2:window.db;
