@@ -3350,6 +3350,13 @@ async function addProtocolEvent(){
  const type=document.getElementById('mp-event-type').value,side=document.getElementById('mp-event-team').value,team=side==='away'?protocolState.match.awayTeam:protocolState.match.homeTeam;
  const data={matchId:protocolState.match.id,minute:Number(document.getElementById('mp-minute').value)||0,type,team,side,player:document.getElementById('mp-event-player').value,assist:document.getElementById('mp-event-assist').value,playerOut:document.getElementById('mp-player-out').value,playerIn:document.getElementById('mp-player-in').value,note:document.getElementById('mp-event-note').value.trim(),createdAt:firebase.firestore.FieldValue.serverTimestamp()};
  if(type==='sub'&&(!data.playerOut||!data.playerIn)){protocolEventSaving=false;alert('Przy zmianie wybierz zawodnika schodzącego i wchodzącego.');return;}
+ if(type==='sub'){
+   const roster=side==='away'?protocolState.awayRoster:protocolState.homeRoster;
+   const outPlayer=roster?.find(p=>String(p.player||'')===String(data.playerOut||''));
+   const inPlayer=roster?.find(p=>String(p.player||'')===String(data.playerIn||''));
+   if(!outPlayer||!inPlayer){protocolEventSaving=false;alert('Nie znaleziono zawodnika w kadrze.');return;}
+   if(protocolPositionKey(outPlayer.position)!==protocolPositionKey(inPlayer.position)){protocolEventSaving=false;alert('Nieprawidłowa zmiana: zawodnik wchodzący musi grać na tej samej pozycji. Bramkarz może wejść tylko za bramkarza.');return;}
+ }
  if(type!=='sub'&&type!=='note'&&!data.player){protocolEventSaving=false;alert('Wybierz zawodnika.');return;}
  try{
    const col=protocolState.db.collection('matchEvents');
@@ -4219,7 +4226,65 @@ function simState(m,now){const d=protocolMatchDate(m);if(!d)return{phase:'upcomi
 function role(lineup,r){return(lineup||[]).filter(x=>x.role===r&&x.player).map(x=>({...x}))}
 function state(h,a){return{home:{active:role(h,'starter'),bench:role(h,'bench'),red:new Set()},away:{active:role(a,'starter'),bench:role(a,'bench'),red:new Set()},goalMinutes:[],blockedGoalMinutes:new Set(),goalPlan:[],eventMinutes:[]}}
 function pick(a,r){return a.length?a[Math.floor(r*a.length)%a.length]:null}
-function subs(st,side,r){const out=st[side].active.filter(p=>!st[side].red.has(String(p.player))),bench=st[side].bench;if(!out.length||!bench.length)return null;const po=pick(out,r),pi=bench.splice(Math.floor(r*bench.length)%bench.length,1)[0];if(!pi)return null;const i=st[side].active.findIndex(p=>String(p.player)===String(po.player));if(i>=0)st[side].active[i]=pi;return{playerOut:po.player,playerIn:pi.player}}
+function scorerPool(players){
+    // Bramkarz nigdy nie jest losowany jako zwykly strzelec.
+    return (players||[]).filter(p=>protocolPositionKey(p?.position)!=='gk');
+}
+function pickScorer(players,r){
+    const pool=scorerPool(players);
+    if(!pool.length)return null;
+    // Rozklad jest celowo nierowny: napastnicy najczesciej, potem pomocnicy,
+    // obroncy rzadziej. Kazdy zawodnik nadal moze strzelic.
+    const weighted=[];
+    pool.forEach(p=>{
+        const pos=protocolPositionKey(p?.position);
+        const weight=pos==='fwd'?62:pos==='mid'?30:pos==='def'?8:1;
+        for(let i=0;i<weight;i++)weighted.push(p);
+    });
+    return pick(weighted,r);
+}
+function pickAssist(players,r){
+    const pool=scorerPool(players);
+    if(!pool.length)return null;
+    const weighted=[];
+    pool.forEach(p=>{
+        const pos=protocolPositionKey(p?.position);
+        const weight=pos==='mid'?50:pos==='fwd'?35:pos==='def'?15:1;
+        for(let i=0;i<weight;i++)weighted.push(p);
+    });
+    return pick(weighted,r);
+}
+function subs(st,side,r){
+    const active=st[side].active.filter(p=>!st[side].red.has(String(p.player)));
+    const bench=st[side].bench;
+    if(!active.length||!bench.length)return null;
+    const positionKey=p=>protocolPositionKey(p?.position);
+    const gk=active.filter(p=>positionKey(p)==='gk');
+    const fieldOut=active.filter(p=>positionKey(p)!=='gk');
+    const useGoalkeeperSub=gk.length&&bench.some(p=>positionKey(p)==='gk')&&r<0.03;
+    let po=null,pi=null;
+    if(useGoalkeeperSub){
+        po=pick(gk,r);
+        pi=pick(bench.filter(p=>positionKey(p)==='gk'),r);
+    }else{
+        const positions=[...new Set(fieldOut.map(positionKey).filter(pos=>pos&&pos!=='other'&&bench.some(p=>positionKey(p)===pos)))];
+        if(!positions.length){
+            const hasOther=fieldOut.some(p=>positionKey(p)==='other')&&bench.some(p=>positionKey(p)==='other');
+            if(!hasOther)return null;
+            positions.push('other');
+        }
+        const pos=positions[Math.floor(r*positions.length)%positions.length];
+        po=pick(fieldOut.filter(p=>positionKey(p)===pos),r);
+        pi=pick(bench.filter(p=>positionKey(p)===pos),r);
+    }
+    if(!po||!pi)return null;
+    const benchIndex=st[side].bench.findIndex(p=>String(p.player)===String(pi.player));
+    if(benchIndex>=0)st[side].bench.splice(benchIndex,1);
+    const i=st[side].active.findIndex(p=>String(p.player)===String(po.player));
+    if(i<0)return null;
+    st[side].active[i]=pi;
+    return{playerOut:po.player,playerIn:pi.player};
+}
 function goalTooSoon(st,min){
     const n=Number(min);
     // Realistyczny odstęp między golami: minimum 10 minut.
@@ -4241,9 +4306,10 @@ const hasPlannedGoal=!!plannedGoal;
 if(min>=55&&min<=82&&!hasPlannedGoal&&!eventBlocked(st,min))['home','away'].forEach((side,i)=>{const r=rnd(id,min,'sub'+i);if(r<.025&&!eventBlocked(st,min)){const x=subs(st,side,rnd(id,min,'subpick'+i));if(x){out.push({minute:min,type:'sub',team:side==='home'?m.homeTeam:m.awayTeam,side,...x});blockEventMinute(st,min)}}});
 ['home','away'].forEach((side,i)=>{const a=st[side].active.filter(p=>!st[side].red.has(String(p.player)));if(!a.length)return;const team=side==='home'?m.homeTeam:m.awayTeam;
 if(plannedGoal&&plannedGoal.side===side&&!goalEventBlocked(st,min)){
-    const p=pick(a,rnd(id,min,'goal'+i));
-    const ap=a.filter(x=>String(x.player)!==String(p?.player));
-    const as=ap.length&&rnd(id,min,'assist'+i)<.68?pick(ap,rnd(id,min,'assistpick'+i)):null;
+    const p=pickScorer(a,rnd(id,min,'goal'+i));
+    if(!p)return;
+    const ap=a.filter(x=>String(x.player)!==String(p.player));
+    const as=ap.length&&rnd(id,min,'assist'+i)<.68?pickAssist(ap,rnd(id,min,'assistpick'+i)):null;
     if(plannedGoal.type==='own_goal'){
         out.push({minute:min,type:'own_goal',team:side==='home'?m.awayTeam:m.homeTeam,side,creditedSide:plannedGoal.creditedSide,player:p.player});
     }else{
