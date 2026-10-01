@@ -4471,8 +4471,10 @@ async function autoSimulateMatches(matches){
    if(al!==bl)return al-bl;
    return (protocolMatchDate(a)?.getTime()||0)-(protocolMatchDate(b)?.getTime()||0);
  });
- // Mały limit chroni quota, ale kolejka nowych meczów jest obsługiwana osobno.
- const batchCandidates=candidates.slice(0,8);
+ // Bez limitu liczby meczów: jeżeli wiele spotkań ma ten sam czas
+ // rozpoczęcia, wszystkie muszą dostać swój aktualny stan w tym samym przebiegu.
+ // Przetwarzanie pozostaje sekwencyjne, aby nie robić lawiny równoległych zapisów.
+ const batchCandidates=candidates;
  if(!batchCandidates.length)return;
  busy=true;
  try{
