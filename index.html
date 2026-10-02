@@ -4779,6 +4779,228 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(init,50),{once:true});else setTimeout(init,50);
 })();
 </script>
+
+<style id="regional-callup-cycle-ui">
+.rw-cycle-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px;padding:12px 14px;background:#f7f9fb;border:1px solid #e1e7ed;border-radius:10px}
+.rw-cycle-head b{display:block;font-size:.78rem;color:#29485e}.rw-cycle-head small{display:block;margin-top:3px;color:#7a8b98;font-size:.64rem;line-height:1.45}
+.rw-cycle-badge{padding:5px 9px;border-radius:999px;background:#eaf5fd;color:#0875c1;font-size:.58rem;font-weight:900;white-space:nowrap}
+.rw-cycle-select{margin:0 0 12px!important}
+.rw-auto-note{padding:10px 12px;border:1px solid #dce8ef;border-radius:9px;background:#fbfdfe;color:#6f8290;font-size:.68rem;line-height:1.5}
+.rw-match-tag{display:inline-flex;align-items:center;gap:5px;padding:3px 7px;border-radius:999px;background:#eef7f4;color:#13795f;font-size:.55rem;font-weight:900;margin-left:5px}
+.rw-player-pos{color:#84939e;font-size:.61rem;margin-top:2px}
+#regional-match-fields,#regional-bulk-fields{margin-top:8px}
+@media(max-width:700px){.rw-cycle-head{flex-direction:column}.rw-cycle-badge{align-self:flex-start}}
+</style>
+<script id="regional-callup-cycle-automation">
+(function(){
+  const PROVINCES=[
+    ['dolnoslaskie','Dolnośląskie','okr_dolnoslaskie'],['kujawsko_pomorskie','Kujawsko-Pomorskie','okr_kujawsko_pomorskie'],
+    ['lubelskie','Lubelskie','okr_lubelskie'],['lubuskie','Lubuskie','okr_lubuska'],['lodzkie','Łódzkie','okr_lodzkie'],
+    ['malopolskie','Małopolskie','okr_malopolska'],['mazowieckie','Mazowieckie','okr_mazowiecka'],['opolskie','Opolskie','okr_opolska'],
+    ['podkarpackie','Podkarpackie','okr_podkarpacka'],['podlaskie','Podlaskie','okr_podlaska'],['pomorskie','Pomorskie','okr_pomorska'],
+    ['slaskie','Śląskie','okr_slaska'],['swietokrzyskie','Świętokrzyskie','okr_swietokrzyska'],['warminsko_mazurskie','Warmińsko-Mazurskie','okr_warminsko_mazurska'],
+    ['wielkopolskie','Wielkopolskie','okr_wielkopolska'],['zachodniopomorskie','Zachodniopomorskie','okr_zachodniopomorskie']
+  ];
+  const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const provinceName=k=>(PROVINCES.find(x=>x[0]===k)||[])[1]||k;
+  const provinceLeagues=k=>(PROVINCES.find(x=>x[0]===k)||[]).slice(2);
+  const dt=m=>{try{if(!m)return null;if(m.toDate)return m.toDate();if(m.seconds)return new Date(m.seconds*1000);const d=new Date(m);return Number.isNaN(d.getTime())?null:d;}catch(e){return null;}};
+  const now=()=>typeof getServerNow==='function'?getServerNow():new Date();
+  const norm=v=>String(v||'').trim().toLowerCase().replace(/\s+/g,' ');
+  const position=p=>{const x=norm(p);if(x.includes('bram'))return 'GK';if(x.includes('obron'))return 'DEF';if(x.includes('pomoc'))return 'MID';if(x.includes('napast'))return 'FWD';return 'OTHER';};
+  const eligible=m=>m && m.representation===true && m.representationProvince && ['friendly','qualifier','playoff'].indexOf(String(m.competitionType||'regular'))===-1 && String(m.competitionType||'regular')!=='tournament';
+  const tournamentEligible=m=>m && m.representation===true && m.representationProvince && String(m.competitionType||'regular')==='tournament' && String(m.competitionName||'').trim();
+  const getPlayers=async province=>{
+    if(!window.db)return[];
+    const teams=new Set();
+    for(const league of provinceLeagues(province)){
+      try{
+        const sd=await window.db.collection('standings').doc(league).get();
+        if(sd.exists && Array.isArray(sd.data().teams)) sd.data().teams.forEach(t=>{if(t?.name)teams.add(norm(t.name));});
+      }catch(e){}
+    }
+    // Fallback: use clubs found in matches from the province leagues.
+    if(!teams.size){
+      try{
+        const ms=await window.db.collection('matches').get();
+        ms.docs.forEach(d=>{const m=d.data()||{};if(provinceLeagues(province).includes(m.league)){if(m.homeTeam)teams.add(norm(m.homeTeam));if(m.awayTeam)teams.add(norm(m.awayTeam));}});
+      }catch(e){}
+    }
+    try{
+      const rs=await window.db.collection('rosters').get();
+      return rs.docs.map(d=>({id:d.id,...d.data()})).filter(p=>p.team && teams.has(norm(p.team)) && String(p.status||'available')==='available' && p.player);
+    }catch(e){console.error('Powołania: roster',e);return[];}
+  };
+  async function autoSelectPlayers(province){
+    const rows=await getPlayers(province); if(!rows.length)return[];
+    let stats=new Map();
+    try{
+      const ss=await window.db.collection('stats').get();
+      ss.docs.forEach(d=>{const x=d.data()||{};const k=norm(x.team)+'|'+norm(x.player);stats.set(k,(Number(x.goals)||0)*3+(Number(x.assists)||0));});
+    }catch(e){}
+    const score=p=>(stats.get(norm(p.team)+'|'+norm(p.player))||0);
+    const groups={GK:[],DEF:[],MID:[],FWD:[],OTHER:[]};
+    rows.forEach(p=>(groups[position(p.position)]||groups.OTHER).push(p));
+    Object.values(groups).forEach(a=>a.sort((x,y)=>score(y)-score(x)||Number(x.number||999)-Number(y.number||999)||String(x.player).localeCompare(String(y.player),'pl')));
+    const picked=[];const used=new Set();
+    const take=(arr,n)=>{for(const p of arr){if(picked.length>=23||n<=0)break;if(used.has(p.id))continue;used.add(p.id);picked.push({rosterId:p.id,playerName:p.player,team:p.team,number:p.number||'',position:p.position||'',status:p.status||'available'});n--;}};
+    take(groups.GK,3);take(groups.DEF,8);take(groups.MID,7);take(groups.FWD,5);
+    if(picked.length<23)take(groups.OTHER,23-picked.length);
+    for(const key of ['GK','DEF','MID','FWD'])if(picked.length<23)take(groups[key],23-picked.length);
+    return picked;
+  }
+  function cycleKeyFor(province,type,name,first){
+    const d=dt(first)||new Date();
+    if(type==='tournament')return `${province}|tournament|${norm(name)}|${d.getFullYear()}`;
+    return `${province}|month|${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+  }
+  function groupMatches(matches,province){
+    const regular=new Map(), tournaments=new Map();
+    (matches||[]).filter(m=>m.representation===true && m.representationProvince===province).forEach(m=>{
+      const type=String(m.competitionType||'regular');
+      const d=dt(m.date);if(!d)return;
+      if(type==='friendly'||type==='qualifier'||type==='playoff')return;
+      if(type==='tournament' && String(m.competitionName||'').trim()){
+        const key=cycleKeyFor(province,'tournament',m.competitionName,d);if(!tournaments.has(key))tournaments.set(key,[]);tournaments.get(key).push(m);
+      }else{
+        const key=cycleKeyFor(province,'regular','',d);if(!regular.has(key))regular.set(key,[]);regular.get(key).push(m);
+      }
+    });
+    return [...regular.entries(),...tournaments.entries()];
+  }
+  async function existingCycle(key){try{const q=await window.db.collection('regionalCallupCycles').where('cycleKey','==',key).limit(1).get();return q.empty?null:{id:q.docs[0].id,...q.docs[0].data()};}catch(e){console.error('Powołania: cycle lookup',e);return null;}}
+  async function createCycle(province,key,type,name,group){
+    if(!window.db)return null;
+    const sorted=[...group].sort((a,b)=>(dt(a.date)?.getTime()||0)-(dt(b.date)?.getTime()||0));
+    const first=dt(sorted[0]?.date), last=dt(sorted[sorted.length-1]?.date);if(!first)return null;
+    const n=now();
+    // Powołanie powstaje dokładnie w oknie 7 dni przed pierwszym meczem.
+    // Jeśli ktoś dodał mecz później, pozwalamy utworzyć je jeszcze przez 24h po starcie.
+    const diff=first.getTime()-n.getTime();
+    if(diff>7*86400000 || diff<-24*3600000)return null;
+    const old=await existingCycle(key);if(old)return old;
+    const players=await autoSelectPlayers(province);if(!players.length)return null;
+    const p=PROVINCES.find(x=>x[0]===province)||[];
+    const cycle={cycleKey:key,province,provinceName:p[1]||province,type,competitionName:type==='tournament'?name:'',firstMatchAt:firebase.firestore.Timestamp.fromDate(first),validUntil:last?firebase.firestore.Timestamp.fromDate(last):null,matchIds:sorted.map(m=>m.id),players,manualEdited:false,createdAt:firebase.firestore.FieldValue.serverTimestamp(),updatedAt:firebase.firestore.FieldValue.serverTimestamp()};
+    const ref=window.db.collection('regionalCallupCycles').doc();
+    const batch=window.db.batch();batch.set(ref,cycle);
+    players.forEach(pl=>{const r=window.db.collection('regionalCallups').doc();batch.set(r,{cycleId:ref.id,cycleKey:key,province,provinceName:p[1]||province,team:pl.team,rosterId:pl.rosterId,playerName:pl.playerName,number:pl.number||'',position:pl.position||'',leagueName:'',auto:true,createdAt:firebase.firestore.FieldValue.serverTimestamp()});});
+    await batch.commit();
+    return {id:ref.id,...cycle};
+  }
+  async function autoGenerateRegionalCallups(){
+    if(!window.db)return;
+    try{
+      const snap=await window.db.collection('matches').get();
+      const all=snap.docs.map(d=>({id:d.id,...d.data()}));
+      for(const province of PROVINCES.map(x=>x[0])){
+        for(const [key,group] of groupMatches(all,province)){
+          const type=String(group[0]?.competitionType||'regular');
+          const name=String(group[0]?.competitionName||'');
+          await createCycle(province,key,type,name,group);
+        }
+      }
+    }catch(e){if(e?.code!=='resource-exhausted')console.error('Automatyczne powołania',e);}
+  }
+  window.autoGenerateRegionalCallups=autoGenerateRegionalCallups;
+  window.rwCallupAutomationNow=autoGenerateRegionalCallups;
+
+  async function getCycles(province){
+    try{const snap=await window.db.collection('regionalCallupCycles').get();return snap.docs.map(d=>({id:d.id,...d.data()})).filter(x=>x.province===province).sort((a,b)=>(b.firstMatchAt?.seconds||0)-(a.firstMatchAt?.seconds||0));}catch(e){return[];}
+  }
+  async function cycleRows(cycleId){try{const snap=await window.db.collection('regionalCallups').get();return snap.docs.map(d=>({id:d.id,...d.data()})).filter(x=>x.cycleId===cycleId);}catch(e){return[];}}
+  window.rwActiveCycleId=null;
+  window.rwRemoveCallup=async function(id){if(!user||!window.db||!id)return;if(!confirm('Usunąć zawodnika z tego powołania?'))return;try{const doc=await window.db.collection('regionalCallups').doc(id).get();const row=doc.exists?doc.data():null;await window.db.collection('regionalCallups').doc(id).delete();if(row?.cycleId){const rows=await cycleRows(row.cycleId);await window.db.collection('regionalCallupCycles').doc(row.cycleId).set({players:rows.map(x=>({rosterId:x.rosterId,playerName:x.playerName,team:x.team,number:x.number||'',position:x.position||'',status:'available'})),manualEdited:true,updatedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});}await rwLoadAdmin();await rwLoadPublic();}catch(e){console.error(e);alert('Nie udało się usunąć zawodnika z powołania.');}};
+  window.rwCallUp=async function(){
+    if(!user||!window.db){alert('Zaloguj się do panelu redakcji.');return;}
+    const p=(typeof currentProvince==='function'?currentProvince():PROVINCES.find(x=>x[0]===document.getElementById('rw-province')?.value)||PROVINCES[0]);
+    const team=document.getElementById('rw-club')?.value||'',playerId=document.getElementById('rw-player')?.value||'',status=document.getElementById('rw-callup-status');
+    if(!team||!playerId){alert('Wybierz klub i zawodnika.');return;}
+    try{
+      const doc=await window.db.collection('rosters').doc(playerId).get();if(!doc.exists){alert('Zawodnik nie istnieje w kadrze klubu.');return;}
+      const pl=doc.data()||{};let cycleId=window.rwActiveCycleId;
+      if(!cycleId){const cycles=await getCycles(p[0]);if(cycles[0])cycleId=cycles[0].id;}
+      if(!cycleId){
+        const d=new Date();const key=`${p[0]}|month|${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+        const first=new Date();first.setHours(0,0,0,0);const cycle=await createManualCycle(p[0],key,first);cycleId=cycle.id;
+      }
+      const rows=await cycleRows(cycleId);if(rows.some(x=>x.rosterId===playerId)){alert('Ten zawodnik jest już w tym powołaniu.');return;}
+      const cycle=await window.db.collection('regionalCallupCycles').doc(cycleId).get();const cd=cycle.exists?cycle.data():{};
+      await window.db.collection('regionalCallups').add({cycleId,cycleKey:cd.cycleKey||'',province:p[0],provinceName:p[1],team,rosterId:playerId,playerName:pl.player||'',number:pl.number||'',position:pl.position||'',leagueName:(typeof L!=='undefined'&&L[document.getElementById('rw-league')?.value||''])||'',auto:false,createdAt:firebase.firestore.FieldValue.serverTimestamp()});
+      await window.db.collection('regionalCallupCycles').doc(cycleId).set({manualEdited:true,updatedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});
+      if(status)status.textContent=`Dodano do powołania: ${pl.player||''} (${team}).`;await rwLoadAdmin();await rwLoadPublic();
+    }catch(e){console.error(e);alert('Nie udało się dodać zawodnika do powołania.');}
+  };
+  async function createManualCycle(province,key,first){const p=PROVINCES.find(x=>x[0]===province)||[];const ref=await window.db.collection('regionalCallupCycles').add({cycleKey:key,province,provinceName:p[1]||province,type:'month',competitionName:'',firstMatchAt:firebase.firestore.Timestamp.fromDate(first),validUntil:null,matchIds:[],players:[],manualEdited:true,createdAt:firebase.firestore.FieldValue.serverTimestamp(),updatedAt:firebase.firestore.FieldValue.serverTimestamp()});return {id:ref.id};}
+  window.rwLoadAdmin=async function(){
+    const el=document.getElementById('rw-admin-list');if(!el||!window.db)return;const sel=document.getElementById('rw-province');const p=PROVINCES.find(x=>x[0]===sel?.value)||PROVINCES[0];
+    const title=document.getElementById('rw-admin-title');if(title)title.textContent=`Reprezentacja ${p[1]} — cykl powołań`;
+    const cycles=await getCycles(p[0]);
+    let picker=document.getElementById('rw-cycle-select');
+    if(!picker){picker=document.createElement('select');picker.id='rw-cycle-select';picker.className='rw-cycle-select';const parent=el.parentElement;parent.insertBefore(picker,el);}
+    if(!cycles.length){picker.innerHTML='<option value="">Brak utworzonych cykli</option>';window.rwActiveCycleId=null;el.innerHTML='<div class="rw-empty">Automatyczne powołanie pojawi się 7 dni przed pierwszym oznaczonym meczem reprezentacji.</div>';return;}
+    if(!window.rwActiveCycleId||!cycles.some(c=>c.id===window.rwActiveCycleId))window.rwActiveCycleId=cycles[0].id;
+    picker.innerHTML=cycles.map(c=>{const d=dt(c.firstMatchAt);const label=c.type==='tournament'?`Turniej: ${c.competitionName||'bez nazwy'}`:`Powołanie miesięczne — ${d?d.toLocaleDateString('pl-PL',{month:'long',year:'numeric'}):'—'}`;return `<option value="${esc(c.id)}">${esc(label)}</option>`;}).join('');picker.value=window.rwActiveCycleId;picker.onchange=()=>{window.rwActiveCycleId=picker.value;rwLoadAdmin();};
+    const c=cycles.find(x=>x.id===window.rwActiveCycleId)||cycles[0];window.rwActiveCycleId=c.id;const rows=await cycleRows(c.id);const first=dt(c.firstMatchAt),until=dt(c.validUntil);
+    el.innerHTML=`<div class="rw-cycle-head"><div><b>${esc(c.type==='tournament'?('Turniej: '+(c.competitionName||'bez nazwy')):('Powołanie miesięczne'))}</b><small>Pierwszy mecz: ${first?first.toLocaleString('pl-PL'): '—'}${until?' · ważne do: '+until.toLocaleString('pl-PL'):''}<br>${c.manualEdited?'Kadra była ręcznie edytowana.':'Kadra utworzona automatycznie.'}</small></div><span class="rw-cycle-badge">${rows.length} zawodników</span></div><div class="rw-auto-note">Zasada: mecze w jednym miesiącu korzystają z jednego powołania. Mecz turniejowy utrzymuje tę samą kadrę do końca turnieju. Baraże, eliminacje i towarzyskie nie tworzą tego cyklu.</div>${rows.length?rows.sort((a,b)=>String(a.team||'').localeCompare(String(b.team||''),'pl')||String(a.playerName||'').localeCompare(String(b.playerName||''),'pl')).map(x=>`<div class="rw-callup-row"><div class="rw-callup-main"><b>${esc(x.playerName||'Nieznany zawodnik')}</b><small>${esc(x.team||'Brak klubu')} · ${esc(x.position||'')}</small></div><div class="rw-callup-actions"><button class="btn-sm btn-del" onclick="rwRemoveCallup('${esc(x.id)}')">Usuń</button></div></div>`).join(''):'<div class="rw-empty">Brak zawodników w tym cyklu.</div>'}`;
+  };
+  window.rwLoadPublic=async function(){
+    const sel=document.getElementById('rw-public-province');if(!sel||!window.db)return;const p=PROVINCES.find(x=>x[0]===sel.value)||PROVINCES[0];const el=document.getElementById('rw-public-content');if(!el)return;el.innerHTML='<div class="rw-empty">Ładowanie aktualnego powołania…</div>';
+    const cycles=await getCycles(p[0]);const c=cycles[0];if(!c){el.innerHTML=`<div class="rw-empty">Brak aktywnego powołania dla Reprezentacji ${esc(p[1])}.</div>`;return;}
+    const rows=await cycleRows(c.id);if(!rows.length){el.innerHTML=`<div class="rw-empty">Powołanie dla Reprezentacji ${esc(p[1])} jest jeszcze puste.</div>`;return;}
+    const groups={};rows.forEach(x=>(groups[x.team||'Brak klubu']??=[]).push(x));const label=c.type==='tournament'?`Turniej: ${c.competitionName||'bez nazwy'}`:'Powołanie miesięczne';
+    el.innerHTML=`<div class="rw-cycle-head"><div><b>${esc(label)}</b><small>Pierwszy mecz: ${dt(c.firstMatchAt)?.toLocaleString('pl-PL')||'—'}${dt(c.validUntil)?' · ważne do: '+dt(c.validUntil).toLocaleString('pl-PL'):''}</small></div><span class="rw-cycle-badge">${rows.length} zawodników</span></div>`+Object.keys(groups).sort((a,b)=>a.localeCompare(b,'pl')).map(team=>`<div class="rw-club-group"><div class="rw-club-head"><b>${esc(team)}</b><small>${groups[team].length} zawod.</small></div>${groups[team].sort((a,b)=>String(a.playerName||'').localeCompare(String(b.playerName||''),'pl')).map(x=>`<div class="rw-player-public"><b>${esc(x.playerName||'Nieznany zawodnik')}</b><small>${esc(x.position||'')}</small></div>`).join('')}</div>`).join('');
+  };
+
+  function injectMatchFields(){
+    const league=document.getElementById('m-league');
+    if(league&&!document.getElementById('regional-match-fields')){
+      const box=document.createElement('div');box.id='regional-match-fields';box.className='form-grid';
+      box.innerHTML=`<select id="m-representation" aria-label="Mecz reprezentacji"><option value="">Mecz klubowy</option>${PROVINCES.map(p=>`<option value="${p[0]}">Reprezentacja ${p[1]}</option>`).join('')}</select><select id="m-competition-type"><option value="regular">Mecz w oknie / miesiącu</option><option value="tournament">Mecz turniejowy</option><option value="qualifier">Eliminacje</option><option value="playoff">Baraż</option><option value="friendly">Towarzyski</option></select>`;
+      league.parentElement.insertAdjacentElement('afterend',box);
+      const name=document.createElement('input');name.id='m-competition-name';name.placeholder='Nazwa turnieju (wymagana tylko dla meczu turniejowego)';name.style.display='none';box.insertAdjacentElement('afterend',name);
+      document.getElementById('m-competition-type').addEventListener('change',()=>{name.style.display=document.getElementById('m-competition-type').value==='tournament'?'block':'none';});
+    }
+    const mb=document.getElementById('mb-league');
+    if(mb&&!document.getElementById('regional-bulk-fields')){
+      const box=document.createElement('div');box.id='regional-bulk-fields';box.className='form-grid';box.innerHTML=`<select id="mb-representation"><option value="">Mecze klubowe</option>${PROVINCES.map(p=>`<option value="${p[0]}">Reprezentacja ${p[1]}</option>`).join('')}</select><select id="mb-competition-type"><option value="regular">Mecz w oknie / miesiącu</option><option value="tournament">Mecz turniejowy</option><option value="qualifier">Eliminacje</option><option value="playoff">Baraż</option><option value="friendly">Towarzyski</option></select>`;mb.insertAdjacentElement('afterend',box);
+      const name=document.createElement('input');name.id='mb-competition-name';name.placeholder='Nazwa turnieju dla wszystkich dodawanych meczów (opcjonalnie)';name.style.display='none';box.insertAdjacentElement('afterend',name);document.getElementById('mb-competition-type').addEventListener('change',()=>{name.style.display=document.getElementById('mb-competition-type').value==='tournament'?'block':'none';});
+    }
+  }
+  function getMatchMeta(prefix){const province=document.getElementById(prefix+'-representation')?.value||'';const type=document.getElementById(prefix+'-competition-type')?.value||'regular';const name=document.getElementById(prefix+'-competition-name')?.value.trim()||'';return {representation:!!province,representationProvince:province,competitionType:type,competitionName:name};}
+  const oldSaveMatch=window.saveMatch;
+  window.saveMatch=async function(){
+    if(!user||!window.db)return;
+    const id=document.getElementById('m-id').value;const sh=document.getElementById('m-sh').value,sa=document.getElementById('m-sa').value;const hasScore=sh!==''&&sa!=='';const dateVal=document.getElementById('m-date').value;const league=document.getElementById('m-league').value;const meta=getMatchMeta('m');
+    if(meta.representation && meta.competitionType==='tournament'&&!meta.competitionName){alert('Podaj nazwę turnieju dla meczu turniejowego.');return;}
+    const data={homeTeam:document.getElementById('m-home').value.trim(),awayTeam:document.getElementById('m-away').value.trim(),scoreHome:hasScore?parseInt(sh):null,scoreAway:hasScore?parseInt(sa):null,status:hasScore?'finished':'upcoming',league,date:dateVal?firebase.firestore.Timestamp.fromDate(new Date(dateVal)):firebase.firestore.FieldValue.serverTimestamp(),...meta};
+    try{
+      const newDbase=getDB(league),oldDbVal=document.getElementById('m-db').value,oldDbase=oldDbVal==='db2'&&window.db2?window.db2:window.db;let oldLeague='';
+      if(id&&oldDbase){try{const oldDoc=await oldDbase.collection('matches').doc(id).get();if(oldDoc.exists)oldLeague=oldDoc.data().league||'';}catch(e){}}
+      if(id){if(oldDbase&&oldDbase!==newDbase){await oldDbase.collection('matches').doc(id).delete();await newDbase.collection('matches').doc(id).set(data);}else await newDbase.collection('matches').doc(id).update(data);}else{const ref=await newDbase.collection('matches').add(data);if(window.queueMatchForSimulation)window.queueMatchForSimulation(ref.id,newDbase);}
+      if(oldLeague&&oldLeague!==league&&oldLeague!=='friendly')await recalculateStandings(oldLeague);if(league!=='friendly')await recalculateStandings(league);clearMF();loadAdminM();setTimeout(()=>window.rwCallupAutomationNow&&window.rwCallupAutomationNow(),300);
+    }catch(e){console.error(e);alert('Błąd zapisu spotkania');}
+  };
+  const oldEditM=window.editM;
+  window.editM=function(id,d){if(typeof oldEditM==='function')oldEditM(id,d);setTimeout(()=>{const meta=d||{};const p=document.getElementById('m-representation'),t=document.getElementById('m-competition-type'),n=document.getElementById('m-competition-name');if(p)p.value=meta.representationProvince||'';if(t)t.value=meta.competitionType||'regular';if(n){n.value=meta.competitionName||'';n.style.display=t&&t.value==='tournament'?'block':'none';}},50);};
+  const oldClearMF=window.clearMF;window.clearMF=function(){if(typeof oldClearMF==='function')oldClearMF();['m-representation','m-competition-type','m-competition-name'].forEach(id=>{const e=document.getElementById(id);if(e)e.value=id==='m-competition-type'?'regular':'';});const n=document.getElementById('m-competition-name');if(n)n.style.display='none';};
+  const oldBulk=window.saveMatchesBulk;
+  window.saveMatchesBulk=async function(){
+    if(!user)return;const league=document.getElementById('mb-league').value,lines=(document.getElementById('mb-lines').value||'').split(/\r?\n/).map((line,i)=>({line:line.trim(),number:i+1})).filter(x=>x.line);if(!lines.length){alert('Wklej przynajmniej jeden mecz.');return;}
+    const meta=getMatchMeta('mb');if(meta.representation&&meta.competitionType==='tournament'&&!meta.competitionName){alert('Podaj nazwę turnieju dla meczów turniejowych.');return;}
+    const dbase=getDB(league);let added=0,errors=[];
+    for(const item of lines){const parts=item.line.split(',').map(x=>x.trim()),vi=parts.length?parts[0].toLowerCase().indexOf(' vs '):-1;if(vi<0||parts.length!==3){errors.push('Linia '+item.number);continue;}const home=parts[0].slice(0,vi).trim(),away=parts[0].slice(vi+4).trim();let date=null;try{date=new Date(parts[1]+'T'+parts[2]);if(Number.isNaN(date.getTime()))date=null;}catch(e){}if(!home||!away||!date){errors.push('Linia '+item.number);continue;}try{const ref=await dbase.collection('matches').add({homeTeam:home,awayTeam:away,scoreHome:null,scoreAway:null,status:'upcoming',league,date:firebase.firestore.Timestamp.fromDate(date),...meta});added++;if(window.queueMatchForSimulation)window.queueMatchForSimulation(ref.id,dbase);}catch(e){errors.push('Linia '+item.number);}}
+    await loadAdminM();setTimeout(()=>window.rwCallupAutomationNow&&window.rwCallupAutomationNow(),300);if(errors.length)alert(`Dodano ${added}. Pominięto: ${errors.join(', ')}.`);else{document.getElementById('mb-lines').value='';alert(`Dodano ${added} meczów.`);}
+  };
+  async function init(){injectMatchFields();try{await window.rwLoadAdmin?.();await window.rwLoadPublic?.();}catch(e){};setTimeout(injectMatchFields,500);}
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(init,120),{once:true});else setTimeout(init,120);
+  // Fallback przeglądarkowy: sprawdzamy cykle co 2 minuty. Gdy masz działającą
+  // funkcję serwerową, zapis cyklu i tak jest idempotentny dzięki cycleKey.
+  setTimeout(()=>window.rwCallupAutomationNow&&window.rwCallupAutomationNow(),2500);
+  setInterval(()=>window.rwCallupAutomationNow&&window.rwCallupAutomationNow(),120000);
+})();
+</script>
+
 </body>
 </html>
 <style id="planethc-pro-overhaul">
