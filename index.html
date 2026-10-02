@@ -462,7 +462,7 @@ nav .tab{height:42px!important;margin:auto 2px!important;padding:0 14px!importan
         <div class="ph-kicker"><i class="fa-solid fa-flag"></i> PLANETHC / REPREZENTACJE</div>
         <h2>Reprezentacje Wojewódzkie</h2>
         <p style="color:var(--muted);font-size:.85rem;margin-top:.35rem;">
-          Każde województwo oraz jego okręgi są przygotowane od razu. Ty dodajesz tylko drużyny z Lig 1–4, z których później wybierani są zawodnicy.
+          Każde województwo, jego okręgi i ligi regionalne są przygotowane od razu. Kluby z lig regionalnych trafiają automatycznie do właściwego województwa, a kluby z Lig 1–4 można przypisać ręcznie.
         </p>
       </div>
     </div>
@@ -841,7 +841,7 @@ nav .tab{height:42px!important;margin:auto 2px!important;padding:0 14px!importan
     <div>
       <div class="mp-kicker">REPREZENTACJE WOJEWÓDZKIE</div>
       <h3>Konfiguracja reprezentacji</h3>
-      <p>Województwa i ich okręgi są gotowe od razu. Dodaj tutaj tylko konkretne drużyny z Lig 1–4, a ich zawodnicy będą dostępni w reprezentacji.</p>
+      <p>Województwa i ich okręgi są gotowe od razu. Wszystkie kluby z lig wojewódzkich są przypisywane automatycznie; kluby z Lig 1–4 można przypisać ręcznie do właściwego województwa i okręgu.</p>
     </div>
     <span class="mp-status">NOWE</span>
   </div>
@@ -4815,11 +4815,11 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 (function(){
   'use strict';
 
-  /*
-   * REPREZENTACJE WOJEWÓDZKIE
-   * Województwa + okręgi są wbudowane od razu.
-   * Administrator dopisuje tylko konkretne kluby z Lig 1–4.
-   */
+  /* REPREZENTACJE WOJEWÓDZKIE
+     Hierarchia: WOJEWÓDZTWO -> OKRĘG -> LIGA -> KLUB -> ZAWODNICY.
+     Ligi regionalne są przypisywane automatycznie na podstawie ligi istniejącej w PlanetHC.
+     Kluby z Lig 1-4 pozostają dostępne do przypisania, ponieważ w obecnej bazie nie mają pola województwa.
+  */
   const RW_PROVINCES = [
     {id:'dolnoslaskie',name:'Dolnośląskie',districts:['Jelenia Góra','Legnica','Wałbrzych','Wrocław']},
     {id:'kujawsko-pomorskie',name:'Kujawsko-Pomorskie',districts:['Bydgoszcz','Toruń','Włocławek']},
@@ -4836,232 +4836,135 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
     {id:'swietokrzyskie',name:'Świętokrzyskie',districts:['Kielce']},
     {id:'warminsko-mazurskie',name:'Warmińsko-Mazurskie',districts:['Elbląg','Olsztyn']},
     {id:'wielkopolskie',name:'Wielkopolskie',districts:['Kalisz','Konin','Leszno','Piła','Poznań']},
-    {id:'zachodniopomorskie',name:'Zachodniopomorskie',districts:['Koszalin','Szczecin']},
+    {id:'zachodniopomorskie',name:'Zachodniopomorskie',districts:['Koszalin','Szczecin']}
   ];
 
-  const RW_LEAGUES = ['liga1','liga2','liga3','liga4'];
-  const RW_TYPES = {
-    friendly:'Mecz towarzyski', qualifier:'Eliminacje', playoff:'Baraż',
-    puchar_wojewodzki:'Puchar Wojewódzki',
-    puchar_krajowy:'Puchar Krajowy',
-    puchar_mistrzow:'Puchar Mistrzów'
+  const RW_REGIONAL_LEAGUES={
+    okr_podkarpacka:'podkarpackie', okr_pomorska:'pomorskie', okr_warminsko_mazurska:'warminsko-mazurskie',
+    okr_slaska:'slaskie', okr_dolnoslaska:'dolnoslaskie', okr_malopolska:'malopolskie',
+    okr_mazowiecka:'mazowieckie', okr_lubelska:'lubelskie', okr_lubuska:'lubuskie',
+    okr_lodzkie:'lodzkie', okr_opolska:'opolskie', okr_podlaska:'podlaskie',
+    okr_swietokrzyska:'swietokrzyskie', okr_wielkopolska:'wielkopolskie',
+    okr_zachodniopomorska:'zachodniopomorskie', okr_kujawsko_pomorska:'kujawsko-pomorskie'
   };
-
+  const RW_LEAGUES=['liga1','liga2','liga3','liga4',...Object.keys(RW_REGIONAL_LEAGUES)];
+  const RW_TYPES={friendly:'Mecz towarzyski',qualifier:'Eliminacje',playoff:'Baraż',puchar_wojewodzki:'Puchar Wojewódzki',puchar_krajowy:'Puchar Krajowy',puchar_mistrzow:'Puchar Mistrzów'};
   const rwDb=()=>window.db||null;
   const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const province=id=>RW_PROVINCES.find(x=>x.id===id);
   const pname=id=>(province(id)||{name:id}).name;
+  const leagueName=id=>(window.L&&window.L[id])||id||'';
 
   function fillProvince(id,empty=false){
-    const el=document.getElementById(id); if(!el)return;
-    el.innerHTML=(empty?'<option value="">Wybierz województwo</option>':'')+
-      RW_PROVINCES.map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join('');
+    const el=document.getElementById(id);if(!el)return;
+    el.innerHTML=(empty?'<option value="">Wybierz województwo</option>':'')+RW_PROVINCES.map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join('');
+  }
+  function fillDistrict(id,pid,empty=true){
+    const el=document.getElementById(id);if(!el)return;
+    const p=province(pid);el.innerHTML=(empty?'<option value="">Wybierz okręg</option>':'')+(p?p.districts:[]).map(d=>`<option value="${esc(d)}">${esc(d)}</option>`).join('');
   }
 
-  function fillDistrict(id,provinceId,empty=true){
-    const el=document.getElementById(id); if(!el)return;
-    const p=province(provinceId);
-    el.innerHTML=(empty?'<option value="">Wybierz okręg</option>':'')+
-      (p?p.districts:[]).map(d=>`<option value="${esc(d)}">${esc(d)}</option>`).join('');
+  async function standingsTeams(league){
+    const db=rwDb();if(!db)return[];
+    try{
+      const snap=await db.collection('standings').doc(league).get();
+      if(!snap.exists)return[];
+      return (snap.data().teams||[]).map(t=>({...t,league})).filter(t=>t.name);
+    }catch(e){console.warn('RW standings',league,e);return[];}
+  }
+  async function allLeagueTeams(){
+    const out=[];
+    for(const league of RW_LEAGUES){
+      const teams=await standingsTeams(league);
+      teams.forEach(t=>out.push({team:String(t.name).trim(),league:t.league,leagueName:leagueName(t.league),autoProvince:RW_REGIONAL_LEAGUES[t.league]||''}));
+    }
+    const seen=new Set();return out.filter(x=>{const k=x.league+'|'+x.team.toLowerCase();if(seen.has(k))return false;seen.add(k);return true;});
+  }
+  async function manualMappings(){
+    const db=rwDb();if(!db)return[];
+    try{const s=await db.collection('regionalTeams').get();return s.docs.map(d=>({id:d.id,...d.data()}));}catch(e){return[];}
   }
 
-  async function mappings(){
-    const db=rwDb(); if(!db)return [];
-    const s=await db.collection('regionalTeams').get();
-    return s.docs.map(d=>({id:d.id,...d.data()}));
-  }
-
-  async function clubs(){
-    const db=rwDb(); if(!db)return [];
-    const snap=await db.collection('rosters').get();
-    const set=new Set();
-    snap.docs.forEach(d=>{
-      const p=d.data()||{};
-      if(p.team)set.add(String(p.team).trim());
+  // Automatycznie buduje regionalTeams dla każdej drużyny z ligi wojewódzkiej.
+  async function syncAutomaticRegionalTeams(){
+    const db=rwDb();if(!db)return[];
+    const teams=await allLeagueTeams();
+    const regional=teams.filter(x=>x.autoProvince);
+    const existing=await manualMappings();
+    const keys=new Set(existing.map(x=>`${x.province}|${String(x.team||'').trim().toLowerCase()}|${x.league||''}`));
+    const batch=db.batch();let writes=0;
+    regional.forEach(x=>{
+      const key=`${x.autoProvince}|${x.team.toLowerCase()}|${x.league}`;
+      if(keys.has(key))return;
+      const ref=db.collection('regionalTeams').doc(`auto_${x.league}_${x.team.toLowerCase().replace(/[^a-z0-9ąćęłńóśźż]+/gi,'_').slice(0,90)}`);
+      batch.set(ref,{team:x.team,province:x.autoProvince,district:'',leagueSource:x.league,leagueName:x.leagueName,automatic:true,updatedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});writes++;
     });
-    return [...set].sort((a,b)=>a.localeCompare(b,'pl'));
+    if(writes)await batch.commit();
+    return manualMappings();
   }
+
+  async function mappings(){return await syncAutomaticRegionalTeams();}
 
   async function roster(provinceId){
-    const db=rwDb(); if(!db||!provinceId)return [];
-    const maps=await mappings();
-    const teamNames=new Set(
-      maps.filter(x=>x.province===provinceId)
-          .map(x=>String(x.team||'').trim().toLowerCase())
-    );
-    if(!teamNames.size)return [];
+    const db=rwDb();if(!db||!provinceId)return[];
+    const maps=(await mappings()).filter(x=>x.province===provinceId);
+    const teams=new Set(maps.map(x=>String(x.team||'').trim().toLowerCase()));
+    if(!teams.size)return[];
     const snap=await db.collection('rosters').get();
-    return snap.docs.map(d=>({id:d.id,...d.data()})).filter(p=>
-      p.team && teamNames.has(String(p.team).trim().toLowerCase()) &&
-      RW_LEAGUES.includes(String(p.league||'').trim())
-    ).sort((a,b)=>{
-      const r=x=>({Bramkarz:1,'Obrońca':2,'Pomocnik':3,'Napastnik':4}[x]||9);
-      return r(a.position)-r(b.position) ||
-        String(a.player||'').localeCompare(String(b.player||''),'pl');
+    return snap.docs.map(d=>({id:d.id,...d.data()})).filter(p=>p.team&&teams.has(String(p.team).trim().toLowerCase())).sort((a,b)=>{
+      const r=x=>({Bramkarz:1,'Obrońca':2,Pomocnik:3,Napastnik:4}[x]||9);
+      return r(a.position)-r(b.position)||String(a.player||'').localeCompare(String(b.player||''),'pl');
     });
   }
 
   async function publicSquad(){
-    const id=document.getElementById('rw-province-select')?.value;
-    if(!id)return;
-    const box=document.getElementById('rw-public-squad');
-    const sum=document.getElementById('rw-province-summary');
-    const maps=(await mappings()).filter(x=>x.province===id);
-    const players=await roster(id);
-    if(sum)sum.textContent=`${maps.length} dodanych klubów • ${players.length} zawodników z Lig 1–4`;
+    const id=document.getElementById('rw-province-select')?.value;if(!id)return;
+    const box=document.getElementById('rw-public-squad'),sum=document.getElementById('rw-province-summary');
+    const maps=(await mappings()).filter(x=>x.province===id),players=await roster(id);
+    const leagues=[...new Set(maps.map(x=>x.leagueName||x.leagueSource).filter(Boolean))];
+    if(sum)sum.textContent=`${maps.length} klubów • ${players.length} zawodników • ${leagues.length} poziomów rozgrywek`;
     if(!box)return;
-    if(!players.length){
-      box.innerHTML='<div class="rw-empty">Nie dodano jeszcze klubów z Lig 1–4 do tej reprezentacji.</div>';
-      return;
-    }
-    const groups={};
-    players.forEach(p=>(groups[p.position||'Zawodnik']??=[]).push(p));
-    box.innerHTML='<div class="rw-squad-grid">'+Object.entries(groups).map(([pos,list])=>`
-      <div class="card"><div class="league-label"><i class="fa-solid fa-user"></i>${esc(pos)}<span class="badge-up">${list.length}</span></div>
-      ${list.map(p=>`<div class="rw-player"><div><b>${esc(p.player)}</b><small>${esc(p.team||'')}</small></div><span class="rw-position">${esc(p.position||'')}</span></div>`).join('')}
-      </div>`).join('')+'</div>';
+    if(!players.length){box.innerHTML='<div class="rw-empty">Brak zawodników w klubach przypisanych do tego województwa.</div>';return;}
+    const groups={};players.forEach(p=>(groups[p.position||'Zawodnik']??=[]).push(p));
+    box.innerHTML='<div class="rw-squad-grid">'+Object.entries(groups).map(([pos,list])=>`<div class="card"><div class="league-label"><i class="fa-solid fa-user"></i>${esc(pos)}<span class="badge-up">${list.length}</span></div>${list.map(p=>`<div class="rw-player"><div><b>${esc(p.player)}</b><small>${esc(p.team||'')}</small></div><span class="rw-position">${esc(p.position||'')}</span></div>`).join('')}</div>`).join('')+'</div>';
   }
 
   async function publicMatches(){
-    const db=rwDb(),box=document.getElementById('rw-public-matches'),id=document.getElementById('rw-province-select')?.value;
-    if(!db||!box||!id)return;
-    const s=await db.collection('regionalMatches').get();
-    const rows=s.docs.map(d=>({id:d.id,...d.data()}))
-      .filter(m=>m.homeProvince===id||m.awayProvince===id)
-      .sort((a,b)=>String(a.date||'').localeCompare(String(b.date||'')));
-    box.innerHTML=rows.length?rows.map(m=>`
-      <div class="rw-match-card">
-        <div class="rw-team">${esc(pname(m.homeProvince))}</div>
-        <div><div class="rw-score">${m.homeScore!=null&&m.awayScore!=null?esc(m.homeScore)+' : '+esc(m.awayScore):'VS'}</div>
-        <div class="rw-meta">${esc(RW_TYPES[m.type]||m.type||'')} • ${esc(m.date||'')}</div></div>
-        <div class="rw-team away">${esc(pname(m.awayProvince))}</div>
-      </div>`).join(''):'<div class="rw-empty">Brak spotkań.</div>';
+    const db=rwDb(),box=document.getElementById('rw-public-matches'),id=document.getElementById('rw-province-select')?.value;if(!db||!box||!id)return;
+    const s=await db.collection('regionalMatches').get();const rows=s.docs.map(d=>({id:d.id,...d.data()})).filter(m=>m.homeProvince===id||m.awayProvince===id).sort((a,b)=>String(a.date||'').localeCompare(String(b.date||'')));
+    box.innerHTML=rows.length?rows.map(m=>`<div class="rw-match-card"><div class="rw-team">${esc(pname(m.homeProvince))}</div><div><div class="rw-score">${m.homeScore!=null&&m.awayScore!=null?esc(m.homeScore)+' : '+esc(m.awayScore):'VS'}</div><div class="rw-meta">${esc(RW_TYPES[m.type]||m.type||'')} • ${esc(m.date||'')}</div></div><div class="rw-team away">${esc(pname(m.awayProvince))}</div></div>`).join(''):'<div class="rw-empty">Brak spotkań.</div>';
   }
-
-  function publicCups(){
-    const b=document.getElementById('rw-public-cups'); if(!b)return;
-    b.innerHTML=`<div class="rw-squad-grid">
-      <div class="card"><div class="league-label"><i class="fa-solid fa-trophy"></i>Puchar Wojewódzki</div><p style="color:var(--muted);font-size:.8rem">Eliminacje, baraże i turniej główny.</p></div>
-      <div class="card"><div class="league-label"><i class="fa-solid fa-trophy"></i>Puchar Krajowy</div><p style="color:var(--muted);font-size:.8rem">Eliminacje i turniej główny.</p></div>
-      <div class="card"><div class="league-label"><i class="fa-solid fa-crown"></i>Puchar Mistrzów</div><p style="color:var(--muted);font-size:.8rem">Rozgrywki dla zakwalifikowanych reprezentacji.</p></div>
-    </div>
-    <div class="card" style="margin-top:12px"><b>Okienka reprezentacyjne</b><p style="color:var(--muted);font-size:.8rem;margin-top:5px">Listopad • Grudzień • Luty • Marzec • Czerwiec • Lipiec</p></div>`;
-  }
-
-  window.rwPublicTab=function(tab,btn){
-    document.querySelectorAll('.rw-public-tab').forEach(x=>x.classList.remove('active'));
-    if(btn)btn.classList.add('active');
-    document.querySelectorAll('.rw-public-panel').forEach(x=>x.style.display='none');
-    const el=document.getElementById('rw-public-'+tab);if(el)el.style.display='block';
-    if(tab==='squad')publicSquad();
-    if(tab==='matches')publicMatches();
-    if(tab==='cups')publicCups();
-  };
+  function publicCups(){const b=document.getElementById('rw-public-cups');if(!b)return;b.innerHTML=`<div class="rw-squad-grid"><div class="card"><div class="league-label"><i class="fa-solid fa-trophy"></i>Puchar Wojewódzki</div><p style="color:var(--muted);font-size:.8rem">Eliminacje, baraże i turniej główny.</p></div><div class="card"><div class="league-label"><i class="fa-solid fa-trophy"></i>Puchar Krajowy</div><p style="color:var(--muted);font-size:.8rem">Eliminacje i turniej główny.</p></div><div class="card"><div class="league-label"><i class="fa-solid fa-crown"></i>Puchar Mistrzów</div><p style="color:var(--muted);font-size:.8rem">Rozgrywki dla zakwalifikowanych reprezentacji.</p></div></div><div class="card" style="margin-top:12px"><b>Okienka reprezentacyjne</b><p style="color:var(--muted);font-size:.8rem;margin-top:5px">Listopad • Grudzień • Luty • Marzec • Czerwiec • Lipiec</p></div>`;}
+  window.rwPublicTab=function(tab,btn){document.querySelectorAll('.rw-public-tab').forEach(x=>x.classList.remove('active'));if(btn)btn.classList.add('active');document.querySelectorAll('.rw-public-panel').forEach(x=>x.style.display='none');const el=document.getElementById('rw-public-'+tab);if(el)el.style.display='block';if(tab==='squad')publicSquad();if(tab==='matches')publicMatches();if(tab==='cups')publicCups();};
+  window.rwLoadPublicProvince=async function(){await mappings();publicSquad();publicMatches();publicCups();};
 
   window.rwAdminLoadClubs=async function(){
-    const provinceId=document.getElementById('rw-admin-province')?.value;
-    const districtEl=document.getElementById('rw-admin-district');
-    fillDistrict('rw-admin-district',provinceId,true);
-
-    const clubEl=document.getElementById('rw-admin-club'); if(!clubEl)return;
-    const all=await clubs(), maps=await mappings();
-    const assigned=new Set(maps.filter(x=>x.province===provinceId).map(x=>String(x.team||'').toLowerCase()));
-    clubEl.innerHTML=all.filter(c=>!assigned.has(c.toLowerCase()))
-      .map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join('')||
-      '<option value="">Brak klubów do dodania</option>';
-
-    const list=document.getElementById('rw-admin-clubs');
-    const rows=maps.filter(x=>x.province===provinceId).sort((a,b)=>String(a.team).localeCompare(String(b.team),'pl'));
-    list.innerHTML=rows.length?rows.map(x=>`
-      <div class="rw-admin-club">
-        <span><b>${esc(x.team)}</b><br><small style="color:var(--muted)">${esc(x.district||'Okręg nieustalony')}</small></span>
-        <button class="btn-sm btn-del" onclick="rwRemoveClub('${esc(x.id)}')">Usuń</button>
-      </div>`).join(''):'<div class="rw-empty">Brak dodanych klubów. Województwo i okręgi są już gotowe.</div>';
+    const p=document.getElementById('rw-admin-province')?.value,d=document.getElementById('rw-admin-district');fillDistrict('rw-admin-district',p,true);
+    const clubEl=document.getElementById('rw-admin-club');if(!clubEl)return;
+    const all=await allLeagueTeams(),maps=await mappings(),assigned=new Set(maps.filter(x=>x.province===p).map(x=>`${String(x.team||'').toLowerCase()}|${x.leagueSource||''}`));
+    const available=all.filter(x=>!assigned.has(`${x.team.toLowerCase()}|${x.league}`));
+    clubEl.innerHTML='<option value="">Wybierz klub</option>'+available.map(x=>`<option value="${esc(x.team)}" data-league="${esc(x.league)}">${esc(x.team)} — ${esc(x.leagueName)}${x.autoProvince===p?' • AUTO':''}</option>`).join('');
+    const list=document.getElementById('rw-admin-clubs');const rows=maps.filter(x=>x.province===p).sort((a,b)=>String(a.team).localeCompare(String(b.team),'pl'));
+    if(list)list.innerHTML=rows.length?rows.map(x=>`<div class="rw-admin-club"><div><b>${esc(x.team)}</b><div style="font-size:.7rem;color:var(--muted)">${esc(x.leagueName||x.leagueSource||'')} ${x.district?' • '+esc(x.district):''} ${x.automatic?' • AUTOMATYCZNIE':''}</div></div>${x.automatic?'':'<button class="btn-sm btn-del" onclick="rwRemoveClub(\''+esc(x.id)+'\')">Usuń</button>'}</div>`).join(''):'<div class="rw-empty">Brak klubów.</div>';
   };
-
   window.rwAssignClub=async function(){
-    const db=rwDb();if(!db)return;
-    const p=document.getElementById('rw-admin-province')?.value;
-    const d=document.getElementById('rw-admin-district')?.value;
-    const team=document.getElementById('rw-admin-club')?.value;
+    const db=rwDb();if(!db)return;const p=document.getElementById('rw-admin-province')?.value,d=document.getElementById('rw-admin-district')?.value,team=document.getElementById('rw-admin-club')?.value,option=document.querySelector('#rw-admin-club option:checked'),league=option?.dataset?.league||'';
     if(!p||!team)return alert('Wybierz województwo i klub.');
-    const id=btoa(unescape(encodeURIComponent(team))).replace(/[^a-zA-Z0-9_-]/g,'').slice(0,80)+'_'+p;
-    await db.collection('regionalTeams').doc(id).set({
-      team,province:p,district:d||'',leagueSource:'1-4',
-      updatedAt:firebase.firestore.FieldValue.serverTimestamp()
-    },{merge:true});
-    await rwAdminLoadClubs();
-    if(document.getElementById('rw-province-select')?.value===p)publicSquad();
+    if(RW_REGIONAL_LEAGUES[league]&&RW_REGIONAL_LEAGUES[league]!==p)return alert('Ten klub jest automatycznie przypisany do innego województwa na podstawie ligi.');
+    await db.collection('regionalTeams').add({team,province:p,district:d||'',leagueSource:league||'manual_liga_1_4',leagueName:leagueName(league),automatic:false,updatedAt:firebase.firestore.FieldValue.serverTimestamp()});
+    await rwAdminLoadClubs();if(document.getElementById('rw-province-select')?.value===p)publicSquad();
   };
-
-  window.rwRemoveClub=async function(id){
-    const db=rwDb();if(!db)return;
-    if(!confirm('Usunąć klub z reprezentacji?'))return;
-    await db.collection('regionalTeams').doc(id).delete();
-    rwAdminLoadClubs();
-  };
-
-  window.rwSaveMatch=async function(){
-    const db=rwDb();if(!db)return;
-    const home=document.getElementById('rw-home-province')?.value;
-    const away=document.getElementById('rw-away-province')?.value;
-    const date=document.getElementById('rw-match-date')?.value;
-    const type=document.getElementById('rw-match-type')?.value;
-    if(!home||!away||home===away||!date)return alert('Wybierz dwie różne reprezentacje i termin.');
-    const hs=document.getElementById('rw-home-score')?.value,as=document.getElementById('rw-away-score')?.value;
-    await db.collection('regionalMatches').add({
-      homeProvince:home,awayProvince:away,date,type,
-      homeScore:hs===''?null:Number(hs),awayScore:as===''?null:Number(as),
-      status:hs===''||as===''?'upcoming':'finished',
-      createdAt:firebase.firestore.FieldValue.serverTimestamp()
-    });
-    rwLoadAdminMatches();publicMatches();
-  };
-
-  window.rwDeleteMatch=async function(id){
-    const db=rwDb();if(!db)return;
-    if(!confirm('Usunąć mecz reprezentacji?'))return;
-    await db.collection('regionalMatches').doc(id).delete();rwLoadAdminMatches();
-  };
-
-  async function rwLoadAdminMatches(){
-    const db=rwDb(),box=document.getElementById('rw-admin-matches');if(!db||!box)return;
-    const s=await db.collection('regionalMatches').get();
-    const rows=s.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>String(a.date||'').localeCompare(String(b.date||'')));
-    box.innerHTML=rows.length?rows.map(m=>`
-      <div class="rw-admin-club"><div><b>${esc(pname(m.homeProvince))} — ${esc(pname(m.awayProvince))}</b>
-      <div style="font-size:.7rem;color:var(--muted)">${esc(m.date||'')} • ${esc(RW_TYPES[m.type]||m.type||'')} • ${m.homeScore!=null?esc(m.homeScore)+' : '+esc(m.awayScore):'NADCHODZĄCY'}</div></div>
-      <button class="btn-sm btn-del" onclick="rwDeleteMatch('${esc(m.id)}')">Usuń</button></div>`).join(''):'<div class="rw-empty">Brak meczów reprezentacji.</div>';
-  }
+  window.rwRemoveClub=async function(id){const db=rwDb();if(!db||!id)return;await db.collection('regionalTeams').doc(id).delete();rwAdminLoadClubs();publicSquad();};
+  window.rwSaveMatch=async function(){const db=rwDb();if(!db)return;const home=document.getElementById('rw-home-province')?.value,away=document.getElementById('rw-away-province')?.value,date=document.getElementById('rw-match-date')?.value,type=document.getElementById('rw-match-type')?.value;if(!home||!away||!date)return alert('Uzupełnij gospodarza, gości i datę.');const hs=document.getElementById('rw-home-score')?.value,as=document.getElementById('rw-away-score')?.value;await db.collection('regionalMatches').add({homeProvince:home,awayProvince:away,date,type,homeScore:hs===''?null:Number(hs),awayScore:as===''?null:Number(as),createdAt:firebase.firestore.FieldValue.serverTimestamp()});rwLoadAdminMatches();publicMatches();};
+  window.rwDeleteMatch=async function(id){const db=rwDb();if(!db||!id)return;await db.collection('regionalMatches').doc(id).delete();rwLoadAdminMatches();publicMatches();};
+  window.rwLoadAdminMatches=async function(){const db=rwDb(),el=document.getElementById('rw-admin-matches');if(!db||!el)return;const s=await db.collection('regionalMatches').get();const rows=s.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>String(a.date||'').localeCompare(String(b.date||'')));el.innerHTML=rows.length?rows.map(m=>`<div class="rw-admin-club"><div><b>${esc(pname(m.homeProvince))} — ${esc(pname(m.awayProvince))}</b><div style="font-size:.7rem;color:var(--muted)">${esc(RW_TYPES[m.type]||m.type)} • ${esc(m.date||'')}</div></div><button class="btn-sm btn-del" onclick="rwDeleteMatch('${esc(m.id)}')">Usuń</button></div>`).join(''):'<div class="rw-empty">Brak meczów reprezentacji.</div>';};
 
   async function init(){
-    fillProvince('rw-province-select');
-    fillProvince('rw-admin-province');
-    fillProvince('rw-home-province');
-    fillProvince('rw-away-province');
-    if(document.getElementById('rw-admin-province')){
-      document.getElementById('rw-admin-province').value='malopolskie';
-      await rwAdminLoadClubs();
-    }
-    if(document.getElementById('rw-province-select')){
-      document.getElementById('rw-province-select').value='malopolskie';
-      await publicSquad();
-    }
-    await rwLoadAdminMatches();
-    publicCups();
+    fillProvince('rw-province-select');fillProvince('rw-admin-province');fillProvince('rw-home-province');fillProvince('rw-away-province');
+    const p='podkarpackie';['rw-admin-province','rw-province-select','rw-home-province'].forEach(id=>{const e=document.getElementById(id);if(e)e.value=p;});
+    await mappings();fillDistrict('rw-admin-district',p,true);await rwAdminLoadClubs();await publicSquad();await publicMatches();publicCups();await rwLoadAdminMatches();
   }
-
-  document.addEventListener('DOMContentLoaded',()=>setTimeout(init,300));
-
-  const oldGo=window.go;
-  if(typeof oldGo==='function'&&!window.__rwGoWrapped){
-    window.__rwGoWrapped=true;
-    window.go=function(id){
-      const r=oldGo(id);
-      if(id==='representations')setTimeout(init,100);
-      return r;
-    };
-  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(init,500));else setTimeout(init,500);
 })();
 </script>'representations')setTimeout(rwInit,100);
       return r;
