@@ -1212,7 +1212,7 @@ Adam Wiśniewski | 1 | Bramkarz | Zawieszony | 2 mecze"></textarea>
             friendly:'Mecz towarzyski'
         };
         
-        const MATCH_TYPE_LABELS = { friendly: 'Mecz towarzyski' };
+        const MATCH_TYPE_LABELS = { friendly: 'Mecz towarzyski', representation: 'Mecz reprezentacyjny' };
         function matchCompetitionLabel(value){
             const key = typeof value === 'string' ? value : (value && value.league);
             return MATCH_TYPE_LABELS[key] || L[key] || key || '';
@@ -4567,7 +4567,7 @@ await matchRef.update({
     finishedAt:firebase.firestore.FieldValue.serverTimestamp()
 });
 Object.assign(m,{status:'finished',scoreHome:sh,scoreAway:sa,liveMinute:90,livePhase:'finished',simulation:true,simulationComplete:true,simulationVersion:6});
-if(m.league&&m.league!=='friendly')await recalculateStandings(m.league);
+if(m.league&&m.league!=='friendly'&&m.league!=='representation')await recalculateStandings(m.league);
 await updateStats(db,m,all);
 return true;
 }
@@ -5075,7 +5075,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
       const hp=provinceFromTeam(home)||homeProv,ap=provinceFromTeam(away)||awayProv;
       if(!date||!home||!away||hp===ap){errors.push('Linia '+item.number);continue;}
       try{
-        const data={homeTeam:home,awayTeam:away,scoreHome:null,scoreAway:null,status:'upcoming',league:'friendly',date:firebase.firestore.Timestamp.fromDate(date),representation:true,representationProvince:hp,representationHomeProvince:hp,representationAwayProvince:ap,representationProvinces:[hp,ap],competitionType:type,competitionName:name,representationMatch:true};
+        const data={homeTeam:home,awayTeam:away,scoreHome:null,scoreAway:null,status:'upcoming',league:'representation',date:firebase.firestore.Timestamp.fromDate(date),representation:true,representationProvince:hp,representationHomeProvince:hp,representationAwayProvince:ap,representationProvinces:[hp,ap],competitionType:type,competitionName:name,representationMatch:true};
         const ref=await window.db.collection('matches').add(data);added++;
         if(window.queueMatchForSimulation)window.queueMatchForSimulation(ref.id,window.db);
       }catch(e){console.error(e);errors.push('Linia '+item.number);}
