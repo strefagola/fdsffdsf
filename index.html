@@ -5054,26 +5054,28 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
     const homeSel=document.getElementById('mrep-home'),awaySel=document.getElementById('mrep-away');
     const homeProv=homeSel?.value||'',awayProv=awaySel?.value||'',type=document.getElementById('mrep-type')?.value||'regular',name=document.getElementById('mrep-name')?.value.trim()||'';
     const raw=(document.getElementById('mrep-lines')?.value||'').split(/\r?\n/).map((line,i)=>({line:line.trim(),number:i+1})).filter(x=>x.line);
-    if(!homeProv||!awayProv){alert('Wybierz reprezentację gospodarzy i reprezentację gości.');return;}
-    if(homeProv===awayProv){alert('Reprezentacje gospodarzy i gości muszą być różne.');return;}
     if(type==='tournament'&&!name){alert('Podaj nazwę turnieju.');return;}
     if(!raw.length){alert('Wpisz przynajmniej jeden termin.');return;}
     const label=id=>{const x=REPS.find(r=>r[0]===id);return 'Reprezentacja '+(x?x[1]:id);};
     let added=0,errors=[];
     for(const item of raw){
-      let home=label(homeProv),away=label(awayProv),date=null;
+      let home=homeProv?label(homeProv):'',away=awayProv?label(awayProv):'',date=null;
       const parts=item.line.split(/\s*,\s*/).map(x=>x.trim()).filter(Boolean);
       if(parts.length===2){
+        // Skrócona składnia: data, godzina — tutaj reprezentacje muszą być wybrane z pól powyżej.
+        if(!homeProv||!awayProv){errors.push('Linia '+item.number+' (wybierz reprezentacje)');continue;}
         date=parseDate(parts[0],parts[1]);
       }else if(parts.length>=3){
         const vi=parts[0].toLowerCase().indexOf(' vs ');
         if(vi>=0){
+          // Pełna składnia: Reprezentacja X vs Reprezentacja Y, data, godzina.
+          // W tym wariancie pola wyboru reprezentacji nie są wymagane.
           home=parts[0].slice(0,vi).trim();away=parts[0].slice(vi+4).trim();
           date=parseDate(parts[1],parts[2]);
         }
       }
-      const hp=provinceFromTeam(home)||homeProv,ap=provinceFromTeam(away)||awayProv;
-      if(!date||!home||!away||hp===ap){errors.push('Linia '+item.number);continue;}
+      const hp=provinceFromTeam(home),ap=provinceFromTeam(away);
+      if(!date||!home||!away||!hp||!ap||hp===ap){errors.push('Linia '+item.number);continue;}
       try{
         const data={homeTeam:home,awayTeam:away,scoreHome:null,scoreAway:null,status:'upcoming',league:'representation',date:firebase.firestore.Timestamp.fromDate(date),representation:true,representationProvince:hp,representationHomeProvince:hp,representationAwayProvince:ap,representationProvinces:[hp,ap],competitionType:type,competitionName:name,representationMatch:true};
         const ref=await window.db.collection('matches').add(data);added++;
