@@ -4856,7 +4856,11 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
   }
   function groupMatches(matches,province){
     const regular=new Map(), tournaments=new Map();
-    (matches||[]).filter(m=>m.representation===true && m.representationProvince===province).forEach(m=>{
+    (matches||[]).filter(m=>{
+      if(m.representation!==true) return false;
+      const provinces=Array.isArray(m.representationProvinces)?m.representationProvinces:[];
+      return m.representationProvince===province || m.representationHomeProvince===province || m.representationAwayProvince===province || provinces.includes(province);
+    }).forEach(m=>{
       const type=String(m.competitionType||'regular');
       const d=dt(m.date);if(!d)return;
       if(type==='friendly'||type==='qualifier'||type==='playoff')return;
@@ -4998,6 +5002,92 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
   // funkcję serwerową, zapis cyklu i tak jest idempotentny dzięki cycleKey.
   setTimeout(()=>window.rwCallupAutomationNow&&window.rwCallupAutomationNow(),2500);
   setInterval(()=>window.rwCallupAutomationNow&&window.rwCallupAutomationNow(),120000);
+})();
+</script>
+
+
+<script id="mass-representation-matches">
+(function(){
+  const REPS=[
+    ['dolnoslaskie','Dolnośląskie'],['kujawsko_pomorskie','Kujawsko-Pomorskie'],['lubelskie','Lubelskie'],['lubuskie','Lubuskie'],
+    ['lodzkie','Łódzkie'],['malopolskie','Małopolskie'],['mazowieckie','Mazowieckie'],['opolskie','Opolskie'],
+    ['podkarpackie','Podkarpackie'],['podlaskie','Podlaskie'],['pomorskie','Pomorskie'],['slaskie','Śląskie'],
+    ['swietokrzyskie','Świętokrzyskie'],['warminsko_mazurskie','Warmińsko-Mazurskie'],['wielkopolskie','Wielkopolskie'],['zachodniopomorskie','Zachodniopomorskie']
+  ];
+  const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  function inject(){
+    const base=document.getElementById('mb-lines');
+    if(!base || document.getElementById('mass-rep-box')) return;
+    const card=document.createElement('div');
+    card.id='mass-rep-box'; card.className='card'; card.style.marginBottom='2rem';
+    card.innerHTML=`
+      <h3 style="font-size:.75rem;color:var(--green);margin-bottom:.7rem;text-transform:uppercase;letter-spacing:1.2px;">Masowe dodawanie meczów reprezentacyjnych</h3>
+      <p style="font-size:.72rem;color:var(--muted);margin-bottom:1rem;">Wybierz dwie reprezentacje i wpisz wiele terminów. Każda linia = jeden mecz. Przykład: <strong>2026-09-14, 18:00</strong>. Możesz też podać pełny zapis: <strong>Reprezentacja Dolnośląska vs Reprezentacja Małopolska, 2026-09-14, 18:00</strong>.</p>
+      <div class="form-grid">
+        <select id="mrep-home"><option value="">Reprezentacja gospodarzy</option>${REPS.map(x=>`<option value="${x[0]}">Reprezentacja ${x[1]}</option>`).join('')}</select>
+        <select id="mrep-away"><option value="">Reprezentacja gości</option>${REPS.map(x=>`<option value="${x[0]}">Reprezentacja ${x[1]}</option>`).join('')}</select>
+      </div>
+      <select id="mrep-type" style="margin-top:8px;"><option value="regular">Mecz w oknie / miesiącu</option><option value="tournament">Mecz turniejowy</option><option value="qualifier">Eliminacje</option><option value="playoff">Baraż</option><option value="friendly">Towarzyski</option></select>
+      <input id="mrep-name" placeholder="Nazwa turnieju (wymagana przy meczu turniejowym)" style="display:none;margin-top:8px;">
+      <textarea id="mrep-lines" style="margin-top:8px;min-height:140px;" placeholder="2026-09-14, 18:00\n2026-09-30, 20:00\n\nLub pełne linie:\nReprezentacja Dolnośląska vs Reprezentacja Małopolska, 2026-10-14, 18:00"></textarea>
+      <button class="btn" type="button" onclick="saveRepresentationMatchesBulk()" style="margin-top:8px;"><i class="fa-solid fa-flag"></i> Dodaj mecze reprezentacyjne masowo</button>
+      <div id="mrep-status" style="font-size:.72rem;color:var(--muted);margin-top:8px;"></div>`;
+    const existingCard=base.closest('.card');
+    if(existingCard && existingCard.parentElement) existingCard.parentElement.insertBefore(card,existingCard.nextElementSibling);
+    else base.parentElement?.appendChild(card);
+    const type=document.getElementById('mrep-type'),name=document.getElementById('mrep-name');
+    type?.addEventListener('change',()=>{name.style.display=type.value==='tournament'?'block':'none';});
+  }
+  function parseDate(s,t){
+    const d=String(s||'').trim().replace(/\s+/g,''), tm=String(t||'').trim().replace(/\s+/g,'');
+    if(!/^\d{4}[-./]\d{1,2}[-./]\d{1,2}$/.test(d)||!/^\d{1,2}:\d{2}$/.test(tm)) return null;
+    const a=d.split(/[-./]/).map(Number), h=tm.split(':').map(Number), dt=new Date(a[0],a[1]-1,a[2],h[0],h[1],0,0);
+    return dt.getFullYear()===a[0]&&dt.getMonth()===a[1]-1&&dt.getDate()===a[2]&&dt.getHours()===h[0]&&dt.getMinutes()===h[1]?dt:null;
+  }
+  function provinceFromTeam(name){
+    const n=String(name||'').trim().toLowerCase().replace(/^reprezentacja\s+/,'');
+    const x=REPS.find(r=>r[1].toLowerCase()===n||r[0]===n);
+    return x?x[0]:'';
+  }
+  window.saveRepresentationMatchesBulk=async function(){
+    if(!user||!window.db){alert('Zaloguj się do panelu redakcji.');return;}
+    const homeSel=document.getElementById('mrep-home'),awaySel=document.getElementById('mrep-away');
+    const homeProv=homeSel?.value||'',awayProv=awaySel?.value||'',type=document.getElementById('mrep-type')?.value||'regular',name=document.getElementById('mrep-name')?.value.trim()||'';
+    const raw=(document.getElementById('mrep-lines')?.value||'').split(/\r?\n/).map((line,i)=>({line:line.trim(),number:i+1})).filter(x=>x.line);
+    if(!homeProv||!awayProv){alert('Wybierz reprezentację gospodarzy i reprezentację gości.');return;}
+    if(homeProv===awayProv){alert('Reprezentacje gospodarzy i gości muszą być różne.');return;}
+    if(type==='tournament'&&!name){alert('Podaj nazwę turnieju.');return;}
+    if(!raw.length){alert('Wpisz przynajmniej jeden termin.');return;}
+    const label=id=>{const x=REPS.find(r=>r[0]===id);return 'Reprezentacja '+(x?x[1]:id);};
+    let added=0,errors=[];
+    for(const item of raw){
+      let home=label(homeProv),away=label(awayProv),date=null;
+      const parts=item.line.split(/\s*,\s*/).map(x=>x.trim()).filter(Boolean);
+      if(parts.length===2){
+        date=parseDate(parts[0],parts[1]);
+      }else if(parts.length>=3){
+        const vi=parts[0].toLowerCase().indexOf(' vs ');
+        if(vi>=0){
+          home=parts[0].slice(0,vi).trim();away=parts[0].slice(vi+4).trim();
+          date=parseDate(parts[1],parts[2]);
+        }
+      }
+      const hp=provinceFromTeam(home)||homeProv,ap=provinceFromTeam(away)||awayProv;
+      if(!date||!home||!away||hp===ap){errors.push('Linia '+item.number);continue;}
+      try{
+        const data={homeTeam:home,awayTeam:away,scoreHome:null,scoreAway:null,status:'upcoming',league:'friendly',date:firebase.firestore.Timestamp.fromDate(date),representation:true,representationProvince:hp,representationHomeProvince:hp,representationAwayProvince:ap,representationProvinces:[hp,ap],competitionType:type,competitionName:name,representationMatch:true};
+        const ref=await window.db.collection('matches').add(data);added++;
+        if(window.queueMatchForSimulation)window.queueMatchForSimulation(ref.id,window.db);
+      }catch(e){console.error(e);errors.push('Linia '+item.number);}
+    }
+    const status=document.getElementById('mrep-status');
+    if(status)status.textContent=`Dodano ${added} meczów reprezentacyjnych${errors.length?`. Pominięto: ${errors.join(', ')}`:'.'}`;
+    if(added && typeof loadAdminM==='function')await loadAdminM();
+    setTimeout(()=>window.rwCallupAutomationNow&&window.rwCallupAutomationNow(),300);
+    if(!errors.length)document.getElementById('mrep-lines').value='';
+  };
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(inject,500),{once:true});else setTimeout(inject,500);
+  setTimeout(inject,1800);
 })();
 </script>
 
