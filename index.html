@@ -351,6 +351,19 @@ nav .tab{height:42px!important;margin:auto 2px!important;padding:0 14px!importan
 <style id="regional-representations-css">
 .rw-admin-card{padding:20px!important}.rw-kicker{font-size:.58rem;letter-spacing:1.5px;font-weight:850;color:var(--pro-accent);margin-bottom:5px}.rw-admin-card h3,.rw-public-head h2{margin:0 0 7px;color:var(--pro-ink)}.rw-muted,.rw-public-head p{font-size:.75rem;line-height:1.55;color:var(--pro-muted);margin:0 0 16px}.rw-status{min-height:18px;margin-top:9px;font-size:.72rem;color:var(--pro-muted)}.rw-section-title{display:flex;flex-direction:column;margin-bottom:12px}.rw-section-title span{font-size:.58rem;letter-spacing:1.4px;color:var(--pro-accent);font-weight:850}.rw-section-title strong{font-size:.9rem}.rw-empty{padding:18px;border:1px dashed #dce5ec;border-radius:10px;text-align:center;color:#81909b;font-size:.75rem}.rw-callup-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 12px;border:1px solid #e5ebef;border-radius:10px;background:#fff;margin-bottom:8px}.rw-callup-main{min-width:0}.rw-callup-main b{display:block;font-size:.78rem}.rw-callup-main small{display:block;color:#788b99;font-size:.65rem;margin-top:2px}.rw-callup-actions{display:flex;gap:5px;align-items:center}.rw-public-head{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;margin-bottom:15px}.rw-public-head select{max-width:330px}.rw-info-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}.rw-info-box{border:1px solid #dce5ec;border-radius:10px;background:#f7f9fa;padding:13px}.rw-info-box span{display:block;font-size:.55rem;letter-spacing:1.1px;color:#718392;font-weight:850;margin-bottom:5px}.rw-info-box b{font-size:.7rem;color:#29485e;line-height:1.5}.rw-club-group{border:1px solid #dce5ec;border-radius:11px;background:#fff;margin-bottom:10px;overflow:hidden}.rw-club-head{padding:11px 13px;background:#f5f8fa;border-bottom:1px solid #e2e8ed;display:flex;justify-content:space-between;gap:10px}.rw-club-head b{font-size:.78rem}.rw-club-head small{font-size:.62rem;color:#7c8d99}.rw-player-public{display:flex;justify-content:space-between;gap:10px;padding:8px 13px;border-bottom:1px solid #edf1f4}.rw-player-public:last-child{border-bottom:0}.rw-player-public b{font-size:.72rem}.rw-player-public small{font-size:.62rem;color:#84929e}@media(max-width:700px){.rw-public-head,.rw-info-grid{grid-template-columns:1fr;display:grid}.rw-public-head select{max-width:none}.rw-callup-row{align-items:flex-start;flex-direction:column}.rw-callup-actions{width:100%}.rw-callup-actions button{flex:1}}
 </style>
+
+<style id="polish-puchar-polski">
+/* Puchar Polski — klubowe rozgrywki pucharowe, bez reprezentacji */
+.cup-sub-tab{color:#9a6a08!important;background:linear-gradient(180deg,#fffaf0,#fff)!important;border:1px solid #ead8aa!important;font-weight:800!important}
+.cup-sub-tab:hover{color:#7a5200!important;background:#fff7df!important}
+.cup-sub-tab.active{color:#7a5200!important;background:linear-gradient(135deg,#fff3c4,#fff9e8)!important;border-color:#d9b55c!important;box-shadow:0 4px 14px rgba(194,145,38,.12)!important}
+.cup-sub-tab i{margin-right:5px}
+.cup-match-card{border-color:#e7d8b4!important;background:linear-gradient(180deg,#fffdf7 0%,#fff 100%)!important}
+.cup-match-card .league-label{color:#9a6a08!important}
+.cup-match-card .league-label>i{color:#c48b1b!important}
+.cup-round-badge{margin-left:7px;padding:3px 7px;border-radius:999px;background:#fff4cf;color:#8a610d;font-size:.52rem;letter-spacing:.4px;font-weight:850;text-transform:none}
+#m-cup-round,#mb-cup-round{border-color:#e5cf91!important;background:#fffaf0!important;color:#76520b!important}
+</style>
 </head>
 <body>
 
@@ -512,6 +525,7 @@ nav .tab{height:42px!important;margin:auto 2px!important;padding:0 14px!importan
                     <button class="sub-tab" onclick="filterM('okr_rzeszow',this)">Okr. Rzeszów</button>
                     <button class="sub-tab" onclick="filterM('okr_debica',this)">Okr. Dębica</button>
                     <button class="sub-tab" onclick="filterM('okr_stalowa',this)">Okr. Stalowa Wola</button>
+                    <button class="sub-tab cup-sub-tab" onclick="filterM('puchar_polski',this)"><i class="fa-solid fa-trophy"></i> Puchar Polski</button>
                 </div>
             </div>
 
@@ -537,6 +551,7 @@ nav .tab{height:42px!important;margin:auto 2px!important;padding:0 14px!importan
                     <option value="okr_wielkopolska">Okręgowa Liga Wielkopolska</option>
                     <option value="okr_zachodniopomorska">Okręgowa Liga Zachodniopomorska</option>
                     <option value="okr_kujawsko_pomorska">Okręgowa Liga Kujawsko-Pomorska</option>
+                    <option value="puchar_polski">Puchar Polski</option>
                     <option value="friendly">Mecze towarzyskie</option>
                 </select>
             </div>
@@ -845,7 +860,7 @@ nav .tab{height:42px!important;margin:auto 2px!important;padding:0 14px!importan
                             </div>
                             <div class="form-grid">
                                 <input type="datetime-local" id="m-date">
-                                <select id="m-league"><option value="liga1">Liga 1</option><option value="liga2">2 liga</option><option value="liga3">3 liga</option><option value="liga4">4 liga</option><option value="okr_podkarpacka">Okręgowa Liga Podkarpacka</option><option value="okr_pomorska">Okręgowa Liga Pomorska</option><option value="okr_warminsko_mazurska">Okręgowa Liga Warmińsko-Mazurska</option><option value="okr_slaska">Okręgowa Liga Śląska</option><option value="okr_dolnoslaska">Okręgowa Liga Dolnośląska</option><option value="okr_malopolska">Okręgowa Liga Małopolska</option><option value="okr_mazowiecka">Okręgowa Liga Mazowiecka</option><option value="okr_lubelska">Okręgowa Liga Lubelska</option><option value="okr_lubuska">Okręgowa Liga Lubuska</option><option value="okr_lodzkie">Okręgowa Liga Łódzka</option><option value="okr_opolska">Okręgowa Liga Opolska</option><option value="okr_podlaska">Okręgowa Liga Podlaska</option><option value="okr_swietokrzyska">Okręgowa Liga Świętokrzyska</option><option value="okr_wielkopolska">Okręgowa Liga Wielkopolska</option><option value="okr_zachodniopomorska">Okręgowa Liga Zachodniopomorska</option><option value="okr_kujawsko_pomorska">Okręgowa Liga Kujawsko-Pomorska</option><option value="friendly">Mecz towarzyski</option></select>
+                                <select id="m-league"><option value="liga1">Liga 1</option><option value="liga2">2 liga</option><option value="liga3">3 liga</option><option value="liga4">4 liga</option><option value="okr_podkarpacka">Okręgowa Liga Podkarpacka</option><option value="okr_pomorska">Okręgowa Liga Pomorska</option><option value="okr_warminsko_mazurska">Okręgowa Liga Warmińsko-Mazurska</option><option value="okr_slaska">Okręgowa Liga Śląska</option><option value="okr_dolnoslaska">Okręgowa Liga Dolnośląska</option><option value="okr_malopolska">Okręgowa Liga Małopolska</option><option value="okr_mazowiecka">Okręgowa Liga Mazowiecka</option><option value="okr_lubelska">Okręgowa Liga Lubelska</option><option value="okr_lubuska">Okręgowa Liga Lubuska</option><option value="okr_lodzkie">Okręgowa Liga Łódzka</option><option value="okr_opolska">Okręgowa Liga Opolska</option><option value="okr_podlaska">Okręgowa Liga Podlaska</option><option value="okr_swietokrzyska">Okręgowa Liga Świętokrzyska</option><option value="okr_wielkopolska">Okręgowa Liga Wielkopolska</option><option value="okr_zachodniopomorska">Okręgowa Liga Zachodniopomorska</option><option value="okr_kujawsko_pomorska">Okręgowa Liga Kujawsko-Pomorska</option><option value="puchar_polski">Puchar Polski</option><option value="friendly">Mecz towarzyski</option></select>
                             </div>
                             <div class="form-grid">
                                 <input type="number" id="m-sh" placeholder="Bramki G (puste = nadchodzący)">
@@ -1209,6 +1224,7 @@ Adam Wiśniewski | 1 | Bramkarz | Zawieszony | 2 mecze"></textarea>
             okr_opolska:'Okręgowa Liga Opolska', okr_podlaska:'Okręgowa Liga Podlaska',
             okr_swietokrzyska:'Okręgowa Liga Świętokrzyska', okr_wielkopolska:'Okręgowa Liga Wielkopolska',
             okr_zachodniopomorska:'Okręgowa Liga Zachodniopomorska', okr_kujawsko_pomorska:'Okręgowa Liga Kujawsko-Pomorska',
+            puchar_polski:'Puchar Polski',
             friendly:'Mecz towarzyski'
         };
         
@@ -1483,8 +1499,9 @@ Adam Wiśniewski | 1 | Bramkarz | Zawieszony | 2 mecze"></textarea>
             const up=matchIsUpcoming(m),live=matchIsLive(m);
             const score=up?'<span class="match-vs-text">vs</span>':`${m.scoreHome??0}:${m.scoreAway??0}`;
             const statusLabel=live?fmtLiveMatch(m):(up?'<span class="badge-up">Nadchodzący</span>':'');
-            return `<div class="card match-card-live-${live?'yes':'no'}">
-                <div class="league-label"><i class="fa-solid fa-circle"></i>${matchCompetitionLabel(m)}${statusLabel}</div>
+            const cupRound=m.league==='puchar_polski'&&m.cupRound?`<span class="cup-round-badge">${m.cupRound}</span>`:'';
+            return `<div class="card match-card-live-${live?'yes':'no'} ${m.league==='puchar_polski'?'cup-match-card':''}">
+                <div class="league-label"><i class="fa-solid fa-trophy"></i>${matchCompetitionLabel(m)}${cupRound}${statusLabel}</div>
                 <div class="match-row">
                     <div class="team-wrap">${crestImg(m.homeTeam)}<span class="team-name" onclick="openClubProfile('${m.homeTeam}')">${m.homeTeam||'?'}</span></div>
                     <div class="score-box ${up?'vs':''} ${live?'live-score':''}">${score}</div>
@@ -1660,6 +1677,7 @@ Adam Wiśniewski | 1 | Bramkarz | Zawieszony | 2 mecze"></textarea>
         }
 
         async function recalculateStandings(league){
+            if(league==='puchar_polski' || league==='friendly' || league==='representation') return;
             invalidateLeagueCache(league);
             try{
                 const dbase = getDB(league);
@@ -2511,8 +2529,8 @@ async function sendContact(){
                     if(window.queueMatchForSimulation) window.queueMatchForSimulation(createdRef.id, newDbase);
                 }
 
-                if(oldLeague && oldLeague !== newLeague && oldLeague !== 'friendly') await recalculateStandings(oldLeague);
-                if(newLeague !== 'friendly') await recalculateStandings(newLeague);
+                if(oldLeague && oldLeague !== newLeague && !['friendly','puchar_polski','representation'].includes(oldLeague)) await recalculateStandings(oldLeague);
+                if(!['friendly','puchar_polski','representation'].includes(newLeague)) await recalculateStandings(newLeague);
                 clearMF();loadAdminM();
             }catch(e){console.error(e);alert('Błąd zapisu spotkania');}
         }
@@ -2603,7 +2621,7 @@ async function sendContact(){
                 try{
                     const matchData=await deleteMatchCompletely(dbase,id);
                     const league=matchData?.league||'';
-                    if(league && league !== 'friendly') await recalculateStandings(league);
+                    if(league && !['friendly','puchar_polski','representation'].includes(league)) await recalculateStandings(league);
                     // Natychmiast usuwamy również lokalny wpis z pamięci strony.
                     mc=Array.isArray(mc)?mc.filter(x=>!(x.id===id&&((x._db||'db1')===(dbVal||'db1')))):mc;
                     adminMatchesCache=Array.isArray(adminMatchesCache)?adminMatchesCache.filter(x=>!(x.id===id&&x._db===(dbVal||'db1'))):adminMatchesCache;
@@ -3564,17 +3582,24 @@ function closeMatchDetails(){document.getElementById('match-detail-modal').class
 
     </script>
 <script>
-const PLANET_LEAGUES=[['liga1','Liga 1'], ['liga2','2 liga'], ['liga3','3 liga'], ['liga4','4 liga'], ['okr_podkarpacka','Okręgowa Liga Podkarpacka'], ['okr_pomorska','Okręgowa Liga Pomorska'], ['okr_warminsko_mazurska','Okręgowa Liga Warmińsko-Mazurska'], ['okr_slaska','Okręgowa Liga Śląska'], ['okr_dolnoslaska','Okręgowa Liga Dolnośląska'], ['okr_malopolska','Okręgowa Liga Małopolska'], ['okr_mazowiecka','Okręgowa Liga Mazowiecka'], ['okr_lubelska','Okręgowa Liga Lubelska'], ['okr_lubuska','Okręgowa Liga Lubuska'], ['okr_lodzkie','Okręgowa Liga Łódzka'], ['okr_opolska','Okręgowa Liga Opolska'], ['okr_podlaska','Okręgowa Liga Podlaska'], ['okr_swietokrzyska','Okręgowa Liga Świętokrzyska'], ['okr_wielkopolska','Okręgowa Liga Wielkopolska'], ['okr_zachodniopomorska','Okręgowa Liga Zachodniopomorska'], ['okr_kujawsko_pomorska','Okręgowa Liga Kujawsko-Pomorska'], ['friendly','Mecz towarzyski']];
+const PLANET_LEAGUES=[['liga1','Liga 1'], ['liga2','2 liga'], ['liga3','3 liga'], ['liga4','4 liga'], ['okr_podkarpacka','Okręgowa Liga Podkarpacka'], ['okr_pomorska','Okręgowa Liga Pomorska'], ['okr_warminsko_mazurska','Okręgowa Liga Warmińsko-Mazurska'], ['okr_slaska','Okręgowa Liga Śląska'], ['okr_dolnoslaska','Okręgowa Liga Dolnośląska'], ['okr_malopolska','Okręgowa Liga Małopolska'], ['okr_mazowiecka','Okręgowa Liga Mazowiecka'], ['okr_lubelska','Okręgowa Liga Lubelska'], ['okr_lubuska','Okręgowa Liga Lubuska'], ['okr_lodzkie','Okręgowa Liga Łódzka'], ['okr_opolska','Okręgowa Liga Opolska'], ['okr_podlaska','Okręgowa Liga Podlaska'], ['okr_swietokrzyska','Okręgowa Liga Świętokrzyska'], ['okr_wielkopolska','Okręgowa Liga Wielkopolska'], ['okr_zachodniopomorska','Okręgowa Liga Zachodniopomorska'], ['okr_kujawsko_pomorska','Okręgowa Liga Kujawsko-Pomorska'], ['puchar_polski','Puchar Polski'], ['friendly','Mecz towarzyski']];
 function planetLeagueSelect(key){
  document.querySelectorAll('.planet-league-pill,.side-league').forEach(b=>b.classList.toggle('active',b.dataset.league===key));
  document.querySelectorAll('select[id$="-league"]').forEach(s=>s.value=key);
+ if(key==='puchar_polski'){
+   try{go('matches')}catch(e){}
+   try{filterM('puchar_polski')}catch(e){}
+   const cupSelect=document.getElementById('match-league-filter');
+   if(cupSelect) cupSelect.value='puchar_polski';
+   return;
+ }
  try{loadTable(key)}catch(e){} try{loadStats(key)}catch(e){} try{loadZones(false,key)}catch(e){} try{if(typeof filterTransfers==="function")filterTransfers(key)}catch(e){}
 }
 document.addEventListener('DOMContentLoaded',()=>{
  document.querySelectorAll('select[id$="-league"]').forEach(sel=>{sel.innerHTML=PLANET_LEAGUES.map(x=>`<option value="${x[0]}">${x[1]}</option>`).join('');sel.value='liga1'});
  const bulkLeague=document.getElementById('bulk-crest-league');
  if(bulkLeague){
-   bulkLeague.innerHTML='<option value="">Wszystkie rozgrywki</option>'+PLANET_LEAGUES.map(x=>`<option value="${x[0]}">${x[1]}</option>`).join('');
+   bulkLeague.innerHTML='<option value="">Wszystkie ligi</option>'+PLANET_LEAGUES.filter(x=>x[0]!=='puchar_polski').map(x=>`<option value="${x[0]}">${x[1]}</option>`).join('');
    bulkLeague.value='';
  }
  planetLeagueSelect('liga1');
@@ -4576,7 +4601,7 @@ await matchRef.update({
     finishedAt:firebase.firestore.FieldValue.serverTimestamp()
 });
 Object.assign(m,{status:'finished',scoreHome:sh,scoreAway:sa,liveMinute:90,livePhase:'finished',simulation:true,simulationComplete:true,simulationVersion:6});
-if(m.league&&m.league!=='friendly'&&m.league!=='representation')await recalculateStandings(m.league);
+if(m.league&&!['friendly','representation','puchar_polski'].includes(m.league))await recalculateStandings(m.league);
 await updateStats(db,m,all);
 return true;
 }
@@ -4982,13 +5007,20 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
       const name=document.createElement('input');name.id='m-competition-name';name.placeholder='Nazwa turnieju (wymagana tylko dla meczu turniejowego)';name.style.display='none';box.insertAdjacentElement('afterend',name);
       document.getElementById('m-competition-type').addEventListener('change',()=>{name.style.display=document.getElementById('m-competition-type').value==='tournament'?'block':'none';});
     }
+    const cupRoundOptions=`<option value="">Wybierz rundę</option><option value="I runda">I runda</option><option value="II runda">II runda</option><option value="III runda">III runda</option><option value="1/16 finału">1/16 finału</option><option value="1/8 finału">1/8 finału</option><option value="Ćwierćfinał">Ćwierćfinał</option><option value="Półfinał">Półfinał</option><option value="Finał">Finał</option>`;
+    if(league&&!document.getElementById('m-cup-round')){
+      const cup=document.createElement('select');cup.id='m-cup-round';cup.style.display=league.value==='puchar_polski'?'block':'none';cup.innerHTML=cupRoundOptions;
+      league.parentElement.insertAdjacentElement('afterend',cup);
+      league.addEventListener('change',()=>{cup.style.display=league.value==='puchar_polski'?'block':'none';if(league.value!=='puchar_polski')cup.value='';});
+    }
     const mb=document.getElementById('mb-league');
     if(mb&&!document.getElementById('regional-bulk-fields')){
       const box=document.createElement('div');box.id='regional-bulk-fields';box.className='form-grid';box.innerHTML=`<select id="mb-representation"><option value="">Mecze klubowe</option>${PROVINCES.map(p=>`<option value="${p[0]}">Reprezentacja ${p[1]}</option>`).join('')}</select><select id="mb-competition-type"><option value="regular">Mecz w oknie / miesiącu</option><option value="tournament">Mecz turniejowy</option><option value="qualifier">Eliminacje</option><option value="playoff">Baraż</option><option value="friendly">Towarzyski</option></select>`;mb.insertAdjacentElement('afterend',box);
       const name=document.createElement('input');name.id='mb-competition-name';name.placeholder='Nazwa turnieju dla wszystkich dodawanych meczów (opcjonalnie)';name.style.display='none';box.insertAdjacentElement('afterend',name);document.getElementById('mb-competition-type').addEventListener('change',()=>{name.style.display=document.getElementById('mb-competition-type').value==='tournament'?'block':'none';});
+      const cup=document.createElement('select');cup.id='mb-cup-round';cup.style.display=mb.value==='puchar_polski'?'block':'none';cup.innerHTML=cupRoundOptions;name.insertAdjacentElement('afterend',cup);mb.addEventListener('change',()=>{cup.style.display=mb.value==='puchar_polski'?'block':'none';if(mb.value!=='puchar_polski')cup.value='';});
     }
   }
-  function getMatchMeta(prefix){const province=document.getElementById(prefix+'-representation')?.value||'';const type=document.getElementById(prefix+'-competition-type')?.value||'regular';const name=document.getElementById(prefix+'-competition-name')?.value.trim()||'';return {representation:!!province,representationProvince:province,competitionType:type,competitionName:name};}
+  function getMatchMeta(prefix){const province=document.getElementById(prefix+'-representation')?.value||'';const type=document.getElementById(prefix+'-competition-type')?.value||'regular';const name=document.getElementById(prefix+'-competition-name')?.value.trim()||'';const league=document.getElementById(prefix+'-league')?.value||'';const cupRound=league==='puchar_polski'?(document.getElementById(prefix+'-cup-round')?.value||'') : '';return {representation:!!province,representationProvince:province,competitionType:type,competitionName:name,cupRound};}
   const oldSaveMatch=window.saveMatch;
   window.saveMatch=async function(){
     if(!user||!window.db)return;
@@ -5003,8 +5035,8 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
     }catch(e){console.error(e);alert('Błąd zapisu spotkania');}
   };
   const oldEditM=window.editM;
-  window.editM=function(id,d){if(typeof oldEditM==='function')oldEditM(id,d);setTimeout(()=>{const meta=d||{};const p=document.getElementById('m-representation'),t=document.getElementById('m-competition-type'),n=document.getElementById('m-competition-name');if(p)p.value=meta.representationProvince||'';if(t)t.value=meta.competitionType||'regular';if(n){n.value=meta.competitionName||'';n.style.display=t&&t.value==='tournament'?'block':'none';}},50);};
-  const oldClearMF=window.clearMF;window.clearMF=function(){if(typeof oldClearMF==='function')oldClearMF();['m-representation','m-competition-type','m-competition-name'].forEach(id=>{const e=document.getElementById(id);if(e)e.value=id==='m-competition-type'?'regular':'';});const n=document.getElementById('m-competition-name');if(n)n.style.display='none';};
+  window.editM=function(id,d){if(typeof oldEditM==='function')oldEditM(id,d);setTimeout(()=>{const meta=d||{};const p=document.getElementById('m-representation'),t=document.getElementById('m-competition-type'),n=document.getElementById('m-competition-name'),c=document.getElementById('m-cup-round'),league=document.getElementById('m-league');if(p)p.value=meta.representationProvince||'';if(t)t.value=meta.competitionType||'regular';if(n){n.value=meta.competitionName||'';n.style.display=t&&t.value==='tournament'?'block':'none';}if(c){c.value=meta.cupRound||'';c.style.display=league&&league.value==='puchar_polski'?'block':'none';}},50);};
+  const oldClearMF=window.clearMF;window.clearMF=function(){if(typeof oldClearMF==='function')oldClearMF();['m-representation','m-competition-type','m-competition-name','m-cup-round'].forEach(id=>{const e=document.getElementById(id);if(e)e.value=id==='m-competition-type'?'regular':'';});const n=document.getElementById('m-competition-name');if(n)n.style.display='none';const c=document.getElementById('m-cup-round');if(c){c.value='';c.style.display='none';}};
   const oldBulk=window.saveMatchesBulk;
   window.saveMatchesBulk=async function(){
     if(!user)return;const league=document.getElementById('mb-league').value,lines=(document.getElementById('mb-lines').value||'').split(/\r?\n/).map((line,i)=>({line:line.trim(),number:i+1})).filter(x=>x.line);if(!lines.length){alert('Wklej przynajmniej jeden mecz.');return;}
