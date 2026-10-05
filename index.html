@@ -1213,8 +1213,17 @@ Adam Wiśniewski | 1 | Bramkarz | Zawieszony | 2 mecze"></textarea>
         };
         
         const MATCH_TYPE_LABELS = { friendly: 'Mecz towarzyski', representation: 'Mecz reprezentacyjny' };
+        const REPRESENTATION_TYPE_LABELS = {
+            regular: 'Mecz reprezentacyjny',
+            tournament: 'Turniej reprezentacyjny',
+            qualifier: 'Eliminacje',
+            playoff: 'Baraż',
+            friendly: 'Mecz towarzyski'
+        };
         function matchCompetitionLabel(value){
-            const key = typeof value === 'string' ? value : (value && value.league);
+            const obj = typeof value === 'object' && value ? value : null;
+            const key = typeof value === 'string' ? value : (obj && obj.league);
+            if(obj && obj.representation===true) return REPRESENTATION_TYPE_LABELS[String(obj.competitionType||'regular')] || 'Mecz reprezentacyjny';
             return MATCH_TYPE_LABELS[key] || L[key] || key || '';
         }
 
@@ -4863,7 +4872,6 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
     }).forEach(m=>{
       const type=String(m.competitionType||'regular');
       const d=dt(m.date);if(!d)return;
-      if(type==='friendly'||type==='qualifier'||type==='playoff')return;
       if(type==='tournament' && String(m.competitionName||'').trim()){
         const key=cycleKeyFor(province,'tournament',m.competitionName,d);if(!tournaments.has(key))tournaments.set(key,[]);tournaments.get(key).push(m);
       }else{
@@ -4946,7 +4954,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
     if(!window.rwActiveCycleId||!cycles.some(c=>c.id===window.rwActiveCycleId))window.rwActiveCycleId=cycles[0].id;
     picker.innerHTML=cycles.map(c=>{const d=dt(c.firstMatchAt);const label=c.type==='tournament'?`Turniej: ${c.competitionName||'bez nazwy'}`:`Powołanie miesięczne — ${d?d.toLocaleDateString('pl-PL',{month:'long',year:'numeric'}):'—'}`;return `<option value="${esc(c.id)}">${esc(label)}</option>`;}).join('');picker.value=window.rwActiveCycleId;picker.onchange=()=>{window.rwActiveCycleId=picker.value;rwLoadAdmin();};
     const c=cycles.find(x=>x.id===window.rwActiveCycleId)||cycles[0];window.rwActiveCycleId=c.id;const rows=await cycleRows(c.id);const first=dt(c.firstMatchAt),until=dt(c.validUntil);
-    el.innerHTML=`<div class="rw-cycle-head"><div><b>${esc(c.type==='tournament'?('Turniej: '+(c.competitionName||'bez nazwy')):('Powołanie miesięczne'))}</b><small>Pierwszy mecz: ${first?first.toLocaleString('pl-PL'): '—'}${until?' · ważne do: '+until.toLocaleString('pl-PL'):''}<br>${c.manualEdited?'Kadra była ręcznie edytowana.':'Kadra utworzona automatycznie.'}</small></div><span class="rw-cycle-badge">${rows.length} zawodników</span></div><div class="rw-auto-note">Zasada: mecze w jednym miesiącu korzystają z jednego powołania. Mecz turniejowy utrzymuje tę samą kadrę do końca turnieju. Baraże, eliminacje i towarzyskie nie tworzą tego cyklu.</div>${rows.length?rows.sort((a,b)=>String(a.team||'').localeCompare(String(b.team||''),'pl')||String(a.playerName||'').localeCompare(String(b.playerName||''),'pl')).map(x=>`<div class="rw-callup-row"><div class="rw-callup-main"><b>${esc(x.playerName||'Nieznany zawodnik')}</b><small>${esc(x.team||'Brak klubu')} · ${esc(x.position||'')}</small></div><div class="rw-callup-actions"><button class="btn-sm btn-del" onclick="rwRemoveCallup('${esc(x.id)}')">Usuń</button></div></div>`).join(''):'<div class="rw-empty">Brak zawodników w tym cyklu.</div>'}`;
+    el.innerHTML=`<div class="rw-cycle-head"><div><b>${esc(c.type==='tournament'?('Turniej: '+(c.competitionName||'bez nazwy')):('Powołanie miesięczne'))}</b><small>Pierwszy mecz: ${first?first.toLocaleString('pl-PL'): '—'}${until?' · ważne do: '+until.toLocaleString('pl-PL'):''}<br>${c.manualEdited?'Kadra była ręcznie edytowana.':'Kadra utworzona automatycznie.'}</small></div><span class="rw-cycle-badge">${rows.length} zawodników</span></div><div class="rw-auto-note">Zasada: mecze w jednym miesiącu korzystają z jednego powołania. Mecz turniejowy utrzymuje tę samą kadrę do końca turnieju. Eliminacje, baraże i mecze towarzyskie również otrzymują własne powołanie dla danego meczu.</div>${rows.length?rows.sort((a,b)=>String(a.team||'').localeCompare(String(b.team||''),'pl')||String(a.playerName||'').localeCompare(String(b.playerName||''),'pl')).map(x=>`<div class="rw-callup-row"><div class="rw-callup-main"><b>${esc(x.playerName||'Nieznany zawodnik')}</b><small>${esc(x.team||'Brak klubu')} · ${esc(x.position||'')}</small></div><div class="rw-callup-actions"><button class="btn-sm btn-del" onclick="rwRemoveCallup('${esc(x.id)}')">Usuń</button></div></div>`).join(''):'<div class="rw-empty">Brak zawodników w tym cyklu.</div>'}`;
   };
   window.rwLoadPublic=async function(){
     const sel=document.getElementById('rw-public-province');if(!sel||!window.db)return;const p=PROVINCES.find(x=>x[0]===sel.value)||PROVINCES[0];const el=document.getElementById('rw-public-content');if(!el)return;el.innerHTML='<div class="rw-empty">Ładowanie reprezentacji…</div>';
@@ -4956,7 +4964,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
     let matchRowsData=[];try{matchRowsData=await matchRows();}catch(e){}
     const now=Date.now();const upcoming=matchRowsData.filter(m=>{const d=matchDate(m);return d&&d.getTime()>now&&(m.status||'upcoming')!=='finished';});
     const finished=matchRowsData.filter(m=>{const d=matchDate(m);return (m.status==='finished'||(d&&d.getTime()<=now))&&m.scoreHome!==null&&m.scoreAway!==null;}).sort((a,b)=>(matchDate(b)?.getTime()||0)-(matchDate(a)?.getTime()||0));
-    const matchCard=m=>{const d=matchDate(m);const hs=m.homeTeam||'Reprezentacja';const as=m.awayTeam||'Reprezentacja';const finishedMatch=m.scoreHome!==null&&m.scoreAway!==null&&m.scoreHome!==undefined&&m.scoreAway!==undefined;return `<div class="rw-match-public"><div class="rw-match-date">${d?d.toLocaleDateString('pl-PL',{day:'2-digit',month:'2-digit',year:'numeric'})+' · '+d.toLocaleTimeString('pl-PL',{hour:'2-digit',minute:'2-digit'}):'—'}</div><div class="rw-match-teams"><b>${escM(hs)}</b><span>${finishedMatch?`${escM(m.scoreHome)} : ${escM(m.scoreAway)}`:'vs'}</span><b>${escM(as)}</b></div>${m.competitionName?`<small class="rw-match-comp">${escM(m.competitionName)}</small>`:''}</div>`;};
+    const matchCard=m=>{const d=matchDate(m);const hs=m.homeTeam||'Reprezentacja';const as=m.awayTeam||'Reprezentacja';const finishedMatch=m.scoreHome!==null&&m.scoreAway!==null&&m.scoreHome!==undefined&&m.scoreAway!==undefined;const typeLabel=matchCompetitionLabel(m);const extra=m.competitionName?` · ${escM(m.competitionName)}`:'';return `<div class="rw-match-public"><div class="rw-match-date">${d?d.toLocaleDateString('pl-PL',{day:'2-digit',month:'2-digit',year:'numeric'})+' · '+d.toLocaleTimeString('pl-PL',{hour:'2-digit',minute:'2-digit'}):'—'}</div><div class="rw-match-teams"><b>${escM(hs)}</b><span>${finishedMatch?`${escM(m.scoreHome)} : ${escM(m.scoreAway)}`:'vs'}</span><b>${escM(as)}</b></div><small class="rw-match-comp">${escM(typeLabel)}${extra}</small></div>`;};
     const matchesHtml=`<div class="rw-matches-public"><h3>Nadchodzące mecze</h3>${upcoming.length?upcoming.map(matchCard).join(''):'<div class="rw-empty">Brak nadchodzących meczów.</div>'}<h3 style="margin-top:18px;">Zakończone mecze — wyniki</h3>${finished.length?finished.map(matchCard).join(''):'<div class="rw-empty">Brak zakończonych meczów.</div>'}</div>`;
     const cycles=await getCycles(p[0]);const c=cycles[0];
     let cycleHtml='';
@@ -5107,6 +5115,115 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 .rw-matches-public{margin-top:20px}.rw-matches-public h3{font-size:.95rem;text-transform:uppercase;letter-spacing:.5px;margin:0 0 10px;color:var(--green,#18a56b)}.rw-match-public{background:#fff;border:1px solid var(--line,#e4e8ed);border-radius:10px;padding:12px 14px;margin:7px 0;box-shadow:0 2px 8px rgba(0,0,0,.04)}.rw-match-date{font-size:.68rem;color:var(--muted,#7b8794);margin-bottom:7px}.rw-match-teams{display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:center;text-align:center}.rw-match-teams b:first-child{text-align:right}.rw-match-teams b:last-child{text-align:left}.rw-match-teams span{font-size:1rem;font-weight:900;min-width:55px}.rw-match-comp{display:block;text-align:center;margin-top:6px;color:var(--muted,#7b8794)}
 @media(max-width:600px){.rw-match-teams{grid-template-columns:1fr;gap:5px}.rw-match-teams b:first-child,.rw-match-teams b:last-child{text-align:center}.rw-match-teams span{order:2}.rw-match-teams b:first-child{order:1}.rw-match-teams b:last-child{order:3}}
 </style>
+<script id="representation-lineup-automation-fix">
+(function(){
+  const repTypeLabel={regular:'Mecz reprezentacyjny',tournament:'Turniej reprezentacyjny',qualifier:'Eliminacje',playoff:'Baraż',friendly:'Mecz towarzyski'};
+  function repDate(m){try{if(!m||!m.date)return null;if(typeof m.date.toDate==='function')return m.date.toDate();if(typeof m.date.seconds==='number')return new Date(m.date.seconds*1000);const d=new Date(m.date);return Number.isNaN(d.getTime())?null:d;}catch(e){return null;}}
+  function repProvince(m,side){return side==='home'?(m.representationHomeProvince||m.representationProvince||''):(m.representationAwayProvince||m.representationProvince||'');}
+  async function repCallupsForMatch(db,m,province){
+    if(!db||!m||!province)return [];
+    try{
+      let cycle=null;
+      try{
+        const q=await db.collection('regionalCallupCycles').where('matchIds','array-contains',m.id).limit(1).get();
+        if(!q.empty)cycle={id:q.docs[0].id,...q.docs[0].data()};
+      }catch(e){}
+      if(!cycle){
+        const q=await db.collection('regionalCallupCycles').where('province','==',province).get();
+        const rows=q.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(b.firstMatchAt?.seconds||0)-(a.firstMatchAt?.seconds||0));
+        const md=repDate(m)?.getTime()||0;
+        cycle=rows.find(c=>{
+          const first=c.firstMatchAt?.seconds?c.firstMatchAt.seconds*1000:repDate(c.firstMatchAt)?.getTime()||0;
+          const until=c.validUntil?.seconds?c.validUntil.seconds*1000:repDate(c.validUntil)?.getTime()||0;
+          return (!first||first<=md) && (!until||md<=until+24*3600000);
+        })||rows[0]||null;
+      }
+      if(!cycle)return [];
+      const snap=await db.collection('regionalCallups').where('cycleId','==',cycle.id).get();
+      return snap.docs.map(d=>({id:d.id,...d.data()})).filter(x=>x.playerName||x.player);
+    }catch(e){console.error('Reprezentacja — pobieranie powołań do składu',e);return []}
+  }
+  function lineupFromCallups(rows){
+    const roster=rows.map(x=>({id:x.rosterId||x.id,player:x.playerName||x.player,number:x.number||'',position:x.position||'',status:x.status||'available'}));
+    return typeof buildAutomaticLineup==='function'?buildAutomaticLineup(roster):[];
+  }
+  window.getRepresentationLineup=async function(db,m,side){
+    if(!m?.representation)return [];
+    const rows=await repCallupsForMatch(db,m,repProvince(m,side));
+    return lineupFromCallups(rows);
+  };
+  const oldEnsure=window.ensureAutomaticLineup|| (typeof ensureAutomaticLineup==='function'?ensureAutomaticLineup:null);
+  window.ensureAutomaticLineup=async function(db,m,homeRoster,awayRoster){
+    const currentHome=Array.isArray(m?.lineupHome)?m.lineupHome:[];
+    const currentAway=Array.isArray(m?.lineupAway)?m.lineupAway:[];
+    if(!db||!m)return [currentHome,currentAway];
+    if(m.lineupsManual)return [currentHome,currentAway];
+    if(!matchIsUpcoming(m))return [currentHome,currentAway];
+    const date=repDate(m),now=typeof getServerNow==='function'?getServerNow():new Date();
+    if(!date)return [currentHome,currentAway];
+    const diffHours=(date-now)/3600000;
+    if(diffHours<0||diffHours>48)return [currentHome,currentAway];
+    let home=currentHome,away=currentAway;
+    if(m.representation===true){
+      if(!home.length)home=await window.getRepresentationLineup(db,m,'home');
+      if(!away.length)away=await window.getRepresentationLineup(db,m,'away');
+    }
+    if(!home.length)home=currentHome.length?currentHome:(typeof buildAutomaticLineup==='function'?buildAutomaticLineup(homeRoster):[]);
+    if(!away.length)away=currentAway.length?currentAway:(typeof buildAutomaticLineup==='function'?buildAutomaticLineup(awayRoster):[]);
+    const patch={};
+    if(!currentHome.length&&home.length)patch.lineupHome=home;
+    if(!currentAway.length&&away.length)patch.lineupAway=away;
+    if(!Object.keys(patch).length)return [home,away];
+    patch.lineupsAutoGenerated=true;patch.lineupsManual=false;patch.lineupsUpdatedAt=firebase.firestore.FieldValue.serverTimestamp();
+    try{await db.collection('matches').doc(m.id).update(patch);m.lineupHome=home;m.lineupAway=away;m.lineupsAutoGenerated=true;m.lineupsManual=false;}catch(e){console.error('Automatyczne ustawienie składu reprezentacji:',e)}
+    return [home,away];
+  };
+  async function repSideLineup(db,m,side,clubRoster){
+    const f=side==='home'?'lineupHome':'lineupAway';
+    if(m[f]?.length)return m[f];
+    let x=[];
+    if(m.representation===true)x=await window.getRepresentationLineup(db,m,side);
+    if(!x.length&&typeof buildAutomaticLineup==='function')x=buildAutomaticLineup(clubRoster||[]);
+    if(x.length){await db.collection('matches').doc(m.id).update({[f]:x,lineupsAutoGenerated:true,lineupsManual:false,lineupsUpdatedAt:firebase.firestore.FieldValue.serverTimestamp()});m[f]=x;}
+    return x;
+  }
+  window.sideLineup=repSideLineup;
+  window.autoGenerateUpcomingLineups=async function(matches){
+    const now=typeof getServerNow==='function'?getServerNow():new Date();
+    const candidates=(matches||[]).filter(m=>{if(!m||matchIsLive(m)||matchIsFinished(m))return false;const d=repDate(m);if(!d)return false;const h=(d.getTime()-now.getTime())/3600000;return h>0&&h<=48});
+    for(let i=0;i<candidates.length;i+=6){
+      await Promise.all(candidates.slice(i,i+6).map(async m=>{
+        const db=(m._db==='db2'&&window.db2)?window.db2:window.db;if(!db)return;
+        try{
+          if(m.representation===true&&typeof window.rwCallupAutomationNow==='function')await window.rwCallupAutomationNow();
+          if(!m.lineupHome?.length){const hr=await getRosterForProtocol(m.homeTeam,db);await repSideLineup(db,m,'home',hr)}
+          if(!m.lineupAway?.length){const ar=await getRosterForProtocol(m.awayTeam,db);await repSideLineup(db,m,'away',ar)}
+        }catch(e){if(e?.code!=='resource-exhausted')console.error('Automatyczne składy',m.id,e)}
+      }));
+    }
+  };
+  // Używane przez symulator przy meczu, który właśnie przechodzi do symulacji.
+  const oldSimEnsure=window.__representationSimEnsure;
+  window.__representationSimEnsure=async function(m){
+    const db=window.db;if(!db||!m||m.representation!==true)return true;
+    if(!m.lineupHome?.length){const hr=await getRosterForProtocol(m.homeTeam,db);await repSideLineup(db,m,'home',hr)}
+    if(!m.lineupAway?.length){const ar=await getRosterForProtocol(m.awayTeam,db);await repSideLineup(db,m,'away',ar)}
+    return !!(m.lineupHome?.length&&m.lineupAway?.length);
+  };
+  // Ponownie podpinamy protokół administracyjny, aby reset automatyczny reprezentacji
+  // korzystał z powołanych, a nie z całego klubu.
+  const oldReset=window.resetProtocolLineupsToAuto;
+  window.resetProtocolLineupsToAuto=async function(){
+    if(!window.protocolState||!protocolState.match)return;
+    const m=protocolState.match;
+    let h=[],a=[];
+    if(m.representation===true){h=await window.getRepresentationLineup(protocolState.db,m,'home');a=await window.getRepresentationLineup(protocolState.db,m,'away');}
+    if(!h.length)h=buildAutomaticLineup(protocolState.homeRoster||[]);
+    if(!a.length)a=buildAutomaticLineup(protocolState.awayRoster||[]);
+    renderProtocolPlayers('mp-home-players',protocolState.homeRoster||[],h);renderProtocolPlayers('mp-away-players',protocolState.awayRoster||[],a);protocolState.match.lineupHome=h;protocolState.match.lineupAway=a;refreshProtocolPlayerOptions();const st=document.getElementById('mp-save-status');if(st)st.textContent='Ustawiono automatycznie z powołanych — kliknij „Zapisz składy meczu”.';
+  };
+})();
+</script>
 </body>
 </html>
 <style id="planethc-pro-overhaul">
