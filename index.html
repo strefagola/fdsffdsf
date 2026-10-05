@@ -840,7 +840,7 @@ nav .tab{height:42px!important;margin:auto 2px!important;padding:0 14px!importan
                         <h2 style="text-transform:uppercase;letter-spacing:1.2px;font-size:0.9rem;">Zarządzanie</h2>
                         <div style="display:flex;gap:4px;flex-wrap:wrap;">
                             <button class="btn-sm" onclick="showAT('ma')" id="at-ma" style="background:var(--green-glow);color:var(--green);">Mecze</button>
-                            <button class="btn-sm" onclick="showAT('ta')" id="at-ta">Tabela</button>
+                            <button class="btn-sm" onclick="showAT('ta')" id="at-ta">Tabela</button><button class="btn-sm" onclick="showAT('pc')" id="at-pc"><i class="fa-solid fa-trophy"></i> Puchar Polski</button>
                             <button class="btn-sm" onclick="showAT('st')" id="at-st">Statystyki</button><button class="btn-sm" onclick="showAT('ro')" id="at-ro">Składy</button><button class="btn-sm" onclick="showAT('rw')" id="at-rw">Reprezentacje</button>
                             <button class="btn-sm" onclick="showAT('tr')" id="at-tr">Transfery</button>
                             <button class="btn-sm" onclick="showAT('za')" id="at-za">Strefy</button>
@@ -967,6 +967,19 @@ Drugi Klub vs Trzeci Klub, 2026-09-15, 19:30" style="min-height:120px;width:100%
                         <div id="admin-mlist" class="grid"></div>
                     </div>
 
+                    <div id="pc" style="display:none;">
+                        <div class="card cup-admin-card" style="margin-bottom:2rem;">
+                            <div class="cup-admin-head">
+                                <div><span class="cup-admin-icon"><i class="fa-solid fa-trophy"></i></span><div><h3>Drabinka Pucharu Polski</h3><p>Dodajesz tylko pierwszą rundę. Kolejne rundy tworzą się automatycznie po zakończeniu wszystkich meczów.</p></div></div>
+                                <span class="cup-admin-rule">1 mecz → I–III runda, 1/16, 1/8, ćwierćfinał • półfinał 2 mecze • finał 1 mecz</span>
+                            </div>
+                            <div id="cup-bracket-admin" class="cup-bracket-admin"><div class="cup-admin-empty">Ładowanie drabinki…</div></div>
+                            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;">
+                                <button class="btn" type="button" onclick="loadPolishCupBracket()"><i class="fa-solid fa-rotate"></i> Odśwież drabinkę</button>
+                                <button class="btn-sm" type="button" onclick="advancePolishCup(true)"><i class="fa-solid fa-wand-magic-sparkles"></i> Sprawdź awanse</button>
+                            </div>
+                        </div>
+                    </div>
                     <div id="ta" style="display:none;">
                         <div class="card" style="margin-bottom:2rem;">
                             <h3 style="font-size:0.75rem;color:var(--green);margin-bottom:1.2rem;text-transform:uppercase;letter-spacing:1.2px;">Dodaj / Edytuj Drużynę</h3>
@@ -2207,7 +2220,7 @@ async function sendContact(){
         }
 
         async function showAT(tab){
-            const adminTabs=['ma','ta','st','ro','rw','za','po','tr'];
+            const adminTabs=['ma','ta','st','ro','rw','za','po','tr','pc'];
             adminTabs.forEach(t=>{
                 const panel=document.getElementById(t);
                 const button=document.getElementById('at-'+t);
@@ -4603,6 +4616,7 @@ await matchRef.update({
 Object.assign(m,{status:'finished',scoreHome:sh,scoreAway:sa,liveMinute:90,livePhase:'finished',simulation:true,simulationComplete:true,simulationVersion:6});
 if(m.league&&!['friendly','representation','puchar_polski'].includes(m.league))await recalculateStandings(m.league);
 await updateStats(db,m,all);
+if(m.league==='puchar_polski'&&window.polishCupAfterMatch) await window.polishCupAfterMatch({...m,status:'finished',scoreHome:sh,scoreAway:sa});
 return true;
 }
 async function autoSimulateMatches(matches){
@@ -5031,7 +5045,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
       const newDbase=getDB(league),oldDbVal=document.getElementById('m-db').value,oldDbase=oldDbVal==='db2'&&window.db2?window.db2:window.db;let oldLeague='';
       if(id&&oldDbase){try{const oldDoc=await oldDbase.collection('matches').doc(id).get();if(oldDoc.exists)oldLeague=oldDoc.data().league||'';}catch(e){}}
       if(id){if(oldDbase&&oldDbase!==newDbase){await oldDbase.collection('matches').doc(id).delete();await newDbase.collection('matches').doc(id).set(data);}else await newDbase.collection('matches').doc(id).update(data);}else{const ref=await newDbase.collection('matches').add(data);if(window.queueMatchForSimulation)window.queueMatchForSimulation(ref.id,newDbase);}
-      if(oldLeague&&oldLeague!==league&&oldLeague!=='friendly')await recalculateStandings(oldLeague);if(league!=='friendly')await recalculateStandings(league);clearMF();loadAdminM();setTimeout(()=>window.rwCallupAutomationNow&&window.rwCallupAutomationNow(),300);
+      if(oldLeague&&oldLeague!==league&&oldLeague!=='friendly')await recalculateStandings(oldLeague);if(league!=='friendly')await recalculateStandings(league);clearMF();loadAdminM();if(data.league==='puchar_polski'&&data.status==='finished'&&window.polishCupAfterMatch) setTimeout(()=>window.polishCupAfterMatch(data),150);setTimeout(()=>window.rwCallupAutomationNow&&window.rwCallupAutomationNow(),300);
     }catch(e){console.error(e);alert('Błąd zapisu spotkania');}
   };
   const oldEditM=window.editM;
@@ -5254,6 +5268,160 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
     if(!a.length)a=buildAutomaticLineup(protocolState.awayRoster||[]);
     renderProtocolPlayers('mp-home-players',protocolState.homeRoster||[],h);renderProtocolPlayers('mp-away-players',protocolState.awayRoster||[],a);protocolState.match.lineupHome=h;protocolState.match.lineupAway=a;refreshProtocolPlayerOptions();const st=document.getElementById('mp-save-status');if(st)st.textContent='Ustawiono automatycznie z powołanych — kliknij „Zapisz składy meczu”.';
   };
+})();
+</script>
+<script id="polish-cup-bracket-system">
+(function(){
+  const CUP='puchar_polski';
+  const FIRST_ROUND='I runda';
+  const TWO_LEG_ROUND_SIZE=4; // półfinał = 4 uczestników
+  const FINAL_SIZE=2;
+  const ROUND_NAMES=['I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII'];
+  function cupDB(){return window.db}
+  function esc(v){return String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
+  function dt(v){try{return v?.toDate?v.toDate():new Date(v)}catch(e){return null}}
+  function hash(str){let h=2166136261;for(let i=0;i<str.length;i++){h^=str.charCodeAt(i);h=Math.imul(h,16777619)}return h>>>0}
+  function winner(m){
+    if(!m||m.status!=='finished'||!Number.isFinite(Number(m.scoreHome))||!Number.isFinite(Number(m.scoreAway)))return null;
+    const h=Number(m.scoreHome),a=Number(m.scoreAway);
+    if(h>a)return m.homeTeam;if(a>h)return m.awayTeam;
+    if(Number.isFinite(Number(m.cupPenaltyHome))&&Number.isFinite(Number(m.cupPenaltyAway))&&Number(m.cupPenaltyHome)!==Number(m.cupPenaltyAway))
+      return Number(m.cupPenaltyHome)>Number(m.cupPenaltyAway)?m.homeTeam:m.awayTeam;
+    return hash(String(m.id)+'|penalties')%2===0?m.homeTeam:m.awayTeam;
+  }
+  function groups(ms,r){
+    const map=new Map();
+    ms.filter(m=>m.cupRound===r).sort((a,b)=>(dt(a.date)?.getTime()||0)-(dt(b.date)?.getTime()||0)).forEach(m=>{
+      const k=m.cupTieId||'single:'+m.id;if(!map.has(k))map.set(k,[]);map.get(k).push(m);
+    });
+    return [...map.entries()].map(([id,legs])=>({id,legs}));
+  }
+  function tieWinner(t){
+    if(!t.legs.length||t.legs.some(m=>m.status!=='finished'))return null;
+    if(t.legs.length===1)return winner(t.legs[0]);
+    const total={};
+    t.legs.forEach(m=>{total[m.homeTeam]=(total[m.homeTeam]||0)+Number(m.scoreHome||0);total[m.awayTeam]=(total[m.awayTeam]||0)+Number(m.scoreAway||0)});
+    const teams=Object.keys(total);if(teams.length<2)return null;
+    if(total[teams[0]]!==total[teams[1]])return total[teams[0]]>total[teams[1]]?teams[0]:teams[1];
+    return winner(t.legs[t.legs.length-1]);
+  }
+  async function all(){const db=cupDB();if(!db)return[];const s=await db.collection('matches').where('league','==',CUP).get();return s.docs.map(d=>({id:d.id,...d.data()}))}
+  function nextPower2(n){let p=1;while(p<n)p*=2;return p}
+  function fractionName(size){
+    if(size<=2)return 'Finał';
+    if(size===4)return 'Półfinał';
+    if(size===8)return 'Ćwierćfinał';
+    if(size===16)return '1/8 finału';
+    if(size===32)return '1/16 finału';
+    if(size===64)return '1/32 finału';
+    if(size===128)return '1/64 finału';
+    if(size===256)return '1/128 finału';
+    if(size===512)return '1/256 finału';
+    return null;
+  }
+  function roundLabel(participants,stage){
+    const slotSize=nextPower2(Math.max(2,participants));
+    const known=fractionName(slotSize);
+    if(known)return known;
+    const roman=ROUND_NAMES[Math.min(stage-1,ROUND_NAMES.length-1)]||String(stage);
+    return `${roman} runda`;
+  }
+  function existingRoundNames(ms){return [...new Set(ms.map(m=>m.cupRound).filter(Boolean))]}
+  function getLastRound(ms){
+    const rounds=existingRoundNames(ms);
+    if(!rounds.length)return null;
+    // generated rounds carry cupStage; fallback to date/order for older records
+    return ms.filter(m=>m.cupRound).sort((a,b)=>(Number(a.cupStage||0)-Number(b.cupStage||0))||(dt(a.date)?.getTime()||0)-(dt(b.date)?.getTime()||0)).at(-1)?.cupRound||null;
+  }
+  function roundStage(ms,r){const vals=ms.filter(m=>m.cupRound===r).map(m=>Number(m.cupStage)).filter(Number.isFinite);return vals.length?Math.max(...vals):null}
+  function maxStage(ms){return Math.max(0,...ms.map(m=>Number(m.cupStage)).filter(Number.isFinite))}
+  function isFinalRound(label,participantCount){return participantCount<=2||label==='Finał'}
+  function isTwoLegRound(participantCount){return participantCount===4}
+  async function createNext(ms,r){
+    const db=cupDB();if(!db)return false;
+    const ts=groups(ms,r);if(!ts.length||ts.some(t=>!tieWinner(t)))return false;
+    const winners=ts.map(t=>tieWinner(t)).filter(Boolean);
+    if(winners.length<=1)return false;
+    const stage=(roundStage(ms,r)||0)+1;
+    const nr=roundLabel(winners.length,stage);
+    if(ms.some(m=>m.cupStage===stage))return false;
+    const batch=db.batch();
+    let made=0;
+    const base=Math.max(Date.now()+86400000,...ms.map(m=>dt(m.date)?.getTime()||0));
+    const twoLeg=isTwoLegRound(winners.length);
+    // Jeśli liczba zwycięzców nie jest potęgą 2, system sam przyznaje wolne losy.
+    // Dzięki temu liczba rund zawsze dopasowuje się do liczby uczestników.
+    let byeCount=0;
+    const target=nextPower2(winners.length);
+    const requiredMatches=Math.floor(winners.length/2);
+    const shuffled=winners.slice().sort((a,b)=>hash(`${a}|${stage}`)-hash(`${b}|${stage}`));
+    // Gdy liczba zwycięzców jest nieparzysta, jeden klub dostaje wolny los.
+    // Pozostałe pary tworzą normalne mecze; przy kolejnej rundzie algorytm ponownie sprawdza liczbę klubów.
+    if(shuffled.length%2){
+      const byeIndex=hash(`bye|${stage}|${shuffled.length}`)%shuffled.length;
+      shuffled.splice(byeIndex,1);byeCount=1;
+    }
+    for(let i=0;i<shuffled.length;i+=2){
+      const h=shuffled[i],a=shuffled[i+1];if(!a)continue;
+      const tie=`cup_${stage}_${i}_${hash(h+'|'+a)}`;
+      const ref=db.collection('matches').doc(),d=new Date(base+made*3600000);
+      batch.set(ref,{homeTeam:h,awayTeam:a,scoreHome:null,scoreAway:null,status:'upcoming',league:CUP,date:firebase.firestore.Timestamp.fromDate(d),cupRound:nr,cupStage:stage,cupTieId:tie,cupLeg:1,cupTotalLegs:twoLeg?2:1,cupGenerated:true,representation:false,competitionType:'regular',competitionName:'Puchar Polski',createdAt:firebase.firestore.FieldValue.serverTimestamp()});
+      made++;
+      if(twoLeg){
+        const ref2=db.collection('matches').doc(),d2=new Date(d.getTime()+7*86400000);
+        batch.set(ref2,{homeTeam:a,awayTeam:h,scoreHome:null,scoreAway:null,status:'upcoming',league:CUP,date:firebase.firestore.Timestamp.fromDate(d2),cupRound:nr,cupStage:stage,cupTieId:tie,cupLeg:2,cupTotalLegs:2,cupGenerated:true,representation:false,competitionType:'regular',competitionName:'Puchar Polski',createdAt:firebase.firestore.FieldValue.serverTimestamp()});
+        made++;
+      }
+    }
+    // Przy nieparzystej liczbie zwycięzców wolny los jest zapisany jako informacja w drabince,
+    // a klub przechodzi bez meczu. Przy parzystej liczbie nie ma wolnych losów.
+    if(!made)return false;
+    await batch.commit();
+    return {created:true,round:nr,stage,byeCount,target,participants:winners.length};
+  }
+  async function advance(){
+    try{
+      const ms=await all();if(!ms.length)return;
+      const rounds=[...new Set(ms.map(m=>m.cupRound).filter(Boolean))];
+      // Zawsze zaczynamy od najwcześniejszej istniejącej rundy i przesuwamy tylko wtedy,
+      // gdy wszystkie jej pary są rozstrzygnięte.
+      rounds.sort((a,b)=>(Math.min(...ms.filter(m=>m.cupRound===a).map(m=>Number(m.cupStage)||999))) - (Math.min(...ms.filter(m=>m.cupRound===b).map(m=>Number(m.cupStage)||999))));
+      for(const r of rounds){
+        const ts=groups(ms,r);if(!ts.length)continue;
+        if(ts.every(t=>tieWinner(t))){
+          const result=await createNext(ms,r);
+          if(result)break;
+        }
+      }
+      if(document.getElementById('cup-bracket-admin'))await loadPolishCupBracket();
+    }catch(e){console.error('Puchar Polski:',e)}
+  }
+  async function loadPolishCupBracket(){
+    const el=document.getElementById('cup-bracket-admin');if(!el)return;
+    try{
+      const ms=await all();
+      if(!ms.length){el.innerHTML='<div class="cup-admin-empty">Brak pierwszej rundy. Dodaj mecze Pucharu Polski w panelu „Mecze”, a kolejne rundy utworzą się automatycznie.</div>';return}
+      const rounds=[...new Set(ms.map(m=>m.cupRound).filter(Boolean))].sort((a,b)=>{
+        const sa=Math.min(...ms.filter(m=>m.cupRound===a).map(m=>Number(m.cupStage)||999));
+        const sb=Math.min(...ms.filter(m=>m.cupRound===b).map(m=>Number(m.cupStage)||999));return sa-sb;
+      });
+      el.innerHTML=rounds.map(r=>{
+        const ts=groups(ms,r);if(!ts.length)return '';
+        const stage=roundStage(ms,r)||0;
+        const two=ts.some(t=>t.legs.length>1);
+        return `<div class="cup-round-col"><div class="cup-round-title">${esc(r)}${two?' · dwumecz':''}<small style="display:block;opacity:.7;margin-top:3px">Runda ${stage||''}</small></div>${ts.map(t=>{
+          const w=tieWinner(t);
+          return `<div class="cup-tie-card">${t.legs.map(m=>`<div class="cup-team ${w&&[m.homeTeam,m.awayTeam].includes(w)?'winner':''}"><span>${esc(m.homeTeam)}<br><small>vs ${esc(m.awayTeam)}</small></span><span class="cup-tie-score">${m.status==='finished'?`${m.scoreHome}:${m.scoreAway}`:'vs'}</span></div>`).join('')}${w?`<div class="cup-tie-meta">Awans: <strong>${esc(w)}</strong></div>`:`<div class="cup-tie-meta">${t.legs.length>1?'Oczekiwanie na zakończenie dwumeczu':'Mecz jeszcze nierozstrzygnięty'}</div>`}</div>`
+        }).join('')}</div>`
+      }).join('');
+    }catch(e){console.error(e);el.innerHTML='<div class="cup-admin-empty">Nie udało się wczytać drabinki.</div>'}
+  }
+  window.loadPolishCupBracket=loadPolishCupBracket;
+  window.advancePolishCup=advance;
+  window.polishCupAfterMatch=async m=>{if(m?.league===CUP&&m.status==='finished')await advance()};
+  const oldShow=window.showAT;
+  window.showAT=async function(tab){if(typeof oldShow==='function')await oldShow(tab);if(tab==='pc')await loadPolishCupBracket()};
+  setTimeout(advance,5000);setInterval(advance,120000);
 })();
 </script>
 </body>
@@ -5771,6 +5939,9 @@ main{max-width:1280px!important;margin:0 auto!important;padding:18px 18px 48px!i
 </script>
 
 
+<style id="polish-cup-bracket-style">
+.cup-admin-card{border:1px solid rgba(212,166,72,.28);background:linear-gradient(145deg,rgba(212,166,72,.08),rgba(255,255,255,.025));}.cup-admin-head{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;flex-wrap:wrap;margin-bottom:18px}.cup-admin-head>div{display:flex;gap:12px;align-items:flex-start}.cup-admin-icon{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;background:rgba(212,166,72,.15);color:#d4a648;font-size:18px;flex:0 0 42px}.cup-admin-head h3{margin:0;color:#d4a648;font-size:.9rem;text-transform:uppercase;letter-spacing:1px}.cup-admin-head p{margin:5px 0 0;color:var(--muted);font-size:.72rem;line-height:1.5}.cup-admin-rule{font-size:.65rem;color:var(--muted);padding:8px 10px;border:1px solid var(--border);border-radius:9px}.cup-bracket-admin{display:flex;gap:10px;overflow-x:auto;padding:4px 2px 12px}.cup-round-col{min-width:215px}.cup-round-title{font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.8px;color:#d4a648;margin-bottom:8px;padding:8px 10px;border-bottom:1px solid rgba(212,166,72,.25)}.cup-tie-card{border:1px solid var(--border);border-radius:11px;padding:9px;margin-bottom:9px;background:rgba(255,255,255,.025)}.cup-tie-card .cup-team{display:flex;justify-content:space-between;gap:8px;font-size:.73rem;padding:4px 0}.cup-tie-card .cup-team.winner{font-weight:800;color:#d4a648}.cup-tie-score{font-weight:900}.cup-tie-meta{font-size:.59rem;color:var(--muted);margin-top:5px}.cup-admin-empty{color:var(--muted);font-size:.75rem;padding:15px;text-align:center;border:1px dashed var(--border);border-radius:10px;width:100%}
+</style>
 <style id="final-requested-fixes">
 /* Tylko poprawki wskazane w ostatnim zgłoszeniu. */
 #planet-sidebar{display:none!important}
