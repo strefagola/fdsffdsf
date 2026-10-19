@@ -1487,7 +1487,7 @@ Adam Wiśniewski | 1 | Bramkarz | Zawieszony | 2 mecze"></textarea>
                 // źródłem niepotrzebnego zużycia quota.
                 const [_,snap]=await Promise.all([
                     loadCrests(),
-                    window.db.collection('matches').orderBy('date','desc').limit(10000).get()
+                    window.db.collection('matches').orderBy('date','desc').limit(90000).get()
                 ]);
                 let allM=snap.docs.map(d=>({id:d.id,_db:'db1',...d.data()}));
                 allM.sort((a,b)=>(a.date?.seconds||0)-(b.date?.seconds||0));
