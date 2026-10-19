@@ -5337,6 +5337,21 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
   function maxStage(ms){return Math.max(0,...ms.map(m=>Number(m.cupStage)).filter(Number.isFinite))}
   function isFinalRound(label,participantCount){return participantCount<=2||label==='Finał'}
   function isTwoLegRound(participantCount){return participantCount===4}
+  // Kolejne rundy Pucharu: wyłącznie poniedziałek–piątek, wieczorem (19:00).
+  function nextCupWeekdayEvening(value){
+    const d=new Date(value);
+    d.setHours(19,0,0,0);
+    if(d.getTime()<=Date.now()) d.setDate(d.getDate()+1);
+    while(d.getDay()===0||d.getDay()===6) d.setDate(d.getDate()+1);
+    return d;
+  }
+  function addCupMatchSlot(value,offsetHours){
+    const d=nextCupWeekdayEvening(value);
+    d.setHours(19+(offsetHours||0),0,0,0);
+    if(d.getHours()>=22){d.setDate(d.getDate()+1);d.setHours(19,0,0,0);}
+    while(d.getDay()===0||d.getDay()===6) d.setDate(d.getDate()+1);
+    return d;
+  }
   async function createNext(ms,r){
     const db=cupDB();if(!db)return false;
     const ts=groups(ms,r);if(!ts.length||ts.some(t=>!tieWinner(t)))return false;
@@ -5347,7 +5362,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
     if(ms.some(m=>m.cupStage===stage))return false;
     const batch=db.batch();
     let made=0;
-    const base=Math.max(Date.now()+86400000,...ms.map(m=>dt(m.date)?.getTime()||0));
+    const base=nextCupWeekdayEvening(Math.max(Date.now()+86400000,...ms.map(m=>dt(m.date)?.getTime()||0)));
     const twoLeg=isTwoLegRound(winners.length);
     // Jeśli liczba zwycięzców nie jest potęgą 2, system sam przyznaje wolne losy.
     // Dzięki temu liczba rund zawsze dopasowuje się do liczby uczestników.
@@ -5364,11 +5379,11 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
     for(let i=0;i<shuffled.length;i+=2){
       const h=shuffled[i],a=shuffled[i+1];if(!a)continue;
       const tie=`cup_${stage}_${i}_${hash(h+'|'+a)}`;
-      const ref=db.collection('matches').doc(),d=new Date(base+made*3600000);
+      const ref=db.collection('matches').doc(),d=addCupMatchSlot(base,made%3);
       batch.set(ref,{homeTeam:h,awayTeam:a,scoreHome:null,scoreAway:null,status:'upcoming',league:CUP,date:firebase.firestore.Timestamp.fromDate(d),cupRound:nr,cupStage:stage,cupTieId:tie,cupLeg:1,cupTotalLegs:twoLeg?2:1,cupGenerated:true,representation:false,competitionType:'regular',competitionName:'Puchar Polski',createdAt:firebase.firestore.FieldValue.serverTimestamp()});
       made++;
       if(twoLeg){
-        const ref2=db.collection('matches').doc(),d2=new Date(d.getTime()+7*86400000);
+        const ref2=db.collection('matches').doc(),d2=nextCupWeekdayEvening(new Date(d.getTime()+7*86400000));
         batch.set(ref2,{homeTeam:a,awayTeam:h,scoreHome:null,scoreAway:null,status:'upcoming',league:CUP,date:firebase.firestore.Timestamp.fromDate(d2),cupRound:nr,cupStage:stage,cupTieId:tie,cupLeg:2,cupTotalLegs:2,cupGenerated:true,representation:false,competitionType:'regular',competitionName:'Puchar Polski',createdAt:firebase.firestore.FieldValue.serverTimestamp()});
         made++;
       }
