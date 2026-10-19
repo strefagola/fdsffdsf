@@ -1479,17 +1479,37 @@ Adam Wiśniewski | 1 | Bramkarz | Zawieszony | 2 mecze"></textarea>
             return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
         }
 
+        // Firestore dopuszcza maksymalnie 10 000 dokumentów na jedno zapytanie.
+        // Pobieramy kolejne strony aż do końca kolekcji — bez sztucznego limitu 90 000.
+        // Sortowanie po ID dokumentu uwzględnia również mecze bez pola "date".
+        async function fetchMatchesPaged(){
+            const pageSize=10000;
+            const allDocs=[];
+            let lastDoc=null;
+            while(true){
+                let query=window.db.collection('matches')
+                    .orderBy(firebase.firestore.FieldPath.documentId())
+                    .limit(pageSize);
+                if(lastDoc) query=query.startAfter(lastDoc);
+                const snap=await query.get();
+                if(!snap.docs.length) break;
+                allDocs.push(...snap.docs);
+                lastDoc=snap.docs[snap.docs.length-1];
+                if(snap.docs.length<pageSize) break;
+            }
+            return allDocs;
+        }
+
         async function refreshMatches(){
             const c1=document.getElementById('home-upcoming'); if(!c1)return;
             try{
-                // PlanetHC korzysta z jednej bazy Firestore. Nie pobieramy drugiej bazy
-                // ani nie robimy później osobnego GET dla każdego meczu — to było głównym
-                // źródłem niepotrzebnego zużycia quota.
-                const [_,snap]=await Promise.all([
+                // PlanetHC korzysta z jednej bazy Firestore. Pobieramy mecze partiami,
+                // aby respektować limit 10 000 dokumentów na pojedyncze zapytanie.
+                const [_,matchDocs]=await Promise.all([
                     loadCrests(),
-                    window.db.collection('matches').orderBy('date','desc').limit(90000).get()
+                    fetchMatchesPaged()
                 ]);
-                let allM=snap.docs.map(d=>({id:d.id,_db:'db1',...d.data()}));
+                let allM=matchDocs.map(d=>({id:d.id,_db:'db1',...d.data()}));
                 allM.sort((a,b)=>(a.date?.seconds||0)-(b.date?.seconds||0));
                 // Automatyka obsługuje mecze na żywo oraz stare, niedokończone spotkania
                 // po ponownym dodaniu, bez kolejnego pobierania każdego dokumentu.
